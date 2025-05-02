@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\CalendarProject.API.props" />
+</Project>

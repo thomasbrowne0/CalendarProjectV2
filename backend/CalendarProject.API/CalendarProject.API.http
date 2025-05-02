@@ -1,0 +1,6 @@
+@CalendarProject.API_HostAddress = http://localhost:5188
+
+GET {{CalendarProject.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
