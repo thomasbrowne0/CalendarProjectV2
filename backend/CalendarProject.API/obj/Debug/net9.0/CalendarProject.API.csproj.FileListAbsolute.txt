@@ -180,3 +180,4 @@ C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.API\obj\Deb
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.API\obj\Debug\net9.0\CalendarProject.API.pdb
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.API\obj\Debug\net9.0\CalendarProject.API.genruntimeconfig.cache
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.API\obj\Debug\net9.0\ref\CalendarProject.API.dll
+C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.API\obj\Debug\net9.0\CalendarProject.API.sourcelink.json

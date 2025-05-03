@@ -17,3 +17,4 @@ C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Infrastruct
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Infrastructure\obj\Debug\net9.0\CalendarProject.Infrastructure.pdb
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Infrastructure\obj\Debug\net9.0\CalendarProject.Infrastructure.genruntimeconfig.cache
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Infrastructure\obj\Debug\net9.0\ref\CalendarProject.Infrastructure.dll
+C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Infrastructure\obj\Debug\net9.0\CalendarProject.Infrastructure.sourcelink.json

@@ -13,3 +13,4 @@ C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Application
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Application\obj\Debug\net9.0\refint\CalendarProject.Application.dll
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Application\obj\Debug\net9.0\CalendarProject.Application.pdb
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Application\obj\Debug\net9.0\ref\CalendarProject.Application.dll
+C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Application\obj\Debug\net9.0\CalendarProject.Application.sourcelink.json

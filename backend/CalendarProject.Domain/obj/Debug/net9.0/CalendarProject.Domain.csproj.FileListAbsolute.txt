@@ -9,3 +9,4 @@ C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\Debug\net9.0\refint\CalendarProject.Domain.dll
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.pdb
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\Debug\net9.0\ref\CalendarProject.Domain.dll
+C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.sourcelink.json

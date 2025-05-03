@@ -24,12 +24,44 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
       setState(() {
         _isLoading = true;
       });
-      final companyId = Provider.of<CompanyProvider>(context).selectedCompany!.id;
-      Provider.of<CalendarProvider>(context).fetchEvents(companyId).then((_) {
+      
+      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+      // Check if there's a selected company before trying to access its id
+      if (companyProvider.selectedCompany != null) {
+        final companyId = companyProvider.selectedCompany!.id;
+        Provider.of<CalendarProvider>(context, listen: false)
+            .fetchEvents(companyId)
+            .then((_) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        }).catchError((error) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+            // Optionally show an error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to load events: ${error.toString()}')),
+            );
+          }
+        });
+      } else {
+        // No company selected, handle this case
         setState(() {
           _isLoading = false;
         });
-      });
+        // Optionally show a message to select a company
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Please select a company first')),
+            );
+          }
+        });
+      }
       _isInit = false;
     }
     super.didChangeDependencies();
@@ -38,7 +70,47 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final calendarProvider = Provider.of<CalendarProvider>(context);
-    final companyId = Provider.of<CompanyProvider>(context).selectedCompany!.id;
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final selectedCompany = companyProvider.selectedCompany;
+    
+    // If no company is selected, show a message
+    if (selectedCompany == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Company Calendar'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop(); // Go back to previous screen
+            },
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.business, size: 80, color: Colors.grey),
+              SizedBox(height: 16),
+              Text(
+                'No company selected',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text('Please select a company to view its calendar'),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Go back to company selection
+                },
+                child: Text('Go Back'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    final companyId = selectedCompany.id;
     
     return Scaffold(
       body: _isLoading
@@ -98,9 +170,12 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                   },
                   onPageChanged: (focusedDay) {
                     calendarProvider.setFocusedDay(focusedDay);
-                    calendarProvider.fetchEvents(companyId,
+                    // Only fetch events if we have a valid company
+                    if (selectedCompany != null) {
+                      calendarProvider.fetchEvents(companyId,
                         start: DateTime(focusedDay.year, focusedDay.month, 1),
                         end: DateTime(focusedDay.year, focusedDay.month + 1, 0));
+                    }
                   },
                   calendarStyle: CalendarStyle(
                     markersMaxCount: 3,

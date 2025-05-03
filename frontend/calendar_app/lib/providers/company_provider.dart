@@ -32,9 +32,40 @@ class CompanyProvider with ChangeNotifier {
   }
 
   Future<void> selectCompany(String companyId) async {
-    _selectedCompany = _companies.firstWhere((c) => c.id == companyId);
-    await fetchEmployees(companyId);
-    notifyListeners();
+    try {
+      // Check if companies list is empty first
+      if (_companies.isEmpty) {
+        print('Warning: No companies available to select from');
+        // Don't call notifyListeners() here - it's causing the error
+        await fetchCompanies(); // Try to fetch companies first
+        
+        // After fetching, check again if we have any companies
+        final matchingCompanies = _companies.where((c) => c.id == companyId).toList();
+        if (matchingCompanies.isNotEmpty) {
+          _selectedCompany = matchingCompanies.first;
+          await fetchEmployees(companyId);
+          notifyListeners();
+        }
+        return;
+      }
+
+      // Use where().toList() first to check if any company matches
+      final matchingCompanies = _companies.where((c) => c.id == companyId).toList();
+      
+      if (matchingCompanies.isNotEmpty) {
+        _selectedCompany = matchingCompanies.first;
+        await fetchEmployees(companyId);
+        notifyListeners();
+      } else {
+        print('Warning: No company found with ID: $companyId');
+        // Uncomment if you want to clear the selection when no match is found
+        // _selectedCompany = null;
+        // Don't forget to notify listeners if you change _selectedCompany
+        // notifyListeners();
+      }
+    } catch (error) {
+      print('Error selecting company: $error');
+    }
   }
 
   Future<void> createCompany(String name, String cvr) async {
