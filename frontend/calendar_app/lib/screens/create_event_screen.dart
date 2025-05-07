@@ -6,6 +6,8 @@ import 'package:calendar_app/models/employee.dart';
 import 'package:intl/intl.dart';
 
 class CreateEventScreen extends StatefulWidget {
+  const CreateEventScreen({super.key});
+
   @override
   _CreateEventScreenState createState() => _CreateEventScreenState();
 }
@@ -16,9 +18,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _descriptionController = TextEditingController();
   
   DateTime _startDate = DateTime.now();
-  TimeOfDay _startTime = TimeOfDay(hour: 9, minute: 0);
+  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   DateTime _endDate = DateTime.now();
-  TimeOfDay _endTime = TimeOfDay(hour: 10, minute: 0);
+  TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
   
   final Set<String> _selectedParticipantIds = {};
   bool _isLoading = false;
@@ -34,8 +36,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: _startDate,
-      firstDate: DateTime.now().subtract(Duration(days: 365)),
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (pickedDate != null) {
       setState(() {
@@ -64,7 +66,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       context: context,
       initialDate: _endDate.isBefore(_startDate) ? _startDate : _endDate,
       firstDate: _startDate,
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (pickedDate != null) {
       setState(() {
@@ -105,7 +107,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     if (endDateTime.isBefore(startDateTime)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('End time must be after start time')),
+        const SnackBar(content: Text('End time must be after start time')),
       );
       return;
     }
@@ -150,7 +152,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -164,7 +166,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Event'),
+        title: const Text('Create Event'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -175,7 +177,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Event Title'),
+                decoration: const InputDecoration(labelText: 'Event Title'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an event title';
@@ -183,14 +185,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 3,
               ),
-              SizedBox(height: 20),
-              Text('Start Date and Time', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              const Text('Start Date and Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   Expanded(
@@ -198,23 +200,23 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ),
                   TextButton(
                     onPressed: () => _selectStartDate(context),
-                    child: Text('Change Date'),
+                    child: const Text('Change Date'),
                   ),
                 ],
               ),
               Row(
                 children: [
                   Expanded(
-                    child: Text('${_startTime.format(context)}'),
+                    child: Text(_startTime.format(context)),
                   ),
                   TextButton(
                     onPressed: () => _selectStartTime(context),
-                    child: Text('Change Time'),
+                    child: const Text('Change Time'),
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-              Text('End Date and Time', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              const Text('End Date and Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   Expanded(
@@ -222,26 +224,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ),
                   TextButton(
                     onPressed: () => _selectEndDate(context),
-                    child: Text('Change Date'),
+                    child: const Text('Change Date'),
                   ),
                 ],
               ),
               Row(
                 children: [
                   Expanded(
-                    child: Text('${_endTime.format(context)}'),
+                    child: Text(_endTime.format(context)),
                   ),
                   TextButton(
                     onPressed: () => _selectEndTime(context),
-                    child: Text('Change Time'),
+                    child: const Text('Change Time'),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
-              Text('Participants', style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
+              const SizedBox(height: 20),
+              const Text('Participants', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
               if (employees.isEmpty)
-                Text('No employees available')
+                const Text('No employees available')
               else
                 ...employees.map((employee) => CheckboxListTile(
                   title: Text('${employee.firstName} ${employee.lastName}'),
@@ -257,13 +259,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     });
                   },
                 )),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (_isLoading)
-                Center(child: CircularProgressIndicator())
+                const Center(child: CircularProgressIndicator())
               else
                 ElevatedButton(
                   onPressed: _submit,
-                  child: Text('CREATE EVENT'),
+                  child: const Text('CREATE EVENT'),
                 ),
             ],
           ),

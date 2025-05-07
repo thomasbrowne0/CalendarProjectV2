@@ -5,6 +5,8 @@ import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/screens/create_employee_screen.dart';
 
 class EmployeeListScreen extends StatelessWidget {
+  const EmployeeListScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final companyProvider = Provider.of<CompanyProvider>(context);
@@ -13,7 +15,7 @@ class EmployeeListScreen extends StatelessWidget {
 
     return Scaffold(
       body: employees.isEmpty
-          ? Center(
+          ? const Center(
               child: Text('No employees found.'),
             )
           : ListView.builder(
@@ -21,7 +23,7 @@ class EmployeeListScreen extends StatelessWidget {
               itemBuilder: (ctx, index) {
                 final employee = employees[index];
                 return Card(
-                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                   child: ListTile(
                     leading: CircleAvatar(
                       child: Text(employee.firstName[0] + employee.lastName[0]),
@@ -35,7 +37,6 @@ class EmployeeListScreen extends StatelessWidget {
             ),
       floatingActionButton: isCompanyOwner
           ? FloatingActionButton(
-              child: Icon(Icons.add),
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -44,6 +45,7 @@ class EmployeeListScreen extends StatelessWidget {
                 );
               },
               tooltip: 'Add Employee',
+              child: Icon(Icons.add),
             )
           : null,
     );

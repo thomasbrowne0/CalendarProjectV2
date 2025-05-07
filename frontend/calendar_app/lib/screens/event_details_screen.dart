@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 class EventDetailsScreen extends StatelessWidget {
   final CalendarEvent event;
 
-  EventDetailsScreen({required this.event});
+  const EventDetailsScreen({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class EventDetailsScreen extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event Details'),
+        title: const Text('Event Details'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -23,12 +23,12 @@ class EventDetailsScreen extends StatelessWidget {
           children: [
             Text(
               event.title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'Created by: ${event.createdByName}',
               style: TextStyle(
@@ -36,7 +36,7 @@ class EventDetailsScreen extends StatelessWidget {
                 color: Colors.grey[700],
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -45,26 +45,26 @@ class EventDetailsScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.access_time, color: Colors.blue),
-                        SizedBox(width: 8),
+                        const Icon(Icons.access_time, color: Colors.blue),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '${dateFormat.format(event.startTime)} ${timeFormat.format(event.startTime)} - '
-                            '${event.startTime.day != event.endTime.day ? dateFormat.format(event.endTime) + " " : ""}'
+                            '${event.startTime.day != event.endTime.day ? "${dateFormat.format(event.endTime)} " : ""}'
                             '${timeFormat.format(event.endTime)}',
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 16),
-                    Text(
+                    const SizedBox(height: 16),
+                    const Text(
                       'Description',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       event.description.isNotEmpty 
                         ? event.description 
@@ -74,21 +74,21 @@ class EventDetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 24),
-            Text(
+            const SizedBox(height: 24),
+            const Text(
               'Participants',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             if (event.participants.isEmpty)
-              Text('No participants')
+              const Text('No participants')
             else
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: event.participants.length,
                 itemBuilder: (ctx, index) {
                   final participant = event.participants[index];

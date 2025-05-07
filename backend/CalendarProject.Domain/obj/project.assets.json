@@ -8,19 +8,19 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\BarniLaptop\\.nuget\\packages\\": {}
+    "C:\\Users\\Rdwn\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj",
+      "projectUniqueName": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj",
       "projectName": "CalendarProject.Domain",
-      "projectPath": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj",
-      "packagesPath": "C:\\Users\\BarniLaptop\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Domain\\obj\\",
+      "projectPath": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj",
+      "packagesPath": "C:\\Users\\Rdwn\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\BarniLaptop\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Rdwn\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"

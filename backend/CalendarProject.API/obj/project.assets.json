@@ -5323,19 +5323,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\BarniLaptop\\.nuget\\packages\\": {}
+    "C:\\Users\\Rdwn\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.API\\CalendarProject.API.csproj",
+      "projectUniqueName": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.API\\CalendarProject.API.csproj",
       "projectName": "CalendarProject.API",
-      "projectPath": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.API\\CalendarProject.API.csproj",
-      "packagesPath": "C:\\Users\\BarniLaptop\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.API\\obj\\",
+      "projectPath": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.API\\CalendarProject.API.csproj",
+      "packagesPath": "C:\\Users\\Rdwn\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.API\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\BarniLaptop\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Rdwn\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -5347,14 +5347,14 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Application\\CalendarProject.Application.csproj": {
-              "projectPath": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Application\\CalendarProject.Application.csproj"
+            "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Application\\CalendarProject.Application.csproj": {
+              "projectPath": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Application\\CalendarProject.Application.csproj"
             },
-            "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj": {
-              "projectPath": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj"
+            "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj": {
+              "projectPath": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Domain\\CalendarProject.Domain.csproj"
             },
-            "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Infrastructure\\CalendarProject.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\BarniLaptop\\Desktop\\CalendarProject\\backend\\CalendarProject.Infrastructure\\CalendarProject.Infrastructure.csproj"
+            "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Infrastructure\\CalendarProject.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\Rdwn\\Documents\\Projects\\4th Sem\\CalendarProjectV2\\backend\\CalendarProject.Infrastructure\\CalendarProject.Infrastructure.csproj"
             }
           }
         }

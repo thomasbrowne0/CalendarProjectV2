@@ -55,7 +55,7 @@ class CalendarProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print('Error creating event: $error');
-      throw error;
+      rethrow;
     }
   }
 

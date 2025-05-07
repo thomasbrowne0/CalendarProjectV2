@@ -27,7 +27,7 @@ class CompanyProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print('Error fetching companies: $error');
-      throw error;
+      rethrow;
     }
   }
 
@@ -75,7 +75,7 @@ class CompanyProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print('Error creating company: $error');
-      throw error;
+      rethrow;
     }
   }
 
@@ -86,7 +86,7 @@ class CompanyProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print('Error fetching employees: $error');
-      throw error;
+      rethrow;
     }
   }
 
@@ -105,7 +105,7 @@ class CompanyProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print('Error adding employee: $error');
-      throw error;
+      rethrow;
     }
   }
 }

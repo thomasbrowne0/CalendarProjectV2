@@ -7,6 +7,8 @@ import 'package:calendar_app/screens/employee_list_screen.dart';
 import 'package:calendar_app/screens/create_company_screen.dart';
 
 class CompanyOwnerHomeScreen extends StatefulWidget {
+  const CompanyOwnerHomeScreen({super.key});
+
   @override
   _CompanyOwnerHomeScreenState createState() => _CompanyOwnerHomeScreenState();
 }
@@ -39,18 +41,18 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
     final selectedCompany = companyProvider.selectedCompany;
     final user = Provider.of<AuthProvider>(context).user;
 
-    List<Widget> _pages = [
+    List<Widget> pages = [
       selectedCompany == null ? _buildNoCompanySelected() : CompanyCalendarScreen(),
       selectedCompany == null ? _buildNoCompanySelected() : EmployeeListScreen(),
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Company Calendar'),
+        title: const Text('Company Calendar'),
         actions: [
           DropdownButton<String>(
             underline: Container(),
-            icon: Icon(Icons.business, color: Colors.white),
+            icon: const Icon(Icons.business, color: Colors.white),
             items: companies.map((company) {
               return DropdownMenuItem<String>(
                 value: company.id,
@@ -64,11 +66,11 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
             },
             hint: Text(
               selectedCompany?.name ?? 'Select Company',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.exit_to_app),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: () {
               Provider.of<AuthProvider>(context, listen: false).logout();
             },
@@ -76,8 +78,8 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _pages[_selectedIndex],
+          ? const Center(child: CircularProgressIndicator())
+          : pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -85,7 +87,7 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
             _selectedIndex = index;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
             label: 'Calendar',
@@ -98,13 +100,13 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
       ),
       floatingActionButton: selectedCompany == null
           ? FloatingActionButton(
-              child: Icon(Icons.add),
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => CreateCompanyScreen()),
                 );
               },
               tooltip: 'Create Company',
+              child: Icon(Icons.add),
             )
           : null,
     );
@@ -118,18 +120,18 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (companies.isEmpty) ...[
-            Text('You don\'t have any companies yet.'),
-            SizedBox(height: 20),
+            const Text('You don\'t have any companies yet.'),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => CreateCompanyScreen()),
                 );
               },
-              child: Text('Create Company'),
+              child: const Text('Create Company'),
             ),
           ] else
-            Text('Please select a company from the dropdown menu.'),
+            const Text('Please select a company from the dropdown menu.'),
         ],
       ),
     );

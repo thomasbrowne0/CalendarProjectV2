@@ -128,8 +128,8 @@ class ApiService {
   Future<List<CalendarEvent>> getEvents(String companyId, DateTime start, DateTime end) async {
     try {
       // Format dates as ISO strings without milliseconds for better compatibility
-      String startParam = start.toUtc().toIso8601String().split('.')[0] + 'Z';
-      String endParam = end.toUtc().toIso8601String().split('.')[0] + 'Z';
+      String startParam = '${start.toUtc().toIso8601String().split('.')[0]}Z';
+      String endParam = '${end.toUtc().toIso8601String().split('.')[0]}Z';
 
       final response = await http.get(
         Uri.parse('$baseUrl/companies/$companyId/events?start=$startParam&end=$endParam'),
@@ -161,11 +161,11 @@ class ApiService {
     try {
       // Ensure dates are in UTC format without milliseconds
       if (event['startTime'] is DateTime) {
-        event['startTime'] = (event['startTime'] as DateTime).toUtc().toIso8601String().split('.')[0] + 'Z';
+        event['startTime'] = '${(event['startTime'] as DateTime).toUtc().toIso8601String().split('.')[0]}Z';
       }
       
       if (event['endTime'] is DateTime) {
-        event['endTime'] = (event['endTime'] as DateTime).toUtc().toIso8601String().split('.')[0] + 'Z';
+        event['endTime'] = '${(event['endTime'] as DateTime).toUtc().toIso8601String().split('.')[0]}Z';
       }
       
       // Ensure participantIds is an array of strings (not objects)

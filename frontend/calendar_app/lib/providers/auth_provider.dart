@@ -8,7 +8,7 @@ class AuthProvider with ChangeNotifier {
   User? _user;
   String? _token;
   DateTime? _expiryDate;
-  ApiService? _apiService;
+  final ApiService? _apiService;
 
   AuthProvider(this._apiService);
 
@@ -28,7 +28,7 @@ class AuthProvider with ChangeNotifier {
       _saveAuthData();
       notifyListeners();
     } catch (error) {
-      throw error;
+      rethrow;
     }
   }
 
@@ -38,7 +38,7 @@ class AuthProvider with ChangeNotifier {
       await _apiService!.registerCompanyOwner(firstName, lastName, email, password);
       await login(email, password);
     } catch (error) {
-      throw error;
+      rethrow;
     }
   }
 

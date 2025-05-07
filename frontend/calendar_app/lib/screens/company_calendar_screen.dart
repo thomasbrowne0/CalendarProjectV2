@@ -8,6 +8,8 @@ import 'package:calendar_app/screens/create_event_screen.dart';
 import 'package:calendar_app/screens/event_details_screen.dart';
 
 class CompanyCalendarScreen extends StatefulWidget {
+  const CompanyCalendarScreen({super.key});
+
   @override
   _CompanyCalendarScreenState createState() => _CompanyCalendarScreenState();
 }
@@ -16,7 +18,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
   bool _isInit = true;
   bool _isLoading = false;
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
+  final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
 
   @override
   void didChangeDependencies() {
@@ -57,7 +59,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Please select a company first')),
+              const SnackBar(content: Text('Please select a company first')),
             );
           }
         });
@@ -77,9 +79,9 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
     if (selectedCompany == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Company Calendar'),
+          title: const Text('Company Calendar'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.of(context).pop(); // Go back to previous screen
             },
@@ -89,20 +91,20 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.business, size: 80, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
+              const Icon(Icons.business, size: 80, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text(
                 'No company selected',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8),
-              Text('Please select a company to view its calendar'),
-              SizedBox(height: 16),
+              const SizedBox(height: 8),
+              const Text('Please select a company to view its calendar'),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Go back to company selection
                 },
-                child: Text('Go Back'),
+                child: const Text('Go Back'),
               ),
             ],
           ),
@@ -114,7 +116,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
     
     return Scaffold(
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 // Add custom header to show current view
@@ -125,7 +127,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                     children: [
                       Text(
                         _getFormatTitle(_calendarFormat),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       TextButton(
                         onPressed: () {
@@ -140,7 +142,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                             }
                           });
                         },
-                        child: Text('Change View'),
+                        child: const Text('Change View'),
                       )
                     ],
                   ),
@@ -152,7 +154,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                   calendarFormat: _calendarFormat,
                   rangeSelectionMode: _rangeSelectionMode,
                   // Just use headerStyle to hide the format button
-                  headerStyle: HeaderStyle(
+                  headerStyle: const HeaderStyle(
                     formatButtonVisible: false,
                     titleCentered: true,
                   ),
@@ -171,13 +173,11 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                   onPageChanged: (focusedDay) {
                     calendarProvider.setFocusedDay(focusedDay);
                     // Only fetch events if we have a valid company
-                    if (selectedCompany != null) {
-                      calendarProvider.fetchEvents(companyId,
-                        start: DateTime(focusedDay.year, focusedDay.month, 1),
-                        end: DateTime(focusedDay.year, focusedDay.month + 1, 0));
-                    }
-                  },
-                  calendarStyle: CalendarStyle(
+                    calendarProvider.fetchEvents(companyId,
+                      start: DateTime(focusedDay.year, focusedDay.month, 1),
+                      end: DateTime(focusedDay.year, focusedDay.month + 1, 0));
+                                    },
+                  calendarStyle: const CalendarStyle(
                     markersMaxCount: 3,
                   ),
                 ),
@@ -187,7 +187,6 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
               ],
             ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -196,6 +195,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
           );
         },
         tooltip: 'Create Event',
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -205,7 +205,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
     final events = calendarProvider.getEventsForDay(calendarProvider.focusedDay);
 
     if (events.isEmpty) {
-      return Center(
+      return const Center(
         child: Text('No events for this day.'),
       );
     }
@@ -215,7 +215,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
       itemBuilder: (ctx, index) {
         final event = events[index];
         return Card(
-          margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           child: ListTile(
             title: Text(event.title),
             subtitle: Text('${_formatTimeRange(event.startTime, event.endTime)}\n'

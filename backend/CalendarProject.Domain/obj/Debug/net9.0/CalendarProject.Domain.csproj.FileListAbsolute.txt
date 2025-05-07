@@ -10,3 +10,15 @@ C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.pdb
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\Debug\net9.0\ref\CalendarProject.Domain.dll
 C:\Users\BarniLaptop\Desktop\CalendarProject\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.sourcelink.json
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\bin\Debug\net9.0\CalendarProject.Domain.deps.json
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\bin\Debug\net9.0\CalendarProject.Domain.dll
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\bin\Debug\net9.0\CalendarProject.Domain.pdb
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.AssemblyInfoInputs.cache
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.AssemblyInfo.cs
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.sourcelink.json
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.dll
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\refint\CalendarProject.Domain.dll
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\CalendarProject.Domain.pdb
+C:\Users\Rdwn\Documents\Projects\4th Sem\CalendarProjectV2\backend\CalendarProject.Domain\obj\Debug\net9.0\ref\CalendarProject.Domain.dll

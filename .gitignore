@@ -1,1 +1,10 @@
 /backend/CalendarProject.API/obj
+/backend/CalendarProject.API/bin
+/backend/CalendarProject.Domain/obj
+/backend/CalendarProject.Domain/bin
+/backend/CalendarProject.Infrastructure/obj
+/backend/CalendarProject.Infrastructure/bin
+/backend/CalendarProject.Application/obj
+/backend/CalendarProject.Application/bin
+
+

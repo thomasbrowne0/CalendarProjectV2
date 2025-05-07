@@ -6,6 +6,8 @@ import 'package:calendar_app/screens/company_calendar_screen.dart';
 import 'package:calendar_app/screens/employee_list_screen.dart';
 
 class EmployeeHomeScreen extends StatefulWidget {
+  const EmployeeHomeScreen({super.key});
+
   @override
   _EmployeeHomeScreenState createState() => _EmployeeHomeScreenState();
 }
@@ -43,7 +45,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
     final company = companyProvider.selectedCompany;
     final user = Provider.of<AuthProvider>(context).user;
 
-    List<Widget> _pages = [
+    List<Widget> pages = [
       company == null ? _buildNoCompanyFound() : CompanyCalendarScreen(),
       company == null ? _buildNoCompanyFound() : EmployeeListScreen(),
     ];
@@ -53,7 +55,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
         title: Text(company?.name ?? 'Company Calendar'),
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: () {
               Provider.of<AuthProvider>(context, listen: false).logout();
             },
@@ -61,8 +63,8 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _pages[_selectedIndex],
+          ? const Center(child: CircularProgressIndicator())
+          : pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -70,7 +72,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
             _selectedIndex = index;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
             label: 'Calendar',
@@ -85,7 +87,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
   }
 
   Widget _buildNoCompanyFound() {
-    return Center(
+    return const Center(
       child: Text('No company information found. Please contact your administrator.'),
     );
   }

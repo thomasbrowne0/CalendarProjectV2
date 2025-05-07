@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 
 class CreateEmployeeScreen extends StatefulWidget {
+  const CreateEmployeeScreen({super.key});
+
   @override
   _CreateEmployeeScreenState createState() => _CreateEmployeeScreenState();
 }
@@ -35,7 +37,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Passwords do not match')),
+        const SnackBar(content: Text('Passwords do not match')),
       );
       return;
     }
@@ -73,7 +75,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('OK'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -84,7 +86,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Employee'),
+        title: const Text('Add Employee'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -95,7 +97,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
             children: [
               TextFormField(
                 controller: _firstNameController,
-                decoration: InputDecoration(labelText: 'First Name'),
+                decoration: const InputDecoration(labelText: 'First Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter first name';
@@ -103,10 +105,10 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _lastNameController,
-                decoration: InputDecoration(labelText: 'Last Name'),
+                decoration: const InputDecoration(labelText: 'Last Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter last name';
@@ -114,10 +116,10 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty || !value.contains('@')) {
@@ -126,10 +128,10 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty || value.length < 6) {
@@ -138,10 +140,10 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _confirmPasswordController,
-                decoration: InputDecoration(labelText: 'Confirm Password'),
+                decoration: const InputDecoration(labelText: 'Confirm Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -153,10 +155,10 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _jobTitleController,
-                decoration: InputDecoration(labelText: 'Job Title'),
+                decoration: const InputDecoration(labelText: 'Job Title'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter job title';
@@ -164,13 +166,13 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (_isLoading)
-                Center(child: CircularProgressIndicator())
+                const Center(child: CircularProgressIndicator())
               else
                 ElevatedButton(
                   onPressed: _submit,
-                  child: Text('ADD EMPLOYEE'),
+                  child: const Text('ADD EMPLOYEE'),
                 ),
             ],
           ),

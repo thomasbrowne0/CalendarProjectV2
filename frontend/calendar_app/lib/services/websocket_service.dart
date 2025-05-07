@@ -30,7 +30,7 @@ class WebSocketService {
         onDone: () {
           _isConnected = false;
           // Attempt reconnect after a delay
-          Future.delayed(Duration(seconds: 5), () => connect(token));
+          Future.delayed(const Duration(seconds: 5), () => connect(token));
         },
         onError: (error) {
           print('WebSocket Error: $error');
