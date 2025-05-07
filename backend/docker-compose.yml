@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: calendarproject_db
+    environment:
+      POSTGRES_DB: CalendarProjectDb
+      POSTGRES_USER: calendarapp
+      POSTGRES_PASSWORD: ilovemilk
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
