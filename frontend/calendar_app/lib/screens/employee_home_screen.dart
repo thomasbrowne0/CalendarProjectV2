@@ -18,32 +18,74 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
   int _selectedIndex = 0;
 
   @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
-      final user = Provider.of<AuthProvider>(context).user;
-      // For employees, we need to load their company
-      if (user != null && !user.isCompanyOwner) {
-        // Get company ID from user claims (this might need to be adjusted based on your actual implementation)
-        String companyId = ''; // This should come from user claims
-        Provider.of<CompanyProvider>(context).selectCompany(companyId).then((_) {
-          setState(() {
-            _isLoading = false;
-          });
+void didChangeDependencies() {
+  if (_isInit) {
+    setState(() {
+      _isLoading = true; // Start loading indicator
+    });
+    
+    // Get the AuthProvider instance (listen: false because we only need to read values once here)
+    final authProvider = Provider.of<AuthProvider>(context, listen: false); 
+    
+    // Check if the user is authenticated, has user data, and is an employee
+    if (authProvider.isAuth && authProvider.user != null && !authProvider.user!.isCompanyOwner) {
+      // Retrieve the companyId stored in AuthProvider (this was set during login/auto-login)
+      final String? employeeCompanyId = authProvider.companyId; 
+
+      if (employeeCompanyId != null && employeeCompanyId.isNotEmpty) {
+        // If companyId is available, tell CompanyProvider to select this company
+        Provider.of<CompanyProvider>(context, listen: false)
+            .selectCompany(employeeCompanyId) 
+            .then((_) {
+          // After company selection is complete
+          if (mounted) { // Check if the widget is still part of the widget tree
+            setState(() {
+              _isLoading = false; // Stop loading indicator
+            });
+          }
+        }).catchError((error) {
+          // If there was an error selecting the company
+          if (mounted) {
+            setState(() {
+              _isLoading = false; // Stop loading indicator
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to load company data: ${error.toString()}')),
+            );
+          }
         });
+      } else {
+        // Employee is logged in, but their companyId is missing or empty
+        if (mounted) {
+          setState(() {
+            _isLoading = false; // Stop loading indicator
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Your company information is missing. Please log in again.')),
+          );
+        }
       }
-      _isInit = false;
+    } else {
+      // User is not an employee, not authenticated, or user data is null
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Stop loading indicator
+        });
+        // Optionally, if not authenticated, you might want to navigate to the login screen
+        // if (!authProvider.isAuth) {
+        //   Navigator.of(context).pushReplacementNamed('/login-screen'); // Example
+        // }
+      }
     }
-    super.didChangeDependencies();
+    _isInit = false; // Ensure this logic runs only once
   }
+  super.didChangeDependencies();
+}
 
   @override
   Widget build(BuildContext context) {
     final companyProvider = Provider.of<CompanyProvider>(context);
     final company = companyProvider.selectedCompany;
-    final user = Provider.of<AuthProvider>(context).user;
 
     List<Widget> pages = [
       company == null ? _buildNoCompanyFound() : const CompanyCalendarScreen(),

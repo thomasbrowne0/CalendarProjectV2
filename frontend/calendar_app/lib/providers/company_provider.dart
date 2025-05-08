@@ -32,39 +32,66 @@ class CompanyProvider with ChangeNotifier {
   }
 
   Future<void> selectCompany(String companyId) async {
+    if (_apiService == null || _authProvider == null || !_authProvider!.isAuth) {
+      print('CompanyProvider: ApiService or AuthProvider not available, or not authenticated.');
+      return;
+    }
     try {
-      // Check if companies list is empty first
-      if (_companies.isEmpty) {
-        print('Warning: No companies available to select from');
-        // Don't call notifyListeners() here - it's causing the error
-        await fetchCompanies(); // Try to fetch companies first
-        
-        // After fetching, check again if we have any companies
-        final matchingCompanies = _companies.where((c) => c.id == companyId).toList();
-        if (matchingCompanies.isNotEmpty) {
-          _selectedCompany = matchingCompanies.first;
-          await fetchEmployees(companyId);
-          notifyListeners();
-        }
+      // If the selected company is already the one we want, do nothing extra unless employees need refresh.
+      if (_selectedCompany?.id == companyId) {
         return;
       }
 
-      // Use where().toList() first to check if any company matches
-      final matchingCompanies = _companies.where((c) => c.id == companyId).toList();
-      
-      if (matchingCompanies.isNotEmpty) {
-        _selectedCompany = matchingCompanies.first;
-        await fetchEmployees(companyId);
-        notifyListeners();
+      Company? companyToSelect;
+
+      // Try to find in existing list first
+      final matchingCompaniesInList = _companies.where((c) => c.id == companyId).toList();
+      if (matchingCompaniesInList.isNotEmpty) {
+        companyToSelect = matchingCompaniesInList.first;
       } else {
-        print('Warning: No company found with ID: $companyId');
-        // Uncomment if you want to clear the selection when no match is found
-        // _selectedCompany = null;
-        // Don't forget to notify listeners if you change _selectedCompany
-        // notifyListeners();
+        // If not found in the list, we need to fetch it.
+        // How we fetch depends on whether the user is an owner or employee.
+        if (_authProvider!.user != null && !_authProvider!.user!.isCompanyOwner) {
+          // User is an EMPLOYEE, fetch their specific company by ID
+          print('CompanyProvider: Employee needs company $companyId. Fetching specifically.');
+          try {
+            companyToSelect = await _apiService!.getCompanyById(companyId);
+          } catch (e) {
+            print('CompanyProvider: Error fetching specific company $companyId for employee: $e');
+            _selectedCompany = null; // Clear selection on error
+            notifyListeners();
+            rethrow; // Rethrow to be caught by UI
+          }
+        } else if (_authProvider!.user != null && _authProvider!.user!.isCompanyOwner) {
+          // User is a COMPANY OWNER. If _companies is empty, fetch their list.
+          // This part of the logic might need refinement if an owner is selecting a company
+          // that somehow wasn't in their initial fetchCompanies list.
+          if (_companies.isEmpty) {
+             print('CompanyProvider: Owner has no companies in list. Fetching all their companies.');
+             await fetchCompanies(); // This fetches all companies for the owner
+             // Try finding it again after fetching
+             final stillMatching = _companies.where((c) => c.id == companyId).toList();
+             if (stillMatching.isNotEmpty) {
+               companyToSelect = stillMatching.first;
+             }
+          } else {
+             print('CompanyProvider: Owner selecting company $companyId, but it was not in the pre-loaded list of ${_companies.length} companies.');     }
+        }
       }
+
+      if (companyToSelect != null) {
+        _selectedCompany = companyToSelect;
+        await fetchEmployees(_selectedCompany!.id); // Fetch employees for the newly selected company
+      } else {
+        print('CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
+        _selectedCompany = null; // Clear selection if no company could be set
+      }
+      notifyListeners();
     } catch (error) {
-      print('Error selecting company: $error');
+      print('CompanyProvider: General error in selectCompany for $companyId: $error');
+      _selectedCompany = null; // Ensure selection is cleared on error
+      notifyListeners();
+      rethrow;
     }
   }
 

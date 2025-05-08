@@ -94,6 +94,22 @@ class ApiService {
     }
   }
 
+  Future<Company> getCompanyById(String companyId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/companies/$companyId'),
+      headers: _headers, // Ensure headers include auth token
+    );
+
+    if (response.statusCode == 200) {
+      return Company.fromJson(jsonDecode(response.body));
+    } else {
+      print('ApiService: Failed to load company $companyId. Status: ${response.statusCode}, Body: ${response.body}');
+      throw Exception('Failed to load company details for $companyId');
+    }
+  }
+
+  
+
   // Employees
   Future<List<Employee>> getEmployees(String companyId) async {
     final response = await http.get(
