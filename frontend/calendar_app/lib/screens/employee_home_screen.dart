@@ -46,8 +46,8 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
     final user = Provider.of<AuthProvider>(context).user;
 
     List<Widget> pages = [
-      company == null ? _buildNoCompanyFound() : CompanyCalendarScreen(),
-      company == null ? _buildNoCompanyFound() : EmployeeListScreen(),
+      company == null ? _buildNoCompanyFound() : const CompanyCalendarScreen(),
+      company == null ? _buildNoCompanyFound() : const EmployeeListScreen(),
     ];
 
     return Scaffold(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
-import 'package:calendar_app/models/employee.dart';
 import 'package:intl/intl.dart';
 
 class CreateEventScreen extends StatefulWidget {

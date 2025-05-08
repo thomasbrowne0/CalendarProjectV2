@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:calendar_app/models/user.dart';
 import 'package:calendar_app/models/company.dart';
 import 'package:calendar_app/models/employee.dart';
 import 'package:calendar_app/models/calendar_event.dart';

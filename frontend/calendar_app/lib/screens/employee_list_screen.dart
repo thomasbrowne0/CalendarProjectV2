@@ -40,12 +40,12 @@ class EmployeeListScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => CreateEmployeeScreen(),
+                    builder: (_) => const CreateEmployeeScreen(),
                   ),
                 );
               },
               tooltip: 'Add Employee',
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
     );

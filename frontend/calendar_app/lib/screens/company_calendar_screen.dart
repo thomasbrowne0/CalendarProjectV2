@@ -190,12 +190,12 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => CreateEventScreen(),
+              builder: (_) => const CreateEventScreen(),
             ),
           );
         },
         tooltip: 'Create Event',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

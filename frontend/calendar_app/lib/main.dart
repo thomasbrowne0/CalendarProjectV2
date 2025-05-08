@@ -10,7 +10,7 @@ import 'package:calendar_app/screens/company_owner_home_screen.dart';  // Add th
 import 'package:calendar_app/screens/employee_home_screen.dart';      // Add this import
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -48,9 +48,9 @@ class MyApp extends StatelessWidget {
           ),
           home: auth.isAuth 
               ? auth.isCompanyOwner
-                  ? CompanyOwnerHomeScreen() 
-                  : EmployeeHomeScreen()
-              : LoginScreen(),
+                  ? const CompanyOwnerHomeScreen() 
+                  : const EmployeeHomeScreen()
+              : const LoginScreen(),
         ),
       ),
     );

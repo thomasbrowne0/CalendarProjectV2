@@ -42,8 +42,8 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
     final user = Provider.of<AuthProvider>(context).user;
 
     List<Widget> pages = [
-      selectedCompany == null ? _buildNoCompanySelected() : CompanyCalendarScreen(),
-      selectedCompany == null ? _buildNoCompanySelected() : EmployeeListScreen(),
+      selectedCompany == null ? _buildNoCompanySelected() : const CompanyCalendarScreen(),
+      selectedCompany == null ? _buildNoCompanySelected() : const EmployeeListScreen(),
     ];
 
     return Scaffold(
@@ -102,11 +102,11 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
           ? FloatingActionButton(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => CreateCompanyScreen()),
+                  MaterialPageRoute(builder: (_) => const CreateCompanyScreen()),
                 );
               },
               tooltip: 'Create Company',
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
     );
@@ -125,7 +125,7 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => CreateCompanyScreen()),
+                  MaterialPageRoute(builder: (_) => const CreateCompanyScreen()),
                 );
               },
               child: const Text('Create Company'),
