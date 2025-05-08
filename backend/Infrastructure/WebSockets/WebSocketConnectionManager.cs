@@ -12,7 +12,7 @@ namespace Infrastructure.WebSockets
     {
         private readonly ConcurrentDictionary<Guid, WebSocketConnection> _connections = 
             new ConcurrentDictionary<Guid, WebSocketConnection>();
-
+        
         public WebSocketConnection? GetConnectionById(Guid id)
         {
             _connections.TryGetValue(id, out var connection);
@@ -21,7 +21,9 @@ namespace Infrastructure.WebSockets
 
         public IEnumerable<WebSocketConnection> GetConnectionsByCompany(Guid companyId)
         {
-            return _connections.Values.Where(c => c.CompanyId == companyId);
+            return _connections.Values
+                .Where(c => c.CompanyId == companyId)
+                .ToList(); // Create a snapshot to avoid enumeration issues
         }
 
         public Guid AddConnection(WebSocket socket, Guid userId, string userType, Guid? companyId = null)
@@ -34,7 +36,7 @@ namespace Infrastructure.WebSockets
                 CompanyId = companyId
             };
 
-            _connections.TryAdd(userId, connection);
+            _connections.AddOrUpdate(userId, connection, (_, _) => connection);
             return userId;
         }
 

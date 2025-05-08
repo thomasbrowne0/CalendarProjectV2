@@ -5,21 +5,25 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.WebSockets
 {
     public class WebSocketService : IWebSocketService
     {
         private readonly WebSocketConnectionManager _connectionManager;
+        private readonly ILogger<WebSocketService> _logger;
 
-        public WebSocketService()
+        public WebSocketService(ILogger<WebSocketService> logger)
         {
             _connectionManager = new WebSocketConnectionManager();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task HandleWebSocketConnectionAsync(WebSocket webSocket, Guid userId, string userType)
         {
-            _connectionManager.AddConnection(webSocket, userId, userType ?? "Unknown");
+            _logger.LogInformation($"Handling WebSocket connection for user: {userId}, type: {userType}");
+            _connectionManager.AddConnection(webSocket, userId, userType);
             
             var buffer = new byte[1024 * 4];
             WebSocketReceiveResult result = null;
@@ -32,6 +36,7 @@ namespace Infrastructure.WebSockets
                     
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
+                        _logger.LogInformation($"WebSocket close request received for user {userId}");
                         await _connectionManager.RemoveConnection(userId);
                         break;
                     }
@@ -39,16 +44,18 @@ namespace Infrastructure.WebSockets
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
                         var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        _logger.LogDebug($"WebSocket message received from user {userId}: {message}");
                         await HandleIncomingMessageAsync(userId, message);
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Connection was closed or terminated
+                _logger.LogError(ex, $"Error in WebSocket connection for user {userId}");
             }
             finally
             {
+                _logger.LogInformation($"Closing WebSocket connection for user {userId}");
                 await _connectionManager.RemoveConnection(userId);
             }
         }
@@ -119,34 +126,38 @@ namespace Infrastructure.WebSockets
             await SendToCompanyUsersAsync(companyId, JsonSerializer.Serialize(message));
         }
         
-        private Task HandleIncomingMessageAsync(Guid userId, string message)
+        private async Task HandleIncomingMessageAsync(Guid userId, string message)
         {
             try
             {
+                _logger.LogDebug($"Processing message from user {userId}: {message}");
                 var messageObj = JsonDocument.Parse(message);
                 var root = messageObj.RootElement;
                 
                 if (root.TryGetProperty("type", out var typeElement))
                 {
                     var messageType = typeElement.GetString();
+                    _logger.LogDebug($"Message type: {messageType}");
                     
                     if (messageType == "SetCompany" && 
                         root.TryGetProperty("data", out var dataElement) &&
                         dataElement.TryGetProperty("companyId", out var companyIdElement))
                     {
-                        if (Guid.TryParse(companyIdElement.GetString(), out var companyId))
+                        if (Guid.TryParse(companyIdElement.GetString() ?? companyIdElement.ToString(), out var companyId))
                         {
+                            _logger.LogInformation($"User {userId} setting company to {companyId}");
                             _connectionManager.UpdateCompanyForConnection(userId, companyId);
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Invalid company ID format in message from user {userId}");
                         }
                     }
                 }
-                
-                return Task.CompletedTask;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Invalid message format
-                return Task.CompletedTask;
+                _logger.LogError(ex, $"Error handling WebSocket message from user {userId}");
             }
         }
         

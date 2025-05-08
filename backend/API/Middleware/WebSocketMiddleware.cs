@@ -1,5 +1,8 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -44,19 +47,27 @@ namespace API.Middleware
                         if (string.IsNullOrEmpty(token) || !await authService.ValidateTokenAsync(token))
                         {
                             context.Response.StatusCode = 401; // Unauthorized
+                            _logger.LogWarning("Unauthorized WebSocket connection attempt");
                             return;
                         }
 
                         try
                         {
                             // Extract user ID and type from token
-                            (Guid userId, string userType) = ExtractUserInfoFromToken(token);
+                            var userInfo = ExtractUserInfoFromToken(token);
+                            if (userInfo.userId == Guid.Empty)
+                            {
+                                context.Response.StatusCode = 401; // Unauthorized
+                                _logger.LogWarning("Could not extract user information from token");
+                                return;
+                            }
                             
                             // Accept WebSocket connection
                             var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                            _logger.LogInformation($"WebSocket connection established for user {userInfo.userId}");
                             
                             // Handle the WebSocket connection
-                            await _webSocketService.HandleWebSocketConnectionAsync(webSocket, userId, userType);
+                            await _webSocketService.HandleWebSocketConnectionAsync(webSocket, userInfo.userId, userInfo.userType);
                         }
                         catch (Exception ex)
                         {
@@ -67,6 +78,7 @@ namespace API.Middleware
                 }
                 else
                 {
+                    _logger.LogWarning("Non-WebSocket request to WebSocket endpoint");
                     context.Response.StatusCode = 400; // Bad Request
                 }
             }
@@ -78,12 +90,33 @@ namespace API.Middleware
 
         private (Guid userId, string userType) ExtractUserInfoFromToken(string token)
         {
-            // In a real implementation, you would extract this information from the JWT token
-            // This is a placeholder implementation
-            // You could use a JWT library to parse the token and extract claims
-
-            // For now, we'll just return dummy values
-            return (Guid.NewGuid(), "Employee");
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                if (tokenHandler.CanReadToken(token))
+                {
+                    var jwtToken = tokenHandler.ReadJwtToken(token);
+                    
+                    // Extract user ID
+                    var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                    if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+                    {
+                        // Extract user type
+                        var userTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserType");
+                        string userType = userTypeClaim?.Value ?? "Unknown";
+                        
+                        return (userId, userType);
+                    }
+                }
+                
+                _logger.LogWarning("Failed to extract user information from token");
+                return (Guid.Empty, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error parsing JWT token");
+                return (Guid.Empty, string.Empty);
+            }
         }
     }
 }
