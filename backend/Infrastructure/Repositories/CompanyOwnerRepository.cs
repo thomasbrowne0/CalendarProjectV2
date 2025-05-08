@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using Domain.Repositories;
+using Domain.IRepositories;
 using Infrastructure.Data;
 
 namespace Infrastructure.Repositories

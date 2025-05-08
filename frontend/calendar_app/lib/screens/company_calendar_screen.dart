@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/providers/calendar_provider.dart';
-import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/screens/create_event_screen.dart';
 import 'package:calendar_app/screens/event_details_screen.dart';
 

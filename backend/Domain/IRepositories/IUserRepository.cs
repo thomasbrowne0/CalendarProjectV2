@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Domain.Entities;
 
-namespace Domain.Repositories
+namespace Domain.IRepositories
 {
     public interface IUserRepository : IRepository<User>
     {

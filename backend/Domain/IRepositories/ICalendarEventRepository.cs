@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Entities;
 
-namespace Domain.Repositories
+namespace Domain.IRepositories
 {
     public interface ICalendarEventRepository : IRepository<CalendarEvent>
     {

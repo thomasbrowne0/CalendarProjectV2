@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
-using Domain.Repositories;
-using Domain.Services;
+using Domain.IRepositories;
+using Domain.IServices;
 
 namespace Application.Services
 {

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using Domain.Repositories;
-using Domain.Services;
+using Domain.IRepositories;
+using Domain.IServices;
 using Infrastructure.Repositories;
 
 namespace Infrastructure.Data

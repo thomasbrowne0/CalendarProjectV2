@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Domain.Entities;
 
-namespace Domain.Services
+namespace Domain.IServices
 {
     public interface IUserService
     {
