@@ -10,6 +10,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.IRepositories;
 using Domain.IServices;
+using System.Security.Cryptography;
 
 namespace Application.Services
 {
@@ -32,15 +33,18 @@ namespace Application.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
+        private bool VerifyPassword(string password, string hashedPassword)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            var hashedInput = Convert.ToBase64String(hashedBytes);
+            return hashedInput == hashedPassword;
+        }
+
         public async Task<AuthResponseDto> LoginAsync(UserLoginDto loginDto)
         {
             var user = await _userRepository.GetByEmailAsync(loginDto.Email);
-            if (user == null)
-                throw new Exception("User not found");
-
-            // In a real app, you'd hash the password and compare with the stored hash
-            // This is a simplified version
-            if (user.PasswordHash != loginDto.Password)
+            if (user == null || !VerifyPassword(loginDto.Password, user.PasswordHash))
                 throw new Exception("Invalid credentials");
 
             return new AuthResponseDto
@@ -62,7 +66,7 @@ namespace Application.Services
                 registrationDto.FirstName,
                 registrationDto.LastName,
                 registrationDto.Email,
-                registrationDto.Password
+                registrationDto.Password // Password will be hashed in the constructor
             );
 
             await _companyOwnerRepository.AddAsync(companyOwner);
