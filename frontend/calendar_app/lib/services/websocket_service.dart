@@ -18,7 +18,7 @@ class WebSocketService {
     if (_isConnected) return;
 
     try {
-      final wsUrl = Uri.parse('ws://localhost:5000/ws?token=$token');
+      final wsUrl = Uri.parse('ws://localhost:5188/ws?token=$token');
       _channel = WebSocketChannel.connect(wsUrl);
       _isConnected = true;
 
