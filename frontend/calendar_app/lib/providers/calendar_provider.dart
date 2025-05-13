@@ -3,15 +3,43 @@ import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
 
+import '../services/websocket_service.dart';
+
 class CalendarProvider with ChangeNotifier {
   List<CalendarEvent> _events = [];
   DateTime _focusedDay = DateTime.now();
-  
+  final WebSocketService _webSocketService;
   final ApiService? _apiService;
   final AuthProvider? _authProvider;
 
-  CalendarProvider(this._apiService, this._authProvider);
+  CalendarProvider(this._apiService, this._authProvider, this._webSocketService) {
+    _initializeWebSocket();
+  }
 
+  void _initializeWebSocket() {
+    _webSocketService.messageStream.listen((message) {
+      switch (message['type']) {
+        case 'EventCreated':
+          final event = CalendarEvent.fromJson(message['data']);
+          _events.add(event);
+          notifyListeners();
+          break;
+        case 'EventUpdated':
+          final updatedEvent = CalendarEvent.fromJson(message['data']);
+          final index = _events.indexWhere((e) => e.id == updatedEvent.id);
+          if (index != -1) {
+            _events[index] = updatedEvent;
+            notifyListeners();
+          }
+          break;
+        case 'EventDeleted':
+          final eventId = message['data']['id'];
+          _events.removeWhere((e) => e.id == eventId);
+          notifyListeners();
+          break;
+      }
+    });
+  }
   List<CalendarEvent> get events => [..._events];
   DateTime get focusedDay => _focusedDay;
 

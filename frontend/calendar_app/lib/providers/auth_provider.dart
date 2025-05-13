@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:calendar_app/models/user.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+
+import '../main.dart';
+import '../services/websocket_service.dart';
 
 class AuthProvider with ChangeNotifier {
   User? _user;
@@ -24,26 +28,61 @@ class AuthProvider with ChangeNotifier {
     try {
       final response = await _apiService!.login(email, password);
       _token = response['token'];
+
+      if (_token == null) {
+        throw Exception('No token received from server');
+      }
       _user = User.fromJson(response['user']);
       _expiryDate = DateTime.parse(response['expiresAt']);
 
       if (_token != null && _user != null) {
         if (!_user!.isCompanyOwner) {
           Map<String, dynamic> decodedToken = JwtDecoder.decode(_token!);
-          // JWT claims can be case-sensitive, check for common variations
           _companyId = decodedToken['CompanyId'] ?? decodedToken['companyId'];
         } else {
-          _companyId = null; // Ensure companyId is null for company owners
+          _companyId = null;
         }
       } else {
-        _companyId = null; // Reset if token or user is null
+        _companyId = null;
       }
 
       _apiService!.setToken(_token!);
       await _saveAuthData();
+
+      // Add retry logic for WebSocket connection
+      if (_token != null) {
+        await _connectWebSocket();
+      }
+
       notifyListeners();
     } catch (error) {
       rethrow;
+    }
+  }
+  // New method to handle WebSocket connection with retry
+
+  Future<void> _connectWebSocket() async {
+    const maxRetries = 3;
+    int retryCount = 0;
+
+    while (retryCount < maxRetries) {
+      try {
+        final wsService = Provider.of<WebSocketService>(
+          navigatorKey.currentContext!,
+          listen: false,
+        );
+
+        // Ensure token is properly formatted
+        await wsService.connect(_token!);
+        break;
+      } catch (e) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          print('Failed to connect to WebSocket after $maxRetries attempts');
+          rethrow;
+        }
+        await Future.delayed(Duration(seconds: 2 * retryCount)); // Exponential backoff
+      }
     }
   }
 
@@ -92,6 +131,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
+    Provider.of<WebSocketService>(navigatorKey.currentContext!, listen: false)
+        .disconnect();
     _token = null;
     _user = null;
     _expiryDate = null;

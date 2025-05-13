@@ -25,7 +25,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+      final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
       final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
       // Check if there's a selected company before trying to access its id
       if (companyProvider.selectedCompany != null) {
@@ -70,8 +70,8 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final calendarProvider = Provider.of<CalendarProvider>(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
+    final calendarProvider = context.watch<CalendarProvider>();
+    final companyProvider = context.watch<CompanyProvider>();
     final selectedCompany = companyProvider.selectedCompany;
     
     // If no company is selected, show a message

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:calendar_app/services/api_service.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/html.dart' if (dart.library.io) 'package:web_socket_channel/io.dart';
+import 'package:calendar_app/services/api_service.dart';
 
 class WebSocketService {
   WebSocketChannel? _channel;
@@ -18,30 +20,43 @@ class WebSocketService {
     if (_isConnected) return;
 
     try {
-      final wsUrl = Uri.parse('ws://localhost:5000/ws?token=$token');
+      final cleanToken = token.replaceAll('Bearer ', '');
+      final wsUrl = Uri.parse('ws://localhost:5188/ws?token=$cleanToken');
+
       _channel = WebSocketChannel.connect(wsUrl);
+
       _isConnected = true;
 
       _channel!.stream.listen(
-        (message) {
-          final decodedMessage = jsonDecode(message);
-          _messageController.add(decodedMessage);
+            (message) {
+          if (message is String) {
+            try {
+              final decodedMessage = jsonDecode(message);
+              _messageController.add(decodedMessage);
+            } catch (e) {
+              print('Error decoding message: $e');
+            }
+          }
         },
         onDone: () {
+          print('WebSocket connection closed.');
           _isConnected = false;
-          // Attempt reconnect after a delay
-          Future.delayed(const Duration(seconds: 5), () => connect(token));
+          disconnect();
         },
         onError: (error) {
-          print('WebSocket Error: $error');
+          print('WebSocket error: $error');
           _isConnected = false;
+          disconnect();
         },
+        cancelOnError: true,
       );
     } catch (e) {
-      print('Error connecting to WebSocket: $e');
+      print('WebSocket connection failed: $e');
       _isConnected = false;
+      rethrow;
     }
   }
+
 
   void sendMessage(String type, Map<String, dynamic> data) {
     if (!_isConnected || _channel == null) {
@@ -49,15 +64,20 @@ class WebSocketService {
       return;
     }
 
-    final message = jsonEncode({
-      'type': type,
-      'data': data,
-    });
-    _channel!.sink.add(message);
+    try {
+      final message = jsonEncode({
+        'type': type,
+        'data': data,
+      });
+      _channel!.sink.add(message);
+    } catch (e) {
+      print('Error sending message: $e');
+    }
   }
 
   void disconnect() {
     _channel?.sink.close();
+    _channel = null;
     _isConnected = false;
   }
 
