@@ -93,28 +93,55 @@ namespace API.Middleware
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
+                _logger.LogDebug("Attempting to read token in WebSocketMiddleware. Token snippet: {TokenStart}", token.Length > 20 ? token.Substring(0, 20) : token);
+
                 if (tokenHandler.CanReadToken(token))
                 {
+                    _logger.LogDebug("Token can be read. Reading JWT token.");
                     var jwtToken = tokenHandler.ReadJwtToken(token);
                     
-                    // Extract user ID
-                    var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-                    if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+                    _logger.LogDebug("All claims in WebSocket token:");
+                    foreach (var claim in jwtToken.Claims)
                     {
-                        // Extract user type
-                        var userTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserType");
-                        string userType = userTypeClaim?.Value ?? "Unknown";
-                        
-                        return (userId, userType);
+                        _logger.LogDebug("Claim Type: {Type}, Claim Value: {Value}", claim.Type, claim.Value);
+                    }
+                    
+                    // Extract user ID
+                    var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid");
+                    if (userIdClaim != null)
+                    {
+                        _logger.LogDebug("Found NameIdentifier claim with value: {UserIdClaimValue}", userIdClaim.Value);
+                        if (Guid.TryParse(userIdClaim.Value, out Guid userId))
+                        {
+                            _logger.LogDebug("Successfully parsed UserId: {UserId}", userId);
+                            // Extract user type
+                            var userTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserType"); // Ensure "UserType" matches exactly what's in AuthService
+                            string userType = userTypeClaim?.Value ?? "Unknown";
+                            _logger.LogDebug("Found UserType claim with value: {UserType}", userType);
+                            
+                            return (userId, userType);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Failed to parse NameIdentifier claim value '{UserIdClaimValue}' as Guid.", userIdClaim.Value);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("NameIdentifier claim (ClaimTypes.NameIdentifier) not found in token.");
                     }
                 }
+                else
+                {
+                    _logger.LogWarning("JwtSecurityTokenHandler.CanReadToken returned false for the provided token.");
+                }
                 
-                _logger.LogWarning("Failed to extract user information from token");
+                _logger.LogWarning("Failed to extract user information from token (reached end of method logic).");
                 return (Guid.Empty, string.Empty);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error parsing JWT token");
+                _logger.LogError(ex, "Exception during ExtractUserInfoFromToken");
                 return (Guid.Empty, string.Empty);
             }
         }
