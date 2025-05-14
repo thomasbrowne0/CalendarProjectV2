@@ -6,6 +6,8 @@ import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:calendar_app/screens/create_event_screen.dart';
 import 'package:calendar_app/screens/event_details_screen.dart';
 
+import '../providers/auth_provider.dart';
+
 class CompanyCalendarScreen extends StatefulWidget {
   const CompanyCalendarScreen({super.key});
 
@@ -73,8 +75,7 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
     final calendarProvider = Provider.of<CalendarProvider>(context);
     final companyProvider = Provider.of<CompanyProvider>(context);
     final selectedCompany = companyProvider.selectedCompany;
-    
-    // If no company is selected, show a message
+
     if (selectedCompany == null) {
       return Scaffold(
         appBar: AppBar(
@@ -82,15 +83,49 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).pop(); // Go back to previous screen
+              Navigator.of(context).pop();
             },
           ),
+          actions: [
+            PopupMenuButton<String>(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.person, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Text(
+                      Provider.of<AuthProvider>(context).user?.fullName ?? '',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+              onSelected: (value) {
+                if (value == 'logout') {
+                  Provider.of<AuthProvider>(context, listen: false).logout();
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout),
+                      SizedBox(width: 8),
+                      Text('Logout'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.business, size: 80, color: Colors.grey),
+              const Icon(Icons.business, size: 80, color: Colors.black),
               const SizedBox(height: 16),
               const Text(
                 'No company selected',
@@ -112,8 +147,46 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
     }
     
     final companyId = selectedCompany.id;
-    
+
     return Scaffold(
+        appBar: AppBar(
+        title: const Text('Company Calendar'),
+    actions: [
+    PopupMenuButton<String>(
+    child: Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Row(
+    children: [
+    const Icon(Icons.person, color: Colors.white),
+    const SizedBox(width: 8),
+    Text(
+    Provider.of<AuthProvider>(context).user?.fullName ?? '',
+    style: const TextStyle(color: Colors.white),
+    ),
+    ],
+    ),
+    ),
+    onSelected: (value) {
+    if (value == 'logout') {
+    Provider.of<AuthProvider>(context, listen: false).logout();
+    }
+    },
+    itemBuilder: (context) => [
+    const PopupMenuItem(
+    value: 'logout',
+    child: Row(
+    children: [
+    Icon(Icons.logout),
+    SizedBox(width: 8),
+    Text('Logout'),
+    ],
+    ),
+    ),
+    ],
+    ),
+    ],
+    ),
+
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -185,17 +258,21 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: Provider.of<AuthProvider>(context).canCreateEvents()
+          ? FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => const CreateEventScreen(),
+              builder: (_) => CreateEventScreen(
+                selectedDate: calendarProvider.focusedDay,
+              ),
             ),
           );
         },
         tooltip: 'Create Event',
         child: const Icon(Icons.add),
-      ),
+      )
+          : null,
     );
   }
 
