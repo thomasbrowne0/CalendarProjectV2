@@ -17,6 +17,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _jobTitleController = TextEditingController();
+  final _mobilePhoneController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -27,6 +28,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _jobTitleController.dispose();
+    _mobilePhoneController.dispose(); // Dispose new controller
     super.dispose();
   }
 
@@ -47,7 +49,8 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
     });
 
     try {
-      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+      final companyProvider =
+          Provider.of<CompanyProvider>(context, listen: false);
       await companyProvider.addEmployee(
         companyProvider.selectedCompany!.id,
         _firstNameController.text.trim(),
@@ -55,6 +58,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
         _emailController.text.trim(),
         _passwordController.text,
         _jobTitleController.text.trim(),
+        _mobilePhoneController.text.trim(),
       );
       Navigator.of(context).pop();
     } catch (error) {
@@ -143,7 +147,8 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _confirmPasswordController,
-                decoration: const InputDecoration(labelText: 'Confirm Password'),
+                decoration:
+                    const InputDecoration(labelText: 'Confirm Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -163,6 +168,16 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter job title';
                   }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _mobilePhoneController,
+                decoration: const InputDecoration(labelText: 'Mobile Phone'),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  // Optional: Add phone validation logic here
                   return null;
                 },
               ),

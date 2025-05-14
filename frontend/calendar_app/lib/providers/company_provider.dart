@@ -8,7 +8,7 @@ class CompanyProvider with ChangeNotifier {
   List<Company> _companies = [];
   Company? _selectedCompany;
   List<Employee> _employees = [];
-  
+
   final ApiService? _apiService;
   final AuthProvider? _authProvider;
 
@@ -20,7 +20,7 @@ class CompanyProvider with ChangeNotifier {
 
   Future<void> fetchCompanies() async {
     if (!_authProvider!.isAuth) return;
-    
+
     try {
       final companies = await _apiService!.getCompanies();
       _companies = companies;
@@ -32,8 +32,11 @@ class CompanyProvider with ChangeNotifier {
   }
 
   Future<void> selectCompany(String companyId) async {
-    if (_apiService == null || _authProvider == null || !_authProvider!.isAuth) {
-      print('CompanyProvider: ApiService or AuthProvider not available, or not authenticated.');
+    if (_apiService == null ||
+        _authProvider == null ||
+        !_authProvider!.isAuth) {
+      print(
+          'CompanyProvider: ApiService or AuthProvider not available, or not authenticated.');
       return;
     }
     try {
@@ -45,50 +48,62 @@ class CompanyProvider with ChangeNotifier {
       Company? companyToSelect;
 
       // Try to find in existing list first
-      final matchingCompaniesInList = _companies.where((c) => c.id == companyId).toList();
+      final matchingCompaniesInList =
+          _companies.where((c) => c.id == companyId).toList();
       if (matchingCompaniesInList.isNotEmpty) {
         companyToSelect = matchingCompaniesInList.first;
       } else {
         // If not found in the list, we need to fetch it.
         // How we fetch depends on whether the user is an owner or employee.
-        if (_authProvider!.user != null && !_authProvider!.user!.isCompanyOwner) {
+        if (_authProvider!.user != null &&
+            !_authProvider!.user!.isCompanyOwner) {
           // User is an EMPLOYEE, fetch their specific company by ID
-          print('CompanyProvider: Employee needs company $companyId. Fetching specifically.');
+          print(
+              'CompanyProvider: Employee needs company $companyId. Fetching specifically.');
           try {
             companyToSelect = await _apiService!.getCompanyById(companyId);
           } catch (e) {
-            print('CompanyProvider: Error fetching specific company $companyId for employee: $e');
+            print(
+                'CompanyProvider: Error fetching specific company $companyId for employee: $e');
             _selectedCompany = null; // Clear selection on error
             notifyListeners();
             rethrow; // Rethrow to be caught by UI
           }
-        } else if (_authProvider!.user != null && _authProvider!.user!.isCompanyOwner) {
+        } else if (_authProvider!.user != null &&
+            _authProvider!.user!.isCompanyOwner) {
           // User is a COMPANY OWNER. If _companies is empty, fetch their list.
           // This part of the logic might need refinement if an owner is selecting a company
           // that somehow wasn't in their initial fetchCompanies list.
           if (_companies.isEmpty) {
-             print('CompanyProvider: Owner has no companies in list. Fetching all their companies.');
-             await fetchCompanies(); // This fetches all companies for the owner
-             // Try finding it again after fetching
-             final stillMatching = _companies.where((c) => c.id == companyId).toList();
-             if (stillMatching.isNotEmpty) {
-               companyToSelect = stillMatching.first;
-             }
+            print(
+                'CompanyProvider: Owner has no companies in list. Fetching all their companies.');
+            await fetchCompanies(); // This fetches all companies for the owner
+            // Try finding it again after fetching
+            final stillMatching =
+                _companies.where((c) => c.id == companyId).toList();
+            if (stillMatching.isNotEmpty) {
+              companyToSelect = stillMatching.first;
+            }
           } else {
-             print('CompanyProvider: Owner selecting company $companyId, but it was not in the pre-loaded list of ${_companies.length} companies.');     }
+            print(
+                'CompanyProvider: Owner selecting company $companyId, but it was not in the pre-loaded list of ${_companies.length} companies.');
+          }
         }
       }
 
       if (companyToSelect != null) {
         _selectedCompany = companyToSelect;
-        await fetchEmployees(_selectedCompany!.id); // Fetch employees for the newly selected company
+        await fetchEmployees(_selectedCompany!
+            .id); // Fetch employees for the newly selected company
       } else {
-        print('CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
+        print(
+            'CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
         _selectedCompany = null; // Clear selection if no company could be set
       }
       notifyListeners();
     } catch (error) {
-      print('CompanyProvider: General error in selectCompany for $companyId: $error');
+      print(
+          'CompanyProvider: General error in selectCompany for $companyId: $error');
       _selectedCompany = null; // Ensure selection is cleared on error
       notifyListeners();
       rethrow;
@@ -117,8 +132,9 @@ class CompanyProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addEmployee(
-      String companyId, String firstName, String lastName, String email, String password, String jobTitle) async {
+  Future<void> addEmployee(String companyId, String firstName, String lastName,
+      String email, String password, String jobTitle,
+      [String mobilePhone = '']) async {
     try {
       final employee = await _apiService!.createEmployee(companyId, {
         'firstName': firstName,
@@ -126,8 +142,9 @@ class CompanyProvider with ChangeNotifier {
         'email': email,
         'password': password,
         'jobTitle': jobTitle,
+        'mobilePhone': mobilePhone,
       });
-      
+
       _employees.add(employee);
       notifyListeners();
     } catch (error) {

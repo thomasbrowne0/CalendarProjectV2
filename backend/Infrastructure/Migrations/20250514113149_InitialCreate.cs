@@ -53,7 +53,8 @@ namespace Infrastructure.Migrations
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     UserType = table.Column<string>(type: "character varying(13)", maxLength: 13, nullable: false),
                     CompanyId = table.Column<Guid>(type: "uuid", nullable: true),
-                    JobTitle = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
+                    JobTitle = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    MobilePhone = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: true)
                 },
                 constraints: table =>
                 {

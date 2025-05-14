@@ -6,6 +6,7 @@ class Employee {
   final String jobTitle;
   final String companyId;
   final String companyName;
+  final String mobilePhone; // New property
 
   Employee({
     required this.id,
@@ -15,6 +16,7 @@ class Employee {
     required this.jobTitle,
     required this.companyId,
     this.companyName = '',
+    this.mobilePhone = '',
   });
 
   String get fullName => '$firstName $lastName';
@@ -28,6 +30,7 @@ class Employee {
       jobTitle: json['jobTitle'],
       companyId: json['companyId'],
       companyName: json['companyName'] ?? '',
+      mobilePhone: json['mobilePhone'] ?? '',
     );
   }
 
@@ -40,6 +43,7 @@ class Employee {
       'jobTitle': jobTitle,
       'companyId': companyId,
       'companyName': companyName,
+      'mobilePhone': mobilePhone,
     };
   }
 }
