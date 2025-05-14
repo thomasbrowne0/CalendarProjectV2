@@ -7,6 +7,8 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.IRepositories;
 using Domain.IServices;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Application.Services
 {
@@ -44,22 +46,29 @@ namespace Application.Services
             return employees.Select(MapToEmployeeDto);
         }
 
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
+        }
+
         public async Task<EmployeeDto> CreateEmployeeAsync(Guid companyId, EmployeeCreateDto employeeCreateDto)
         {
             var company = await _companyRepository.GetByIdAsync(companyId);
             if (company == null)
                 throw new Exception($"Company with ID {companyId} not found");
 
-            var existingEmployee = await _employeeRepository.GetByEmailAsync(employeeCreateDto.Email);
-            if (existingEmployee != null)
+            var exists = await _employeeRepository.ExistsByEmailAsync(employeeCreateDto.Email);
+            if (exists) 
                 throw new Exception($"An employee with email {employeeCreateDto.Email} already exists");
-
-            // In a real app, you'd hash the password
+            
+            
             var employee = new Employee(
                 employeeCreateDto.FirstName,
                 employeeCreateDto.LastName,
                 employeeCreateDto.Email,
-                employeeCreateDto.Password,
+                HashPassword(employeeCreateDto.Password), // Hash the password
                 companyId,
                 employeeCreateDto.JobTitle
             );

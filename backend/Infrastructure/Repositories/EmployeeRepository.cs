@@ -36,5 +36,12 @@ namespace Infrastructure.Repositories
                 
             return employee;
         }
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be empty", nameof(email));
+    
+            return await _dbSet.AnyAsync(e => e.Email.ToLower() == email.ToLower());
+        }
     }
 }
