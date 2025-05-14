@@ -7,6 +7,8 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.IRepositories;
 using Domain.IServices;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Application.Services
 {
@@ -44,6 +46,13 @@ namespace Application.Services
             return employees.Select(MapToEmployeeDto);
         }
 
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
+        }
+
         public async Task<EmployeeDto> CreateEmployeeAsync(Guid companyId, EmployeeCreateDto employeeCreateDto)
         {
             var company = await _companyRepository.GetByIdAsync(companyId);
@@ -59,7 +68,7 @@ namespace Application.Services
                 employeeCreateDto.FirstName,
                 employeeCreateDto.LastName,
                 employeeCreateDto.Email,
-                employeeCreateDto.Password,
+                HashPassword(employeeCreateDto.Password), // Hash the password
                 companyId,
                 employeeCreateDto.JobTitle
             );
