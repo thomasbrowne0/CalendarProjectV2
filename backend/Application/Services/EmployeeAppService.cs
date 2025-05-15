@@ -63,7 +63,11 @@ namespace Application.Services
                 companyId,
                 employeeCreateDto.JobTitle,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 employeeCreateDto.MobilePhone 
+=======
+                employeeCreateDto.MobilePhone // Pass mobile phone
+>>>>>>> Stashed changes
 =======
                 employeeCreateDto.MobilePhone // Pass mobile phone
 >>>>>>> Stashed changes

@@ -14,7 +14,11 @@ namespace Infrastructure.Data.EntityConfigurations
 
             builder.Property(e => e.MobilePhone)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 .HasMaxLength(30);
+=======
+                .HasMaxLength(30); // Add this line
+>>>>>>> Stashed changes
 =======
                 .HasMaxLength(30); // Add this line
 >>>>>>> Stashed changes

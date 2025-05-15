@@ -9,7 +9,11 @@ namespace Domain.Entities
         public virtual Company Company { get; private set; }
         public string JobTitle { get; private set; }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         public string MobilePhone { get; private set; } 
+=======
+        public string MobilePhone { get; private set; } // Add this property
+>>>>>>> Stashed changes
 =======
         public string MobilePhone { get; private set; } // Add this property
 >>>>>>> Stashed changes
