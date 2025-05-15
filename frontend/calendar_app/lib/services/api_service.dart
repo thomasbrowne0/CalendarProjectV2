@@ -8,17 +8,11 @@ class ApiService {
   // Update port number to match your running backend
   static const String baseUrl = 'http://localhost:5188/api';
   String? _token;
-  String? _companyId;
+
   String? get token => _token;
-  String? get companyId => _companyId;
   
   void setToken(String token) {
     _token = token;
-  }
-
-  void setCompanyContext(String companyId) {
-    _companyId = companyId;
-    print('Company context set to: $companyId');
   }
 
   Map<String, String> get _headers {

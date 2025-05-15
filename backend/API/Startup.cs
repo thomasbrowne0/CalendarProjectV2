@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using API.Middleware;
 using Infrastructure;
 
 namespace API
@@ -101,38 +102,42 @@ namespace API
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-    if (env.IsDevelopment())
-    {
-        app.UseDeveloperExceptionPage();
-        app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Calendar Project API v1"));
-    }
-    else
-    {
-        app.UseExceptionHandler("/Error");
-        app.UseHsts();
-    }
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Calendar Project API v1"));
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+            }
 
-    app.UseHttpsRedirection();
-    
-    // Apply CORS policy before routing
-    app.UseCors("AllowAll");
-    
-    app.UseRouting();
-    
-    app.UseAuthentication();
-    app.UseAuthorization();
-    
-    // Note: WebSocketMiddleware is no longer needed since Fleck handles its own connections
-    
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-    });
-    
-    // Force instantiation of WebSocketService to start Fleck server
-    var webSocketService = app.ApplicationServices.GetRequiredService<Application.Interfaces.IWebSocketService>();
-    }
+            app.UseHttpsRedirection();
+            
+            // Apply CORS policy before routing
+            app.UseCors("AllowAll");
+            
+            app.UseRouting();
+            
+            app.UseAuthentication();
+            app.UseAuthorization();
+            
+            // Configure WebSockets
+            app.UseWebSockets(new WebSocketOptions
+            {
+                KeepAliveInterval = TimeSpan.FromMinutes(2)
+            });
+            
+            // Use custom WebSocket middleware
+            app.UseMiddleware<WebSocketMiddleware>();
+            
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
     }
 }
