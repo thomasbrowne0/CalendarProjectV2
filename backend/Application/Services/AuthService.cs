@@ -44,7 +44,16 @@ namespace Application.Services
         public async Task<AuthResponseDto> LoginAsync(UserLoginDto loginDto)
         {
             var user = await _userRepository.GetByEmailAsync(loginDto.Email);
+<<<<<<< Updated upstream
             if (user == null || !VerifyPassword(loginDto.Password, user.PasswordHash))
+=======
+            if (user == null)
+                throw new Exception("User not found");
+
+            // Hash the incoming password before comparing
+            var hashedInput = HashPassword(loginDto.Password);
+            if (user.PasswordHash != hashedInput)
+>>>>>>> Stashed changes
                 throw new Exception("Invalid credentials");
 
             return new AuthResponseDto
@@ -61,12 +70,17 @@ namespace Application.Services
             if (exists)
                 throw new Exception("Email already registered");
 
-            // In a real app, you'd hash the password before storing
+            // Hash the password before storing
+            var hashedPassword = HashPassword(registrationDto.Password);
             var companyOwner = new CompanyOwner(
                 registrationDto.FirstName,
                 registrationDto.LastName,
                 registrationDto.Email,
+<<<<<<< Updated upstream
                 registrationDto.Password // Password will be hashed in the constructor
+=======
+                hashedPassword
+>>>>>>> Stashed changes
             );
 
             await _companyOwnerRepository.AddAsync(companyOwner);
@@ -155,6 +169,13 @@ namespace Application.Services
                 Email = user.Email,
                 UserType = userType
             };
+        }
+
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
         }
     }
 }
