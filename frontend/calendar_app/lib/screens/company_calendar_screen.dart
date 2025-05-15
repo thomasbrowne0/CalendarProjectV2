@@ -27,14 +27,14 @@ void didChangeDependencies() {
     setState(() {
       _isLoading = true;
     });
-    
+
     final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
     if (companyProvider.selectedCompany != null) {
       final companyId = companyProvider.selectedCompany!.id;
-      
+
       // Set company ID in CalendarCubit
       context.read<CalendarCubit>().setCompanyId(companyId);
-      
+
       // Use Cubit to fetch events
       context.read<CalendarCubit>().fetchEvents(companyId).then((_) {
         if (mounted) {
@@ -141,8 +141,8 @@ void didChangeDependencies() {
                 ),
                 // CHANGE 1: Replace TableCalendar with BlocBuilder
                 BlocBuilder<CalendarCubit, CalendarState>(
-                  buildWhen: (previous, current) => 
-                    previous.focusedDay != current.focusedDay || 
+                  buildWhen: (previous, current) =>
+                    previous.focusedDay != current.focusedDay ||
                     previous.events != current.events,
                   builder: (context, state) {
                     return TableCalendar(
@@ -182,18 +182,18 @@ void didChangeDependencies() {
                 // CHANGE 2: Replace _buildEventList with BlocBuilder
                 Expanded(
                   child: BlocBuilder<CalendarCubit, CalendarState>(
-                    buildWhen: (previous, current) => 
-                      previous.events != current.events || 
+                    buildWhen: (previous, current) =>
+                      previous.events != current.events ||
                       previous.focusedDay != current.focusedDay,
                     builder: (context, state) {
                       final events = context.read<CalendarCubit>().getEventsForDay(state.focusedDay);
-                      
+
                       if (events.isEmpty) {
                         return const Center(
                           child: Text('No events for this day.'),
                         );
                       }
-                      
+
                       return ListView.builder(
                         itemCount: events.length,
                         itemBuilder: (ctx, index) {

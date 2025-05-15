@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:calendar_app/providers/company_provider.dart';
+import 'package:calendar_app/services/create_company_service.dart';
 
 class CreateCompanyScreen extends StatefulWidget {
   const CreateCompanyScreen({super.key});
@@ -15,51 +14,34 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
   final _cvrController = TextEditingController();
   bool _isLoading = false;
 
+  late final CreateCompanyService _companyService;
+
+  @override
+  void initState() {
+    super.initState();
+    _companyService = CreateCompanyService(context);
+  }
+
+  void _setLoading(bool value) {
+    setState(() {
+      _isLoading = value;
+    });
+  }
+
+  void _submit() {
+    _companyService.submit(
+      formKey: _formKey,
+      nameController: _nameController,
+      cvrController: _cvrController,
+      setLoading: _setLoading,
+    );
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
     _cvrController.dispose();
     super.dispose();
-  }
-
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await Provider.of<CompanyProvider>(context, listen: false).createCompany(
-        _nameController.text.trim(),
-        _cvrController.text.trim(),
-      );
-      Navigator.of(context).pop();
-    } catch (error) {
-      _showErrorDialog('Failed to create company', error.toString());
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  void _showErrorDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override

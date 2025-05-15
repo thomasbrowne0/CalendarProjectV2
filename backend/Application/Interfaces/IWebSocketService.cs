@@ -1,6 +1,6 @@
 using System;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
+using System.Net.WebSockets;
 
 namespace Application.Interfaces
 {

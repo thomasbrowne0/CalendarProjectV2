@@ -4,6 +4,7 @@ import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/screens/company_calendar_screen.dart';
 import 'package:calendar_app/screens/employee_list_screen.dart';
+import 'package:calendar_app/widgets/home_widget.dart';
 
 class EmployeeHomeScreen extends StatefulWidget {
   const EmployeeHomeScreen({super.key});
@@ -18,76 +19,47 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
   int _selectedIndex = 0;
 
   @override
-void didChangeDependencies() {
-  if (_isInit) {
-    setState(() {
-      _isLoading = true; // Start loading indicator
-    });
-    
-    // Get the AuthProvider instance (listen: false because we only need to read values once here)
-    final authProvider = Provider.of<AuthProvider>(context, listen: false); 
-    
-    // Check if the user is authenticated, has user data, and is an employee
-    if (authProvider.isAuth && authProvider.user != null && !authProvider.user!.isCompanyOwner) {
-      // Retrieve the companyId stored in AuthProvider (this was set during login/auto-login)
-      final String? employeeCompanyId = authProvider.companyId; 
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() => _isLoading = true);
 
-      if (employeeCompanyId != null && employeeCompanyId.isNotEmpty) {
-        // If companyId is available, tell CompanyProvider to select this company
-        Provider.of<CompanyProvider>(context, listen: false)
-            .selectCompany(employeeCompanyId) 
-            .then((_) {
-          // After company selection is complete
-          if (mounted) { // Check if the widget is still part of the widget tree
-            setState(() {
-              _isLoading = false; // Stop loading indicator
-            });
-          }
-        }).catchError((error) {
-          // If there was an error selecting the company
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.isAuth && authProvider.user != null && !authProvider.user!.isCompanyOwner) {
+        final employeeCompanyId = authProvider.companyId;
+        if (employeeCompanyId != null && employeeCompanyId.isNotEmpty) {
+          Provider.of<CompanyProvider>(context, listen: false)
+              .selectCompany(employeeCompanyId)
+              .then((_) {
+            if (mounted) setState(() => _isLoading = false);
+          }).catchError((error) {
+            if (mounted) {
+              setState(() => _isLoading = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to load company data: $error')),
+              );
+            }
+          });
+        } else {
           if (mounted) {
-            setState(() {
-              _isLoading = false; // Stop loading indicator
-            });
+            setState(() => _isLoading = false);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to load company data: ${error.toString()}')),
+              const SnackBar(content: Text('Your company information is missing. Please log in again.')),
             );
           }
-        });
-      } else {
-        // Employee is logged in, but their companyId is missing or empty
-        if (mounted) {
-          setState(() {
-            _isLoading = false; // Stop loading indicator
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Your company information is missing. Please log in again.')),
-          );
         }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
       }
-    } else {
-      // User is not an employee, not authenticated, or user data is null
-      if (mounted) {
-        setState(() {
-          _isLoading = false; // Stop loading indicator
-        });
-        // Optionally, if not authenticated, you might want to navigate to the login screen
-        // if (!authProvider.isAuth) {
-        //   Navigator.of(context).pushReplacementNamed('/login-screen'); // Example
-        // }
-      }
+      _isInit = false;
     }
-    _isInit = false; // Ensure this logic runs only once
+    super.didChangeDependencies();
   }
-  super.didChangeDependencies();
-}
 
   @override
   Widget build(BuildContext context) {
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final company = companyProvider.selectedCompany;
+    final company = Provider.of<CompanyProvider>(context).selectedCompany;
 
-    List<Widget> pages = [
+    final pages = [
       company == null ? _buildNoCompanyFound() : const CompanyCalendarScreen(),
       company == null ? _buildNoCompanyFound() : const EmployeeListScreen(),
     ];
@@ -95,35 +67,13 @@ void didChangeDependencies() {
     return Scaffold(
       appBar: AppBar(
         title: Text(company?.name ?? 'Company Calendar'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-            },
-          ),
-        ],
+        actions: const [UserProfileMenu(textColor: Colors.white)],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
+      body: LoadingWrapper(isLoading: _isLoading, child: pages[_selectedIndex]),
+      bottomNavigationBar: AppBottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Colleagues',
-          ),
-        ],
+        onTap: (index) => setState(() => _selectedIndex = index),
+        isOwner: false,
       ),
     );
   }

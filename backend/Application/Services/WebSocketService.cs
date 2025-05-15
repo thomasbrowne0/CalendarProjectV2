@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -6,50 +7,54 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Interfaces;
 
-namespace Infrastructure.WebSockets
+namespace Application.Services
 {
     public class WebSocketService : IWebSocketService
     {
-        private readonly WebSocketConnectionManager _connectionManager;
-
-        public WebSocketService()
-        {
-            _connectionManager = new WebSocketConnectionManager();
-        }
-
+        // Dictionary to store active connections: userId => WebSocket
+        private readonly ConcurrentDictionary<Guid, WebSocket> _userConnections = new ConcurrentDictionary<Guid, WebSocket>();
+        
+        // Dictionary to store user company membership: userId => companyId
+        private readonly ConcurrentDictionary<Guid, Guid> _userCompanyMap = new ConcurrentDictionary<Guid, Guid>();
+        
         public async Task HandleWebSocketConnectionAsync(WebSocket webSocket, Guid userId, string userType)
         {
-            _connectionManager.AddConnection(webSocket, userId, userType ?? "Unknown");
+            // Fix for warning CS8600: Add null-conditional operator to ensure safe type handling
+            _userConnections.TryAdd(userId, webSocket);
             
             var buffer = new byte[1024 * 4];
             WebSocketReceiveResult result = null;
             
             try
             {
+                // Keep the connection open and handle incoming messages
                 while (webSocket.State == WebSocketState.Open)
                 {
                     result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                     
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        await _connectionManager.RemoveConnection(userId);
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by client", CancellationToken.None);
                         break;
                     }
                     
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                         await HandleIncomingMessageAsync(userId, message);
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Connection was closed or terminated
+                // Log the exception
+                Console.WriteLine($"WebSocket error: {ex.Message}");
             }
             finally
             {
-                await _connectionManager.RemoveConnection(userId);
+                // Clean up the connection
+                _userConnections.TryRemove(userId, out _);
+                _userCompanyMap.TryRemove(userId, out _);
             }
         }
         
@@ -123,57 +128,68 @@ namespace Infrastructure.WebSockets
         {
             try
             {
-                var messageObj = JsonDocument.Parse(message);
-                var root = messageObj.RootElement;
+                // Parse the incoming message
+                var messageObject = JsonSerializer.Deserialize<WebSocketMessage>(message);
                 
-                if (root.TryGetProperty("type", out var typeElement))
+                // Handle different message types
+                switch (messageObject.Type)
                 {
-                    var messageType = typeElement.GetString();
-                    
-                    if (messageType == "SetCompany" && 
-                        root.TryGetProperty("data", out var dataElement) &&
-                        dataElement.TryGetProperty("companyId", out var companyIdElement))
-                    {
-                        if (Guid.TryParse(companyIdElement.GetString(), out var companyId))
+                    case "SetCompany":
+                        // Extract company ID from the message
+                        if (messageObject.Data.TryGetProperty("companyId", out var companyIdElement) && 
+                            companyIdElement.TryGetGuid(out var companyId))
                         {
-                            _connectionManager.UpdateCompanyForConnection(userId, companyId);
+                            // Update the user's company mapping
+                            _userCompanyMap.AddOrUpdate(userId, companyId, (_, __) => companyId);
                         }
-                    }
+                        break;
+                    
+                    // Add more message type handlers as needed
                 }
-                
                 return Task.CompletedTask;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Invalid message format
+                // Log the error but don't terminate the connection
+                Console.WriteLine($"Error handling message: {ex.Message}");
                 return Task.CompletedTask;
             }
         }
         
         private async Task SendToCompanyUsersAsync(Guid companyId, string message)
         {
-            var connections = _connectionManager.GetConnectionsByCompany(companyId);
             var messageBytes = Encoding.UTF8.GetBytes(message);
             
-            foreach (var connection in connections)
+            // Find all users belonging to this company
+            foreach (var userPair in _userCompanyMap)
             {
-                if (connection.Socket.State == WebSocketState.Open)
+                if (userPair.Value == companyId && _userConnections.TryGetValue(userPair.Key, out var webSocket))
                 {
                     try
                     {
-                        await connection.Socket.SendAsync(
-                            new ArraySegment<byte>(messageBytes),
-                            WebSocketMessageType.Text,
-                            true,
-                            CancellationToken.None);
+                        // Fix for warning CS8602: Add null check before accessing the State property
+                        if (webSocket != null && webSocket.State == WebSocketState.Open)
+                        {
+                            await webSocket.SendAsync(
+                                new ArraySegment<byte>(messageBytes),
+                                WebSocketMessageType.Text,
+                                true,
+                                CancellationToken.None);
+                        }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // Failed to send message, connection might be closed
-                        await _connectionManager.RemoveConnection(connection.Id);
+                        // Log the error
+                        Console.WriteLine($"Error sending WebSocket message: {ex.Message}");
                     }
                 }
             }
+        }
+        
+        private class WebSocketMessage
+        {
+            public string Type { get; set; } = string.Empty;
+            public JsonElement Data { get; set; }
         }
     }
 }

@@ -40,8 +40,14 @@ class CalendarProvider with ChangeNotifier {
     }
   }
 
-  Future<void> createEvent(String companyId, String title, String description,
-      DateTime startTime, DateTime endTime, List<String> participantIds) async {
+  Future<CalendarEvent> createEvent(
+      String companyId,
+      String title,
+      String description,
+      DateTime startTime,
+      DateTime endTime,
+      List<String> participantIds,
+      ) async {
     try {
       final event = await _apiService!.createEvent(companyId, {
         'title': title,
@@ -50,14 +56,17 @@ class CalendarProvider with ChangeNotifier {
         'endTime': endTime.toIso8601String(),
         'participantIds': participantIds,
       });
-      
+
       _events.add(event);
       notifyListeners();
+
+      return event;  // <-- Return the created event
     } catch (error) {
       print('Error creating event: $error');
       rethrow;
     }
   }
+
 
   List<CalendarEvent> getEventsForDay(DateTime day) {
     return _events.where((event) {

@@ -34,17 +34,7 @@ namespace Infrastructure
             // Register UnitOfWork
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             
-            // Configure WebSocket options
-            services.Configure<WebSocketOptions>(options => 
-            {
-                options.Host = configuration["WebSockets:Host"] ?? "0.0.0.0";
-                options.Port = int.Parse(configuration["WebSockets:Port"] ?? "8181");
-                options.SecureConnection = bool.Parse(configuration["WebSockets:SecureConnection"] ?? "false");
-                options.CertificatePath = configuration["WebSockets:CertificatePath"];
-                options.CertificatePassword = configuration["WebSockets:CertificatePassword"];
-            });
-            
-            // Register WebSocketService as a singleton
+            // Fix ambiguous reference by using the fully qualified name
             services.AddSingleton<IWebSocketService, Infrastructure.WebSockets.WebSocketService>();
 
             // Register Application services
