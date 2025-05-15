@@ -9,14 +9,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace CalendarProject.Infrastructure.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250501155022_InitialCreate")]
+    [Migration("20250514113149_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
-        protected void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,7 +40,7 @@ namespace CalendarProject.Infrastructure.Migrations
                     b.ToTable("EmployeeEvents", (string)null);
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.CalendarEvent", b =>
+            modelBuilder.Entity("Domain.Entities.CalendarEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,7 +81,7 @@ namespace CalendarProject.Infrastructure.Migrations
                     b.ToTable("CalendarEvents", (string)null);
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.Company", b =>
+            modelBuilder.Entity("Domain.Entities.Company", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -110,7 +110,7 @@ namespace CalendarProject.Infrastructure.Migrations
                     b.ToTable("Companies", (string)null);
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.User", b =>
+            modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -152,16 +152,16 @@ namespace CalendarProject.Infrastructure.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.CompanyOwner", b =>
+            modelBuilder.Entity("Domain.Entities.CompanyOwner", b =>
                 {
-                    b.HasBaseType("CalendarProject.Domain.Entities.User");
+                    b.HasBaseType("Domain.Entities.User");
 
                     b.HasDiscriminator().HasValue("CompanyOwner");
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.Employee", b =>
+            modelBuilder.Entity("Domain.Entities.Employee", b =>
                 {
-                    b.HasBaseType("CalendarProject.Domain.Entities.User");
+                    b.HasBaseType("Domain.Entities.User");
 
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uuid");
@@ -171,6 +171,11 @@ namespace CalendarProject.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("MobilePhone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
                     b.HasIndex("CompanyId");
 
                     b.HasDiscriminator().HasValue("Employee");
@@ -178,28 +183,28 @@ namespace CalendarProject.Infrastructure.Migrations
 
             modelBuilder.Entity("CalendarEventEmployee", b =>
                 {
-                    b.HasOne("CalendarProject.Domain.Entities.CalendarEvent", null)
+                    b.HasOne("Domain.Entities.CalendarEvent", null)
                         .WithMany()
                         .HasForeignKey("EventsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CalendarProject.Domain.Entities.Employee", null)
+                    b.HasOne("Domain.Entities.Employee", null)
                         .WithMany()
                         .HasForeignKey("ParticipantsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.CalendarEvent", b =>
+            modelBuilder.Entity("Domain.Entities.CalendarEvent", b =>
                 {
-                    b.HasOne("CalendarProject.Domain.Entities.Company", "Company")
+                    b.HasOne("Domain.Entities.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CalendarProject.Domain.Entities.User", "CreatedBy")
+                    b.HasOne("Domain.Entities.User", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -210,9 +215,9 @@ namespace CalendarProject.Infrastructure.Migrations
                     b.Navigation("CreatedBy");
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.Company", b =>
+            modelBuilder.Entity("Domain.Entities.Company", b =>
                 {
-                    b.HasOne("CalendarProject.Domain.Entities.CompanyOwner", "CompanyOwner")
+                    b.HasOne("Domain.Entities.CompanyOwner", "CompanyOwner")
                         .WithMany("OwnedCompanies")
                         .HasForeignKey("CompanyOwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -221,9 +226,9 @@ namespace CalendarProject.Infrastructure.Migrations
                     b.Navigation("CompanyOwner");
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.Employee", b =>
+            modelBuilder.Entity("Domain.Entities.Employee", b =>
                 {
-                    b.HasOne("CalendarProject.Domain.Entities.Company", "Company")
+                    b.HasOne("Domain.Entities.Company", "Company")
                         .WithMany("Employees")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -232,12 +237,12 @@ namespace CalendarProject.Infrastructure.Migrations
                     b.Navigation("Company");
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.Company", b =>
+            modelBuilder.Entity("Domain.Entities.Company", b =>
                 {
                     b.Navigation("Employees");
                 });
 
-            modelBuilder.Entity("CalendarProject.Domain.Entities.CompanyOwner", b =>
+            modelBuilder.Entity("Domain.Entities.CompanyOwner", b =>
                 {
                     b.Navigation("OwnedCompanies");
                 });

@@ -62,7 +62,8 @@ namespace Application.Services
                 employeeCreateDto.Email,
                 employeeCreateDto.Password,
                 companyId,
-                employeeCreateDto.JobTitle
+                employeeCreateDto.JobTitle,
+                employeeCreateDto.MobilePhone
             );
 
             await _employeeRepository.AddAsync(employee);
@@ -88,6 +89,7 @@ namespace Application.Services
             );
 
             employee.UpdateJobTitle(employeeUpdateDto.JobTitle);
+            employee.UpdateMobilePhone(employeeUpdateDto.MobilePhone); // Update mobile phone
 
             await _employeeRepository.UpdateAsync(employee);
             await _unitOfWork.SaveChangesAsync();
@@ -137,7 +139,8 @@ namespace Application.Services
                 Email = employee.Email,
                 JobTitle = employee.JobTitle,
                 CompanyId = employee.CompanyId,
-                CompanyName = employee.Company?.Name ?? string.Empty
+                CompanyName = employee.Company?.Name ?? string.Empty,
+                MobilePhone = employee.MobilePhone // Map mobile phone
             };
         }
     }

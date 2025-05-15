@@ -12,6 +12,8 @@ namespace Infrastructure.Data.EntityConfigurations
                 .IsRequired()
                 .HasMaxLength(100);
 
+            builder.Property(e => e.MobilePhone)
+                .HasMaxLength(30);
             // Configure navigation properties
             builder.HasOne(e => e.Company)
                 .WithMany(c => c.Employees)

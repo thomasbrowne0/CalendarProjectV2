@@ -11,6 +11,7 @@ namespace Application.DTOs
         public string JobTitle { get; set; } = string.Empty;
         public Guid CompanyId { get; set; }
         public string CompanyName { get; set; } = string.Empty;
+        public string MobilePhone { get; set; } = string.Empty;
     }
 
     public class EmployeeCreateDto
@@ -20,6 +21,7 @@ namespace Application.DTOs
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string JobTitle { get; set; } = string.Empty;
+        public string MobilePhone { get; set; } = string.Empty;
     }
 
     public class EmployeeUpdateDto
@@ -28,5 +30,6 @@ namespace Application.DTOs
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string JobTitle { get; set; } = string.Empty;
+        public string MobilePhone { get; set; } = string.Empty;
     }
 }
