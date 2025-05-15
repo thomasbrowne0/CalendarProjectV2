@@ -62,7 +62,11 @@ namespace Application.Services
                 employeeCreateDto.Password,
                 companyId,
                 employeeCreateDto.JobTitle,
+<<<<<<< Updated upstream
                 employeeCreateDto.MobilePhone 
+=======
+                employeeCreateDto.MobilePhone // Pass mobile phone
+>>>>>>> Stashed changes
             );
 
             await _employeeRepository.AddAsync(employee);

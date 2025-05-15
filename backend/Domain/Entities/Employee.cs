@@ -8,7 +8,11 @@ namespace Domain.Entities
         public Guid CompanyId { get; private set; }
         public virtual Company Company { get; private set; }
         public string JobTitle { get; private set; }
+<<<<<<< Updated upstream
         public string MobilePhone { get; private set; } 
+=======
+        public string MobilePhone { get; private set; } // Add this property
+>>>>>>> Stashed changes
         public virtual ICollection<CalendarEvent> Events { get; private set; }
         
         // For EF Core
