@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/screens/register_screen.dart';
+import 'package:calendar_app/services/login_service.dart';
+import 'package:calendar_app/widgets/login_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,51 +17,31 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await Provider.of<AuthProvider>(context, listen: false).login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-    } catch (error) {
-      _showErrorDialog('Authentication failed', error.toString());
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  void _showErrorDialog(String title, String message) {
-    showDialog(
+  void _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    await LoginService.submitLoginForm(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      email: _emailController.text,
+      password: _passwordController.text,
     );
+
+    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Company Calendar'),
-      ),
+      appBar: AppBar(title: const Text('Company Calendar')),
       body: Center(
         child: Card(
           margin: const EdgeInsets.all(20),
@@ -71,54 +52,17 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Login',
-                    style: Theme.of(context).textTheme.headlineSmall,  // Changed from headline5
-                  ),
+                  LoginWidgets.title(context),
                   const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty || !value.contains('@')) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
+                  LoginWidgets.emailField(_emailController),
                   const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(labelText: 'Password'),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty || value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                  ),
+                  LoginWidgets.passwordField(_passwordController),
                   const SizedBox(height: 20),
-                  if (_isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    ElevatedButton(
-                      onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: const Text('LOGIN'),
-                    ),
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : LoginWidgets.loginButton(_submit),
                   const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                      );
-                    },
-                    child: const Text('Register as Company Owner'),
-                  ),
+                  LoginWidgets.registerLink(context),
                 ],
               ),
             ),

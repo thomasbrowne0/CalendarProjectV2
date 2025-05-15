@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:calendar_app/providers/company_provider.dart';
+import '../services/create_employee_service.dart';
+import '../widgets/create_employee_widgets.dart';
 
 class CreateEmployeeScreen extends StatefulWidget {
   const CreateEmployeeScreen({super.key});
@@ -30,64 +30,30 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
     super.dispose();
   }
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
-      return;
-    }
-
+  void _setLoading(bool value) {
     setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
-      await companyProvider.addEmployee(
-        companyProvider.selectedCompany!.id,
-        _firstNameController.text.trim(),
-        _lastNameController.text.trim(),
-        _emailController.text.trim(),
-        _passwordController.text,
-        _jobTitleController.text.trim(),
-      );
-      Navigator.of(context).pop();
-    } catch (error) {
-      _showErrorDialog('Failed to add employee', error.toString());
-    }
-
-    setState(() {
-      _isLoading = false;
+      _isLoading = value;
     });
   }
 
-  void _showErrorDialog(String title, String message) {
-    showDialog(
+  void _handleSubmit() {
+    CreateEmployeeService.submit(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      formKey: _formKey,
+      firstNameController: _firstNameController,
+      lastNameController: _lastNameController,
+      emailController: _emailController,
+      passwordController: _passwordController,
+      confirmPasswordController: _confirmPasswordController,
+      jobTitleController: _jobTitleController,
+      setLoading: _setLoading,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Employee'),
-      ),
+      appBar: AppBar(title: const Text('Add Employee')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -95,85 +61,51 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
+              CreateEmployeeWidgets.textField(
                 controller: _firstNameController,
-                decoration: const InputDecoration(labelText: 'First Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter first name';
-                  }
-                  return null;
-                },
+                label: 'First Name',
+                validator: (v) => (v == null || v.isEmpty) ? 'Please enter first name' : null,
               ),
-              const SizedBox(height: 12),
-              TextFormField(
+              CreateEmployeeWidgets.spacing(),
+              CreateEmployeeWidgets.textField(
                 controller: _lastNameController,
-                decoration: const InputDecoration(labelText: 'Last Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter last name';
-                  }
-                  return null;
-                },
+                label: 'Last Name',
+                validator: (v) => (v == null || v.isEmpty) ? 'Please enter last name' : null,
               ),
-              const SizedBox(height: 12),
-              TextFormField(
+              CreateEmployeeWidgets.spacing(),
+              CreateEmployeeWidgets.textField(
                 controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
+                label: 'Email',
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty || !value.contains('@')) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
+                validator: (v) =>
+                (v == null || v.isEmpty || !v.contains('@')) ? 'Please enter a valid email' : null,
               ),
-              const SizedBox(height: 12),
-              TextFormField(
+              CreateEmployeeWidgets.spacing(),
+              CreateEmployeeWidgets.textField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty || value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
+                label: 'Password',
+                obscure: true,
+                validator: (v) =>
+                (v == null || v.isEmpty || v.length < 6) ? 'Password must be at least 6 characters' : null,
               ),
-              const SizedBox(height: 12),
-              TextFormField(
+              CreateEmployeeWidgets.spacing(),
+              CreateEmployeeWidgets.textField(
                 controller: _confirmPasswordController,
-                decoration: const InputDecoration(labelText: 'Confirm Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please confirm password';
-                  }
-                  if (value != _passwordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
+                label: 'Confirm Password',
+                obscure: true,
+                validator: (v) =>
+                (v == null || v.isEmpty) ? 'Please confirm password' : null,
               ),
-              const SizedBox(height: 12),
-              TextFormField(
+              CreateEmployeeWidgets.spacing(),
+              CreateEmployeeWidgets.textField(
                 controller: _jobTitleController,
-                decoration: const InputDecoration(labelText: 'Job Title'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter job title';
-                  }
-                  return null;
-                },
+                label: 'Job Title',
+                validator: (v) => (v == null || v.isEmpty) ? 'Please enter job title' : null,
               ),
               const SizedBox(height: 20),
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator())
-              else
-                ElevatedButton(
-                  onPressed: _submit,
-                  child: const Text('ADD EMPLOYEE'),
-                ),
+              _isLoading
+                  ? CreateEmployeeWidgets.loadingIndicator()
+                  : CreateEmployeeWidgets.submitButton(_handleSubmit),
             ],
           ),
         ),

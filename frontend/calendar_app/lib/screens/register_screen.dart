@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:calendar_app/providers/auth_provider.dart';
+import 'package:calendar_app/services/register_service.dart';
+import 'package:calendar_app/widgets/register_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,59 +18,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _showErrorDialog('Password mismatch', 'Passwords do not match');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await Provider.of<AuthProvider>(context, listen: false).registerCompanyOwner(
-        _firstNameController.text.trim(),
-        _lastNameController.text.trim(),
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-      Navigator.of(context).pop();
-    } catch (error) {
-      _showErrorDialog('Registration failed', error.toString());
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
-  void _showErrorDialog(String title, String message) {
-    showDialog(
+  void _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final success = await RegisterService.submitRegistrationForm(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      firstName: _firstNameController.text,
+      lastName: _lastNameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
     );
+
+    setState(() => _isLoading = false);
+
+    if (success) Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register as Company Owner'),
-      ),
+      appBar: AppBar(title: const Text('Register as Company Owner')),
       body: Center(
         child: Card(
           margin: const EdgeInsets.all(20),
@@ -81,89 +61,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Register',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  RegisterWidgets.title(context),
+                  const SizedBox(height: 20),
+                  RegisterWidgets.firstNameField(_firstNameController),
+                  const SizedBox(height: 10),
+                  RegisterWidgets.lastNameField(_lastNameController),
+                  const SizedBox(height: 10),
+                  RegisterWidgets.emailField(_emailController),
+                  const SizedBox(height: 10),
+                  RegisterWidgets.passwordField(_passwordController),
+                  const SizedBox(height: 10),
+                  RegisterWidgets.confirmPasswordField(
+                    _confirmPasswordController,
+                    _passwordController,
                   ),
                   const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _firstNameController,
-                    decoration: const InputDecoration(labelText: 'First Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your first name';
-                      }
-                      return null;
-                    },
-                  ),
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : RegisterWidgets.registerButton(_submit),
                   const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _lastNameController,
-                    decoration: const InputDecoration(labelText: 'Last Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your last name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty || !value.contains('@')) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(labelText: 'Password'),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty || value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    decoration: const InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  if (_isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    ElevatedButton(
-                      onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: const Text('REGISTER'),
-                    ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Back to Login'),
-                  ),
+                  RegisterWidgets.backToLoginButton(context),
                 ],
               ),
             ),
