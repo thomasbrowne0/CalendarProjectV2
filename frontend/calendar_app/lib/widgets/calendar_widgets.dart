@@ -10,7 +10,7 @@ class CalendarWidgets {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.business, size: 80, color: Colors.grey),
+          const Icon(Icons.business, size: 80, color: Colors.black),
           const SizedBox(height: 16),
           const Text(
             'No company selected',

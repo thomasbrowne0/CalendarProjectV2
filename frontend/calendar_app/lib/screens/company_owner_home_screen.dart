@@ -52,7 +52,7 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
         actions: [
           DropdownButton<String>(
             underline: Container(),
-            icon: const Icon(Icons.business, color: Colors.white),
+            icon: const Icon(Icons.business, color: Colors.black),
             items: companies.map((company) {
               return DropdownMenuItem<String>(
                 value: company.id,
@@ -66,15 +66,40 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
             },
             hint: Text(
               selectedCompany?.name ?? 'Select Company',
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
+          DropdownButton<String>(
+            underline: Container(),
+            icon: Row(
+              children: [
+                const Icon(Icons.account_circle, color: Colors.black),
+                const SizedBox(width: 3),
+                Text(
+                  '${user?.firstName} ${user?.lastName}',
+                  style: const TextStyle(color: Colors.black),
+                ),
+              ],
+            ),
+            items: const [
+              DropdownMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.exit_to_app),
+                    SizedBox(width: 3),
+                    Text('Logout'),
+                  ],
+                ),
+              ),
+            ],
+            onChanged: (value) {
+              if (value == 'logout') {
+                Provider.of<AuthProvider>(context, listen: false).logout();
+              }
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading

@@ -9,5 +9,6 @@ namespace Domain.IRepositories
     {
         Task<IEnumerable<Employee>> GetEmployeesByCompanyIdAsync(Guid companyId);
         Task<Employee> GetByEmailAsync(string email);
+        Task<bool> ExistsByEmailAsync(string email);
     }
 }

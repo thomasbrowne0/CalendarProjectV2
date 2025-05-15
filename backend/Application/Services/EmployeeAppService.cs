@@ -49,10 +49,11 @@ namespace Application.Services
             var company = await _companyRepository.GetByIdAsync(companyId);
             if (company == null)
                 throw new Exception($"Company with ID {companyId} not found");
+            
+            var exists = await _employeeRepository.ExistsByEmailAsync(employeeCreateDto.Email);
+            if (exists)
+                throw new Exception($"Employee with email {employeeCreateDto.Email} already exists");
 
-            var existingEmployee = await _employeeRepository.GetByEmailAsync(employeeCreateDto.Email);
-            if (existingEmployee != null)
-                throw new Exception($"An employee with email {employeeCreateDto.Email} already exists");
 
             // In a real app, you'd hash the password
             var employee = new Employee(
@@ -66,13 +67,12 @@ namespace Application.Services
 
             await _employeeRepository.AddAsync(employee);
             await _unitOfWork.SaveChangesAsync();
-
-            var resultDto = MapToEmployeeDto(employee);
+            
 
             // Notify connected clients about new employee
             await _webSocketService.NotifyEmployeeAddedAsync(companyId, employee.Id);
 
-            return resultDto;
+            return MapToEmployeeDto(employee);
         }
 
         public async Task<EmployeeDto> UpdateEmployeeAsync(Guid id, EmployeeUpdateDto employeeUpdateDto)
