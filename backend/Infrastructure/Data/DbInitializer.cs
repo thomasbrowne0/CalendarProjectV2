@@ -4,20 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Infrastructure.Data
 {
     public static class DbInitializer
     {
-        private static string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
-        }
-
         public static async Task SeedAsync(AppDbContext context)
         {
             // Ensure database is created
@@ -34,13 +25,13 @@ namespace Infrastructure.Data
                 "John", 
                 "Smith", 
                 "owner@example.com", 
-                HashPassword("Password123")); // Hash the password
+                "Password123"); // In production, use a proper password hash
 
             var owner2 = new CompanyOwner(
                 "Sarah", 
                 "Johnson", 
                 "sarah@example.com", 
-                HashPassword("Password123")); // Hash the password
+                "Password123");
 
             await context.CompanyOwners.AddRangeAsync(owner1, owner2);
             await context.SaveChangesAsync();
@@ -55,16 +46,16 @@ namespace Infrastructure.Data
             // Create employees for Acme Corp
             var employees1 = new List<Employee>
             {
-                new Employee("Michael", "Brown", "michael@acme.com", HashPassword("Password123"), company1.Id, "Developer"),
-                new Employee("Emma", "Davis", "emma@acme.com", HashPassword("Password123"), company1.Id, "Designer"),
-                new Employee("David", "Wilson", "david@acme.com", HashPassword("Password123"), company1.Id, "Project Manager")
+                new Employee("Michael", "Brown", "michael@acme.com", "Password123", company1.Id, "Developer"),
+                new Employee("Emma", "Davis", "emma@acme.com", "Password123", company1.Id, "Designer"),
+                new Employee("David", "Wilson", "david@acme.com", "Password123", company1.Id, "Project Manager")
             };
 
             // Create employees for Tech Solutions
             var employees2 = new List<Employee>
             {
-                new Employee("Robert", "Jones", "robert@techsolutions.com", HashPassword("Password123"), company2.Id, "Engineer"),
-                new Employee("Jennifer", "Garcia", "jennifer@techsolutions.com", HashPassword("Password123"), company2.Id, "QA Analyst")
+                new Employee("Robert", "Jones", "robert@techsolutions.com", "Password123", company2.Id, "Engineer"),
+                new Employee("Jennifer", "Garcia", "jennifer@techsolutions.com", "Password123", company2.Id, "QA Analyst")
             };
 
             await context.Employees.AddRangeAsync(employees1);

@@ -96,37 +96,11 @@ void didChangeDependencies() {
       appBar: AppBar(
         title: Text(company?.name ?? 'Company Calendar'),
         actions: [
-          PopupMenuButton<String>(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  const Icon(Icons.person, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Text(
-                    Provider.of<AuthProvider>(context).user?.fullName ?? '',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            onSelected: (value) {
-              if (value == 'logout') {
-                Provider.of<AuthProvider>(context, listen: false).logout();
-              }
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),

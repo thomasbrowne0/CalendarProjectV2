@@ -25,10 +25,6 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
         _isLoading = true;
       });
       Provider.of<CompanyProvider>(context).fetchCompanies().then((_) {
-        final companies = Provider.of<CompanyProvider>(context, listen: false).companies;
-        if (companies.isNotEmpty && Provider.of<CompanyProvider>(context, listen: false).selectedCompany == null) {
-          Provider.of<CompanyProvider>(context, listen: false).selectCompany(companies[0].id);
-        }
         setState(() {
           _isLoading = false;
         });
@@ -56,7 +52,7 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
         actions: [
           DropdownButton<String>(
             underline: Container(),
-            icon: const Icon(Icons.business, color: Colors.black),
+            icon: const Icon(Icons.business, color: Colors.white),
             items: companies.map((company) {
               return DropdownMenuItem<String>(
                 value: company.id,
@@ -70,40 +66,14 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
             },
             hint: Text(
               selectedCompany?.name ?? 'Select Company',
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
-          PopupMenuButton<String>(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  const Icon(Icons.person, color: Colors.black),
-                  const SizedBox(width: 8),
-                  Text(
-                    Provider.of<AuthProvider>(context).user?.fullName ?? '',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            onSelected: (value) {
-              if (value == 'logout') {
-                Provider.of<AuthProvider>(context, listen: false).logout();
-              }
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),

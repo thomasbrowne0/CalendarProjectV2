@@ -50,8 +50,8 @@ namespace Application.Services
             if (owner == null)
                 throw new Exception($"Company owner with ID {ownerId} not found");
 
-            var exists = await _companyRepository.ExistsByCVRAsync(companyDto.CVR);
-            if (exists)
+            var existingCompany = await _companyRepository.GetByCVRAsync(companyDto.CVR);
+            if (existingCompany != null)
                 throw new Exception($"A company with CVR {companyDto.CVR} already exists");
 
             var company = new Company(companyDto.Name, companyDto.CVR, ownerId);

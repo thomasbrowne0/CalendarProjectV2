@@ -26,9 +26,6 @@ class AuthProvider with ChangeNotifier {
   String? get token => _token;
   User? get user => _user;
   String? get companyId => _companyId;
-  bool canCreateEvents() {
-    return user?.isCompanyOwner ?? false;
-  }
 
   Future<void> login(String email, String password) async {
     try {

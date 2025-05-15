@@ -5,38 +5,47 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:intl/intl.dart';
 
 class CreateEventScreen extends StatefulWidget {
-  final DateTime selectedDate;
-
-  const CreateEventScreen({
-    super.key,
-    required this.selectedDate,
-  });
+  const CreateEventScreen({super.key});
 
   @override
-  State<CreateEventScreen> createState() => _CreateEventScreenState();
+  _CreateEventScreenState createState() => _CreateEventScreenState();
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  late TimeOfDay _startTime;
-  late TimeOfDay _endTime;
-  bool _isLoading = false;
+  
+  DateTime _startDate = DateTime.now();
+  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
+  DateTime _endDate = DateTime.now();
+  TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
+  
   final Set<String> _selectedParticipantIds = {};
-
-  @override
-  void initState() {
-    super.initState();
-    _startTime = TimeOfDay.now();
-    _endTime = TimeOfDay(hour: TimeOfDay.now().hour + 1, minute: 0);
-  }
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectStartDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _startDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _startDate = pickedDate;
+        if (_endDate.isBefore(_startDate)) {
+          _endDate = _startDate;
+        }
+      });
+    }
   }
 
   Future<void> _selectStartTime(BuildContext context) async {
@@ -47,6 +56,20 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     if (pickedTime != null) {
       setState(() {
         _startTime = pickedTime;
+      });
+    }
+  }
+
+  Future<void> _selectEndDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _endDate.isBefore(_startDate) ? _startDate : _endDate,
+      firstDate: _startDate,
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _endDate = pickedDate;
       });
     }
   }
@@ -78,8 +101,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return;
     }
 
-    final startDateTime = _combineDateAndTime(widget.selectedDate, _startTime);
-    final endDateTime = _combineDateAndTime(widget.selectedDate, _endTime);
+    final startDateTime = _combineDateAndTime(_startDate, _startTime);
+    final endDateTime = _combineDateAndTime(_endDate, _endTime);
 
     if (endDateTime.isBefore(startDateTime)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,8 +117,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
     try {
       final companyId = Provider.of<CompanyProvider>(context, listen: false).selectedCompany!.id;
+      
+      // Convert selected participant IDs to List<String>
       List<String> participantIds = _selectedParticipantIds.toList();
-
+      
+      // Debug output
+      print("Creating event with participants: $participantIds");
+      
       await Provider.of<CalendarProvider>(context, listen: false).createEvent(
         companyId,
         _titleController.text,
@@ -104,9 +132,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         endDateTime,
         participantIds,
       );
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      Navigator.of(context).pop();
     } catch (error) {
       _showErrorDialog('Failed to create event', error.toString());
     }
@@ -136,7 +162,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   Widget build(BuildContext context) {
     final employees = Provider.of<CompanyProvider>(context).employees;
     final dateFormat = DateFormat('MMM dd, yyyy');
-
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Event'),
@@ -165,11 +191,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 maxLines: 3,
               ),
               const SizedBox(height: 20),
-              const Text('Start Time', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Start Date and Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   Expanded(
-                    child: Text('${dateFormat.format(widget.selectedDate)} ${_startTime.format(context)}'),
+                    child: Text(dateFormat.format(_startDate)),
+                  ),
+                  TextButton(
+                    onPressed: () => _selectStartDate(context),
+                    child: const Text('Change Date'),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(_startTime.format(context)),
                   ),
                   TextButton(
                     onPressed: () => _selectStartTime(context),
@@ -178,11 +215,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('End Time', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('End Date and Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   Expanded(
-                    child: Text('${dateFormat.format(widget.selectedDate)} ${_endTime.format(context)}'),
+                    child: Text(dateFormat.format(_endDate)),
+                  ),
+                  TextButton(
+                    onPressed: () => _selectEndDate(context),
+                    child: const Text('Change Date'),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(_endTime.format(context)),
                   ),
                   TextButton(
                     onPressed: () => _selectEndTime(context),
