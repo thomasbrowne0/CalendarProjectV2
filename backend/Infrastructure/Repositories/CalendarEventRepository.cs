@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using Domain.IRepositories;
 using Infrastructure.Data;
-using Infrastructure.Data;
 
 namespace Infrastructure.Repositories
 {
@@ -18,42 +17,41 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<CalendarEvent>> GetEventsByCompanyIdAsync(Guid companyId)
         {
-            return await _dbSet
-                .Include(e => e.CreatedBy)
+            return await _context.CalendarEvents
                 .Where(e => e.CompanyId == companyId)
+                .Include(e => e.Participants)
+                .OrderBy(e => e.StartTime)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<CalendarEvent>> GetEventsByEmployeeIdAsync(Guid employeeId)
         {
-            return await _dbSet
-                .Include(e => e.CreatedBy)
-                .Include(e => e.Participants)
+            return await _context.CalendarEvents
                 .Where(e => e.Participants.Any(p => p.Id == employeeId))
+                .Include(e => e.Participants)
+                .OrderBy(e => e.StartTime)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<CalendarEvent>> GetEventsByDateRangeAsync(Guid companyId, DateTime start, DateTime end)
         {
-            return await _dbSet
-                .Include(e => e.CreatedBy)
-                .Include(e => e.Participants)
+            return await _context.CalendarEvents
                 .Where(e => e.CompanyId == companyId &&
-                           (e.StartTime <= end && e.EndTime >= start))
+                            ((e.StartTime >= start && e.StartTime <= end) || 
+                             (e.EndTime >= start && e.EndTime <= end) ||
+                             (e.StartTime <= start && e.EndTime >= end)))
+                .Include(e => e.Participants)
+                .OrderBy(e => e.StartTime)
                 .ToListAsync();
         }
 
         public async Task<CalendarEvent> GetEventWithParticipantsAsync(Guid eventId)
         {
-            var calendarEvent = await _dbSet
-                .Include(e => e.CreatedBy)
+            return await _context.CalendarEvents
                 .Include(e => e.Participants)
+                .Include(e => e.CreatedBy)
+                .Include(e => e.Company)
                 .FirstOrDefaultAsync(e => e.Id == eventId);
-                
-            if (calendarEvent == null)
-                throw new KeyNotFoundException($"Calendar event with ID {eventId} not found");
-                
-            return calendarEvent;
         }
     }
 }

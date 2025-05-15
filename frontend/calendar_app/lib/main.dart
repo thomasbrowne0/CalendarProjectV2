@@ -45,10 +45,10 @@ class MyApp extends StatelessWidget {
 
         // CompanyProvider depends on ApiService and AuthProvider
         // Assuming CompanyProvider constructor is: CompanyProvider(ApiService? api, AuthProvider? auth)
-        ChangeNotifierProxyProvider2<ApiService, AuthProvider, CompanyProvider>(
-          create: (_) => CompanyProvider(null, null), // Initial placeholder
-          update: (context, apiService, authProvider, _) => // Ignore previous CompanyProvider instance
-              CompanyProvider(apiService, authProvider),
+        ChangeNotifierProxyProvider3<ApiService, AuthProvider, WebSocketService, CompanyProvider>(
+        create: (_) => CompanyProvider(null, null, null), // Add null for webSocketService
+        update: (context, apiService, authProvider, webSocketService, _) => 
+        CompanyProvider(apiService, authProvider, webSocketService), // Add webSocketService
         ),
 
         // CalendarProvider depends on ApiService and AuthProvider

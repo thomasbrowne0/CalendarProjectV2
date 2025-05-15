@@ -11,7 +11,7 @@ class AuthProvider with ChangeNotifier {
   String? _token;
   DateTime? _expiryDate;
   final ApiService? _apiService;
-  WebSocketService? _webSocketService;
+  final WebSocketService? _webSocketService;
   String? _companyId;
 
  AuthProvider(this._apiService, this._webSocketService, {AuthProvider? previousAuthProvider}) {

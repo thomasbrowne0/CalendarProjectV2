@@ -3,6 +3,7 @@ import 'package:calendar_app/models/company.dart';
 import 'package:calendar_app/models/employee.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
+import 'package:calendar_app/services/websocket_service.dart';
 
 class CompanyProvider with ChangeNotifier {
   List<Company> _companies = [];
@@ -11,8 +12,9 @@ class CompanyProvider with ChangeNotifier {
   
   final ApiService? _apiService;
   final AuthProvider? _authProvider;
+  final WebSocketService? _webSocketService;
 
-  CompanyProvider(this._apiService, this._authProvider);
+  CompanyProvider(this._apiService, this._authProvider, this._webSocketService);
 
   List<Company> get companies => [..._companies];
   Company? get selectedCompany => _selectedCompany;
@@ -82,6 +84,12 @@ class CompanyProvider with ChangeNotifier {
       if (companyToSelect != null) {
         _selectedCompany = companyToSelect;
         await fetchEmployees(_selectedCompany!.id); // Fetch employees for the newly selected company
+        
+        // Add this code - update WebSocket with company ID
+        if (_webSocketService != null && _webSocketService!.isConnected) {
+          _webSocketService!.setCompany(companyToSelect.id);
+        }
+        
       } else {
         print('CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
         _selectedCompany = null; // Clear selection if no company could be set
