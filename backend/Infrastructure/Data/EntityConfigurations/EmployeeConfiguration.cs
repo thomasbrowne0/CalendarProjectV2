@@ -13,16 +13,7 @@ namespace Infrastructure.Data.EntityConfigurations
                 .HasMaxLength(100);
 
             builder.Property(e => e.MobilePhone)
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
                 .HasMaxLength(30);
-=======
-                .HasMaxLength(30); // Add this line
->>>>>>> Stashed changes
-=======
-                .HasMaxLength(30); // Add this line
->>>>>>> Stashed changes
-
             // Configure navigation properties
             builder.HasOne(e => e.Company)
                 .WithMany(c => c.Employees)
