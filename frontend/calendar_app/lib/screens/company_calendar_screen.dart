@@ -5,6 +5,8 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:calendar_app/screens/create_event_screen.dart';
 import 'package:calendar_app/screens/event_details_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:calendar_app/blocs/calendar_cubit.dart';
 
 class CompanyCalendarScreen extends StatefulWidget {
   const CompanyCalendarScreen({super.key});
@@ -20,57 +22,48 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
   final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
 
   @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
+void didChangeDependencies() {
+  if (_isInit) {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+    if (companyProvider.selectedCompany != null) {
+      final companyId = companyProvider.selectedCompany!.id;
       
-      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
-      // Check if there's a selected company before trying to access its id
-      if (companyProvider.selectedCompany != null) {
-        final companyId = companyProvider.selectedCompany!.id;
-        Provider.of<CalendarProvider>(context, listen: false)
-            .fetchEvents(companyId)
-            .then((_) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        }).catchError((error) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-            // Optionally show an error message
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to load events: ${error.toString()}')),
-            );
-          }
-        });
-      } else {
-        // No company selected, handle this case
-        setState(() {
-          _isLoading = false;
-        });
-        // Optionally show a message to select a company
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please select a company first')),
-            );
-          }
-        });
-      }
-      _isInit = false;
+      // Set company ID in CalendarCubit
+      context.read<CalendarCubit>().setCompanyId(companyId);
+      
+      // Use Cubit to fetch events
+      context.read<CalendarCubit>().fetchEvents(companyId).then((_) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }).catchError((error) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load events: ${error.toString()}')),
+          );
+        }
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
     }
-    super.didChangeDependencies();
+    _isInit = false;
   }
+  super.didChangeDependencies();
+}
 
   @override
   Widget build(BuildContext context) {
-    final calendarProvider = Provider.of<CalendarProvider>(context);
     final companyProvider = Provider.of<CompanyProvider>(context);
     final selectedCompany = companyProvider.selectedCompany;
     
@@ -146,42 +139,85 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                     ],
                   ),
                 ),
-                TableCalendar(
-                  firstDay: DateTime.utc(2020, 1, 1),
-                  lastDay: DateTime.utc(2030, 12, 31),
-                  focusedDay: calendarProvider.focusedDay,
-                  calendarFormat: _calendarFormat,
-                  rangeSelectionMode: _rangeSelectionMode,
-                  // Just use headerStyle to hide the format button
-                  headerStyle: const HeaderStyle(
-                    formatButtonVisible: false,
-                    titleCentered: true,
-                  ),
-                  eventLoader: (day) => calendarProvider.getEventsForDay(day),
-                  selectedDayPredicate: (day) {
-                    return isSameDay(calendarProvider.focusedDay, day);
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    calendarProvider.setFocusedDay(focusedDay);
-                  },
-                  onFormatChanged: (format) {
-                    setState(() {
-                      _calendarFormat = format;
-                    });
-                  },
-                  onPageChanged: (focusedDay) {
-                    calendarProvider.setFocusedDay(focusedDay);
-                    // Only fetch events if we have a valid company
-                    calendarProvider.fetchEvents(companyId,
-                      start: DateTime(focusedDay.year, focusedDay.month, 1),
-                      end: DateTime(focusedDay.year, focusedDay.month + 1, 0));
-                                    },
-                  calendarStyle: const CalendarStyle(
-                    markersMaxCount: 3,
-                  ),
+                // CHANGE 1: Replace TableCalendar with BlocBuilder
+                BlocBuilder<CalendarCubit, CalendarState>(
+                  buildWhen: (previous, current) => 
+                    previous.focusedDay != current.focusedDay || 
+                    previous.events != current.events,
+                  builder: (context, state) {
+                    return TableCalendar(
+                      firstDay: DateTime.utc(2020, 1, 1),
+                      lastDay: DateTime.utc(2030, 12, 31),
+                      focusedDay: state.focusedDay,
+                      calendarFormat: _calendarFormat,
+                      rangeSelectionMode: _rangeSelectionMode,
+                      headerStyle: const HeaderStyle(
+                        formatButtonVisible: false,
+                        titleCentered: true,
+                      ),
+                      eventLoader: (day) => context.read<CalendarCubit>().getEventsForDay(day),
+                      selectedDayPredicate: (day) {
+                        return isSameDay(state.focusedDay, day);
+                      },
+                      onDaySelected: (selectedDay, focusedDay) {
+                        context.read<CalendarCubit>().setFocusedDay(focusedDay);
+                      },
+                      onFormatChanged: (format) {
+                        setState(() {
+                          _calendarFormat = format;
+                        });
+                      },
+                      onPageChanged: (focusedDay) {
+                        context.read<CalendarCubit>().setFocusedDay(focusedDay);
+                        context.read<CalendarCubit>().fetchEvents(companyId,
+                          start: DateTime(focusedDay.year, focusedDay.month, 1),
+                          end: DateTime(focusedDay.year, focusedDay.month + 1, 0));
+                      },
+                      calendarStyle: const CalendarStyle(
+                        markersMaxCount: 3,
+                      ),
+                    );
+                  }
                 ),
+                // CHANGE 2: Replace _buildEventList with BlocBuilder
                 Expanded(
-                  child: _buildEventList(),
+                  child: BlocBuilder<CalendarCubit, CalendarState>(
+                    buildWhen: (previous, current) => 
+                      previous.events != current.events || 
+                      previous.focusedDay != current.focusedDay,
+                    builder: (context, state) {
+                      final events = context.read<CalendarCubit>().getEventsForDay(state.focusedDay);
+                      
+                      if (events.isEmpty) {
+                        return const Center(
+                          child: Text('No events for this day.'),
+                        );
+                      }
+                      
+                      return ListView.builder(
+                        itemCount: events.length,
+                        itemBuilder: (ctx, index) {
+                          final event = events[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            child: ListTile(
+                              title: Text(event.title),
+                              subtitle: Text('${_formatTimeRange(event.startTime, event.endTime)}\n'
+                                  'Created by: ${event.createdByName}'),
+                              trailing: Text('${event.participants.length} participants'),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => EventDetailsScreen(event: event),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -196,40 +232,6 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
         tooltip: 'Create Event',
         child: const Icon(Icons.add),
       ),
-    );
-  }
-
-  Widget _buildEventList() {
-    final calendarProvider = Provider.of<CalendarProvider>(context);
-    final events = calendarProvider.getEventsForDay(calendarProvider.focusedDay);
-
-    if (events.isEmpty) {
-      return const Center(
-        child: Text('No events for this day.'),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: events.length,
-      itemBuilder: (ctx, index) {
-        final event = events[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          child: ListTile(
-            title: Text(event.title),
-            subtitle: Text('${_formatTimeRange(event.startTime, event.endTime)}\n'
-                'Created by: ${event.createdByName}'),
-            trailing: Text('${event.participants.length} participants'),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => EventDetailsScreen(event: event),
-                ),
-              );
-            },
-          ),
-        );
-      },
     );
   }
 
@@ -250,5 +252,9 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
       default:
         return '';
     }
+  }
+
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }

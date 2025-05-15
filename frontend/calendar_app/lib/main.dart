@@ -8,6 +8,8 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:calendar_app/screens/company_owner_home_screen.dart';
 import 'package:calendar_app/screens/employee_home_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:calendar_app/blocs/calendar_cubit.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
           // Add dispose to clean up WebSocketService resources
           dispose: (_, service) => service.dispose(),
         ),
-
+        
         // AuthProvider now depends on ApiService and WebSocketService
         // Assuming AuthProvider's constructor was updated to:
         // AuthProvider(ApiService? api, WebSocketService? ws, {AuthProvider? previousAuthProvider})
@@ -59,32 +61,46 @@ class MyApp extends StatelessWidget {
               CalendarProvider(apiService, authProvider),
         ),
       ],
-      child: Consumer<AuthProvider>(
-        builder: (ctx, auth, _) => MaterialApp(
-          title: 'Company Calendar',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-          ),
-          // Handle initial authentication state and auto-login attempt
-          home: auth.isAuth
-              ? (auth.isCompanyOwner
-                  ? const CompanyOwnerHomeScreen()
-                  : const EmployeeHomeScreen())
-              : FutureBuilder(
-                  future: auth.tryAutoLogin(),
-                  builder: (ctx, authResultSnapshot) {
-                    if (authResultSnapshot.connectionState == ConnectionState.waiting) {
-                      // Show a loading indicator while trying to auto-login
-                      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-                    }
-                    // After tryAutoLogin, check auth.isAuth again
-                    return auth.isAuth
-                        ? (auth.isCompanyOwner ? const CompanyOwnerHomeScreen() : const EmployeeHomeScreen())
-                        : const LoginScreen();
-                  },
+      child: Builder(
+        builder: (context) {
+          final apiService = Provider.of<ApiService>(context, listen: false);
+          final webSocketService = Provider.of<WebSocketService>(context, listen: false);
+          
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<CalendarCubit>(
+                create: (context) => CalendarCubit(apiService, webSocketService),
+              ),
+            ],
+            child: Consumer<AuthProvider>(
+              builder: (ctx, auth, _) => MaterialApp(
+                title: 'Company Calendar',
+                theme: ThemeData(
+                  primarySwatch: Colors.blue,
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
                 ),
-        ),
+                // Handle initial authentication state and auto-login attempt
+                home: auth.isAuth
+                    ? (auth.isCompanyOwner
+                        ? const CompanyOwnerHomeScreen()
+                        : const EmployeeHomeScreen())
+                    : FutureBuilder(
+                        future: auth.tryAutoLogin(),
+                        builder: (ctx, authResultSnapshot) {
+                          if (authResultSnapshot.connectionState == ConnectionState.waiting) {
+                            // Show a loading indicator while trying to auto-login
+                            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                          }
+                          // After tryAutoLogin, check auth.isAuth again
+                          return auth.isAuth
+                              ? (auth.isCompanyOwner ? const CompanyOwnerHomeScreen() : const EmployeeHomeScreen())
+                              : const LoginScreen();
+                        },
+                      ),
+              ),
+            ),
+          );
+        }
       ),
     );
   }

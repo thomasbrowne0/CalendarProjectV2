@@ -178,6 +178,28 @@ class ApiService {
     }
   }
 
+  Future<CalendarEvent> getEventById(String companyId, String eventId) async {
+  print('ApiService: Fetching event $eventId for company $companyId');
+  try {
+    final response = await http.get(
+      Uri.parse('$baseUrl/companies/$companyId/events/$eventId'),
+      headers: _headers,
+    );
+    
+    if (response.statusCode == 200) {
+      final event = CalendarEvent.fromJson(jsonDecode(response.body));
+      print('ApiService: Successfully fetched event ${event.title}');
+      return event;
+    } else {
+      print('ApiService: Failed to fetch event, status: ${response.statusCode}, body: ${response.body}');
+      throw Exception('Failed to load event (${response.statusCode})');
+    }
+  } catch (e) {
+    print('ApiService: Error fetching event: $e');
+    throw Exception('Failed to load event: $e');
+  }
+}
+
   Future<CalendarEvent> createEvent(String companyId, Map<String, dynamic> event) async {
     try {
       // Ensure dates are in UTC format without milliseconds
