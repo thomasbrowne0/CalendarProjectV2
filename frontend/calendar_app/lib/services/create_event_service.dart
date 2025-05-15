@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 
+import '../cubit/calendar_cubit.dart';
+
 class CreateEventService {
   static DateTime combineDateAndTime(DateTime date, TimeOfDay time) {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
@@ -51,7 +53,7 @@ class CreateEventService {
           .selectedCompany!
           .id;
 
-      await Provider.of<CalendarProvider>(context, listen: false).createEvent(
+      final createdEvent = await Provider.of<CalendarProvider>(context, listen: false).createEvent(
         companyId,
         title,
         description,
@@ -59,6 +61,9 @@ class CreateEventService {
         endDateTime,
         selectedParticipantIds.toList(),
       );
+
+      // Add the new event to CalendarCubit for instant UI update
+      context.read<CalendarCubit>().addEvent(createdEvent);
 
       onSuccess();
     } catch (error) {
