@@ -2,31 +2,39 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Fleck;
 
 namespace Infrastructure.WebSockets
 {
     public class WebSocketConnectionManager
     {
-        private readonly ConcurrentDictionary<Guid, WebSocketConnection> _connections = 
-            new ConcurrentDictionary<Guid, WebSocketConnection>();
-
-        public WebSocketConnection? GetConnectionById(Guid id)
+        // Change from private to internal to allow access from WebSocketService
+        internal readonly ConcurrentDictionary<Guid, FleckConnection> _connections = 
+            new ConcurrentDictionary<Guid, FleckConnection>();
+        private readonly ILogger<WebSocketConnectionManager> _logger;
+        
+        public WebSocketConnectionManager(ILogger<WebSocketConnectionManager> logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+        
+        public FleckConnection? GetConnectionById(Guid id)
         {
             _connections.TryGetValue(id, out var connection);
             return connection;
         }
 
-        public IEnumerable<WebSocketConnection> GetConnectionsByCompany(Guid companyId)
+        public IEnumerable<FleckConnection> GetConnectionsByCompany(Guid companyId)
         {
-            return _connections.Values.Where(c => c.CompanyId == companyId);
+            return _connections.Values
+                .Where(c => c.CompanyId == companyId)
+                .ToList(); // Create a snapshot to avoid enumeration issues
         }
 
-        public Guid AddConnection(WebSocket socket, Guid userId, string userType, Guid? companyId = null)
+        public void AddConnection(IWebSocketConnection socket, Guid userId, string userType, Guid? companyId = null)
         {
-            var connection = new WebSocketConnection
+            var connection = new FleckConnection
             {
                 Id = userId,
                 Socket = socket,
@@ -34,8 +42,8 @@ namespace Infrastructure.WebSockets
                 CompanyId = companyId
             };
 
-            _connections.TryAdd(userId, connection);
-            return userId;
+            _connections.AddOrUpdate(userId, connection, (_, _) => connection);
+            _logger.LogInformation($"Added WebSocket connection for user {userId} of type {userType}");
         }
 
         public void UpdateCompanyForConnection(Guid userId, Guid companyId)
@@ -43,36 +51,23 @@ namespace Infrastructure.WebSockets
             if (_connections.TryGetValue(userId, out var connection))
             {
                 connection.CompanyId = companyId;
+                _logger.LogInformation($"Updated company to {companyId} for user {userId}");
             }
         }
 
-        public async Task RemoveConnection(Guid id)
+        public void RemoveConnection(Guid id)
         {
             if (_connections.TryRemove(id, out var connection))
             {
-                if (connection.Socket.State != WebSocketState.Closed &&
-                    connection.Socket.State != WebSocketState.Aborted)
-                {
-                    try
-                    {
-                        await connection.Socket.CloseAsync(
-                            WebSocketCloseStatus.NormalClosure,
-                            "Connection closed",
-                            CancellationToken.None);
-                    }
-                    catch (Exception)
-                    {
-                        // Already closed or disposed
-                    }
-                }
+                _logger.LogInformation($"Removed WebSocket connection for user {id}");
             }
         }
     }
 
-    public class WebSocketConnection
+    public class FleckConnection
     {
         public Guid Id { get; set; }
-        public required WebSocket Socket { get; set; }
+        public required IWebSocketConnection Socket { get; set; }
         public required string UserType { get; set; } = string.Empty;
         public Guid? CompanyId { get; set; }
     }

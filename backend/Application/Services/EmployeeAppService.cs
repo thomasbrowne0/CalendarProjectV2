@@ -50,11 +50,11 @@ namespace Application.Services
             if (company == null)
                 throw new Exception($"Company with ID {companyId} not found");
 
-            var exists = await _employeeRepository.ExistsByEmailAsync(employeeCreateDto.Email);
-            if (exists) 
+            var existingEmployee = await _employeeRepository.GetByEmailAsync(employeeCreateDto.Email);
+            if (existingEmployee != null)
                 throw new Exception($"An employee with email {employeeCreateDto.Email} already exists");
-            
-            
+
+            // In a real app, you'd hash the password
             var employee = new Employee(
                 employeeCreateDto.FirstName,
                 employeeCreateDto.LastName,

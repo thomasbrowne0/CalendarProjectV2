@@ -4,24 +4,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:calendar_app/models/user.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:calendar_app/services/websocket_service.dart';
 
 class AuthProvider with ChangeNotifier {
   User? _user;
   String? _token;
   DateTime? _expiryDate;
   final ApiService? _apiService;
+  final WebSocketService? _webSocketService;
   String? _companyId;
 
-  AuthProvider(this._apiService);
+ AuthProvider(this._apiService, this._webSocketService, {AuthProvider? previousAuthProvider}) {
+    if (previousAuthProvider != null) {
+      _token = previousAuthProvider._token;
+      _user = previousAuthProvider._user;
+    }
+  }
 
   bool get isAuth => token != null;
   bool get isCompanyOwner => _user?.userType == 'CompanyOwner';
   String? get token => _token;
   User? get user => _user;
   String? get companyId => _companyId;
-  bool canCreateEvents() {
-    return user?.isCompanyOwner ?? false;
-  }
 
   Future<void> login(String email, String password) async {
     try {
@@ -44,6 +48,12 @@ class AuthProvider with ChangeNotifier {
 
       _apiService!.setToken(_token!);
       await _saveAuthData();
+
+      // Connect WebSocket if token is available and service is initialized
+      if (_token != null && _webSocketService != null) {
+        await _webSocketService!.connect(_token!);
+      }
+
       notifyListeners();
     } catch (error) {
       rethrow;
@@ -53,8 +63,12 @@ class AuthProvider with ChangeNotifier {
   Future<void> registerCompanyOwner(
       String firstName, String lastName, String email, String password) async {
     try {
+      // Registration itself doesn't return a token in your current API design,
+      // so we log in immediately after to get the token and user info.
       await _apiService!.registerCompanyOwner(firstName, lastName, email, password);
-      await login(email, password);
+      // The login method will handle token saving, user parsing, and WebSocket connection.
+      await login(email, password); 
+      // notifyListeners() is called within login()
     } catch (error) {
       rethrow;
     }
@@ -71,7 +85,7 @@ class AuthProvider with ChangeNotifier {
     final expiryDate = DateTime.parse(extractedData['expiryDate']);
 
     if (expiryDate.isBefore(DateTime.now())) {
-      await logout();
+      await logout(); // Logout will also handle WebSocket disconnection
       return false;
     }
 
@@ -90,11 +104,21 @@ class AuthProvider with ChangeNotifier {
 
     _apiService!.setToken(_token!);
     
+    // Connect WebSocket if token is available and service is initialized
+    if (_token != null && _webSocketService != null) {
+      await _webSocketService!.connect(_token!);
+    }
+
     notifyListeners();
     return true;
   }
 
   Future<void> logout() async {
+    // Disconnect WebSocket before clearing auth data
+    if (_webSocketService != null) {
+      _webSocketService!.disconnect();
+    }
+
     _token = null;
     _user = null;
     _expiryDate = null;
@@ -103,7 +127,7 @@ class AuthProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove('authData');
     
-    _apiService!.setToken('');
+    _apiService!.setToken(''); // Clear token in ApiService
     notifyListeners();
   }
 
@@ -111,8 +135,8 @@ class AuthProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final authData = json.encode({
       'token': _token,
-      'user': _user!.toJson(),
-      'expiryDate': _expiryDate!.toIso8601String(),
+      'user': _user!.toJson(), // Assuming _user is not null when this is called
+      'expiryDate': _expiryDate!.toIso8601String(), // Assuming _expiryDate is not null
       'companyId': _companyId,
     });
     
