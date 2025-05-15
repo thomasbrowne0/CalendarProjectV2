@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:calendar_app/providers/company_provider.dart';
+import 'package:calendar_app/services/create_employee_service.dart';
 
 class CreateEmployeeScreen extends StatefulWidget {
   const CreateEmployeeScreen({super.key});
@@ -19,6 +18,33 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
   final _jobTitleController = TextEditingController();
   bool _isLoading = false;
 
+  late final CreateEmployeeService _employeeService;
+
+  @override
+  void initState() {
+    super.initState();
+    _employeeService = CreateEmployeeService(context);
+  }
+
+  void _setLoading(bool value) {
+    setState(() {
+      _isLoading = value;
+    });
+  }
+
+  void _submit() {
+    _employeeService.submit(
+      formKey: _formKey,
+      firstNameController: _firstNameController,
+      lastNameController: _lastNameController,
+      emailController: _emailController,
+      passwordController: _passwordController,
+      confirmPasswordController: _confirmPasswordController,
+      jobTitleController: _jobTitleController,
+      setLoading: _setLoading,
+    );
+  }
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -28,58 +54,6 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
     _confirmPasswordController.dispose();
     _jobTitleController.dispose();
     super.dispose();
-  }
-
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
-      await companyProvider.addEmployee(
-        companyProvider.selectedCompany!.id,
-        _firstNameController.text.trim(),
-        _lastNameController.text.trim(),
-        _emailController.text.trim(),
-        _passwordController.text,
-        _jobTitleController.text.trim(),
-      );
-      Navigator.of(context).pop();
-    } catch (error) {
-      _showErrorDialog('Failed to add employee', error.toString());
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  void _showErrorDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -98,73 +72,40 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
               TextFormField(
                 controller: _firstNameController,
                 decoration: const InputDecoration(labelText: 'First Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter first name';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty ? 'Please enter first name' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _lastNameController,
                 decoration: const InputDecoration(labelText: 'Last Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter last name';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty ? 'Please enter last name' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty || !value.contains('@')) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || !value.contains('@') ? 'Please enter a valid email' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty || value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.length < 6 ? 'Password must be at least 6 characters' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: const InputDecoration(labelText: 'Confirm Password'),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please confirm password';
-                  }
-                  if (value != _passwordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty ? 'Please confirm password' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _jobTitleController,
                 decoration: const InputDecoration(labelText: 'Job Title'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter job title';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty ? 'Please enter job title' : null,
               ),
               const SizedBox(height: 20),
               if (_isLoading)

@@ -5,6 +5,7 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/screens/company_calendar_screen.dart';
 import 'package:calendar_app/screens/employee_list_screen.dart';
 import 'package:calendar_app/screens/create_company_screen.dart';
+import 'package:calendar_app/widgets/home_widget.dart';
 
 class CompanyOwnerHomeScreen extends StatefulWidget {
   const CompanyOwnerHomeScreen({super.key});
@@ -21,17 +22,14 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
   @override
   void didChangeDependencies() {
     if (_isInit) {
-      setState(() {
-        _isLoading = true;
-      });
+      setState(() => _isLoading = true);
       Provider.of<CompanyProvider>(context).fetchCompanies().then((_) {
         final companies = Provider.of<CompanyProvider>(context, listen: false).companies;
-        if (companies.isNotEmpty && Provider.of<CompanyProvider>(context, listen: false).selectedCompany == null) {
+        if (companies.isNotEmpty &&
+            Provider.of<CompanyProvider>(context, listen: false).selectedCompany == null) {
           Provider.of<CompanyProvider>(context, listen: false).selectCompany(companies[0].id);
         }
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       });
       _isInit = false;
     }
@@ -43,9 +41,8 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
     final companyProvider = Provider.of<CompanyProvider>(context);
     final companies = companyProvider.companies;
     final selectedCompany = companyProvider.selectedCompany;
-    final user = Provider.of<AuthProvider>(context).user;
 
-    List<Widget> pages = [
+    final pages = [
       selectedCompany == null ? _buildNoCompanySelected() : const CompanyCalendarScreen(),
       selectedCompany == null ? _buildNoCompanySelected() : const EmployeeListScreen(),
     ];
@@ -73,78 +70,31 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
               style: const TextStyle(color: Colors.black),
             ),
           ),
-          PopupMenuButton<String>(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  const Icon(Icons.person, color: Colors.black),
-                  const SizedBox(width: 8),
-                  Text(
-                    Provider.of<AuthProvider>(context).user?.fullName ?? '',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            onSelected: (value) {
-              if (value == 'logout') {
-                Provider.of<AuthProvider>(context, listen: false).logout();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          const UserProfileMenu(textColor: Colors.black),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
+      body: LoadingWrapper(isLoading: _isLoading, child: pages[_selectedIndex]),
+      bottomNavigationBar: AppBottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Employees',
-          ),
-        ],
+        onTap: (index) => setState(() => _selectedIndex = index),
+        isOwner: true,
       ),
       floatingActionButton: selectedCompany == null
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const CreateCompanyScreen()),
-                );
-              },
-              tooltip: 'Create Company',
-              child: const Icon(Icons.add),
-            )
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CreateCompanyScreen()),
+          );
+        },
+        tooltip: 'Create Company',
+        child: const Icon(Icons.add),
+      )
           : null,
     );
   }
 
   Widget _buildNoCompanySelected() {
     final companies = Provider.of<CompanyProvider>(context).companies;
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

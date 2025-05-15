@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_app/screens/login_screen.dart';
 import 'package:calendar_app/services/api_service.dart';
@@ -7,10 +8,16 @@ import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:calendar_app/screens/company_owner_home_screen.dart';  // Add this import
-import 'package:calendar_app/screens/employee_home_screen.dart';      // Add this import
+import 'package:calendar_app/screens/employee_home_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'firebase_options.dart';      // Add this import
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

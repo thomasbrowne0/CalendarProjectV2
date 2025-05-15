@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:calendar_app/providers/auth_provider.dart';
-import 'package:calendar_app/screens/register_screen.dart';
+import 'package:calendar_app/widgets/login_widget.dart';
+import 'package:calendar_app/services/login_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,42 +15,26 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  late final LoginService _loginService;
 
+  @override
+  void initState() {
+    super.initState();
+    _loginService = LoginService(context);
+  }
+
+  void _setLoading(bool value) {
     setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await Provider.of<AuthProvider>(context, listen: false).login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-    } catch (error) {
-      _showErrorDialog('Authentication failed', error.toString());
-    }
-
-    setState(() {
-      _isLoading = false;
+      _isLoading = value;
     });
   }
 
-  void _showErrorDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+  void _submit() {
+    _loginService.submit(
+      formKey: _formKey,
+      emailController: _emailController,
+      passwordController: _passwordController,
+      setLoading: _setLoading,
     );
   }
 
@@ -71,54 +54,18 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Login',
-                    style: Theme.of(context).textTheme.headlineSmall,  // Changed from headline5
-                  ),
+                  const LoginTitle(),
                   const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty || !value.contains('@')) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
+                  EmailFormField(controller: _emailController),
+                  const SizedBox(height: 10),
+                  PasswordFormField(controller: _passwordController),
+                  const SizedBox(height: 20),
+                  LoginButton(
+                    onPressed: _submit,
+                    isLoading: _isLoading,
                   ),
                   const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(labelText: 'Password'),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty || value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  if (_isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    ElevatedButton(
-                      onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: const Text('LOGIN'),
-                    ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                      );
-                    },
-                    child: const Text('Register as Company Owner'),
-                  ),
+                  const RegisterButton(),
                 ],
               ),
             ),
