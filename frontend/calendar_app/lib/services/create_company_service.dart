@@ -1,3 +1,4 @@
+import 'package:calendar_app/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/company_provider.dart';
@@ -20,24 +21,10 @@ class CreateCompanyService {
       );
       Navigator.of(context).pop();
     } catch (error) {
-      _showErrorDialog(context, 'Failed to create company', error.toString());
+      DialogUtil.showErrorDialog(context, 'Failed to create company', error.toString());
     }
     setLoading(false);
   }
 
-  static void _showErrorDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

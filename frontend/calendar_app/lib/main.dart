@@ -9,7 +9,7 @@ import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:calendar_app/screens/company_owner_home_screen.dart';
 import 'package:calendar_app/screens/employee_home_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:calendar_app/blocs/calendar_cubit.dart';
+import 'package:calendar_app/cubit/calendar_cubit.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,42 +22,33 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Core services
         Provider<ApiService>(create: (_) => ApiService()),
         Provider<WebSocketService>(
           create: (context) => WebSocketService(
             Provider.of<ApiService>(context, listen: false),
           ),
-          // Add dispose to clean up WebSocketService resources
           dispose: (_, service) => service.dispose(),
         ),
-        
-        // AuthProvider now depends on ApiService and WebSocketService
-        // Assuming AuthProvider's constructor was updated to:
-        // AuthProvider(ApiService? api, WebSocketService? ws, {AuthProvider? previousAuthProvider})
+
         ChangeNotifierProxyProvider2<ApiService, WebSocketService, AuthProvider>(
           create: (_) => AuthProvider(null, null), // Initial placeholder
           update: (context, apiService, webSocketService, previousAuthProvider) =>
               AuthProvider(
                 apiService,
                 webSocketService,
-                previousAuthProvider: previousAuthProvider // Pass previous instance
+                previousAuthProvider: previousAuthProvider
               ),
         ),
 
-        // CompanyProvider depends on ApiService and AuthProvider
-        // Assuming CompanyProvider constructor is: CompanyProvider(ApiService? api, AuthProvider? auth)
         ChangeNotifierProxyProvider3<ApiService, AuthProvider, WebSocketService, CompanyProvider>(
-        create: (_) => CompanyProvider(null, null, null), // Add null for webSocketService
+        create: (_) => CompanyProvider(null, null, null),
         update: (context, apiService, authProvider, webSocketService, _) => 
-        CompanyProvider(apiService, authProvider, webSocketService), // Add webSocketService
+        CompanyProvider(apiService, authProvider, webSocketService),
         ),
 
-        // CalendarProvider depends on ApiService and AuthProvider
-        // Assuming CalendarProvider constructor is: CalendarProvider(ApiService? api, AuthProvider? auth)
         ChangeNotifierProxyProvider2<ApiService, AuthProvider, CalendarProvider>(
-          create: (_) => CalendarProvider(null, null), // Initial placeholder
-          update: (context, apiService, authProvider, _) => // Ignore previous CalendarProvider instance
+          create: (_) => CalendarProvider(null, null),
+          update: (context, apiService, authProvider, _) =>
               CalendarProvider(apiService, authProvider),
         ),
       ],
@@ -78,8 +69,14 @@ class MyApp extends StatelessWidget {
                 theme: ThemeData(
                   primarySwatch: Colors.blue,
                   visualDensity: VisualDensity.adaptivePlatformDensity,
+                  brightness: Brightness.light,
                 ),
-                // Handle initial authentication state and auto-login attempt
+                darkTheme: ThemeData(
+                  primarySwatch: Colors.blue,
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  brightness: Brightness.dark,
+                ),
+                themeMode: ThemeMode.system,
                 home: auth.isAuth
                     ? (auth.isCompanyOwner
                         ? const CompanyOwnerHomeScreen()
@@ -88,10 +85,8 @@ class MyApp extends StatelessWidget {
                         future: auth.tryAutoLogin(),
                         builder: (ctx, authResultSnapshot) {
                           if (authResultSnapshot.connectionState == ConnectionState.waiting) {
-                            // Show a loading indicator while trying to auto-login
                             return const Scaffold(body: Center(child: CircularProgressIndicator()));
                           }
-                          // After tryAutoLogin, check auth.isAuth again
                           return auth.isAuth
                               ? (auth.isCompanyOwner ? const CompanyOwnerHomeScreen() : const EmployeeHomeScreen())
                               : const LoginScreen();

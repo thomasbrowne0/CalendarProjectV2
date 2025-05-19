@@ -4,6 +4,8 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/widgets/create_event_widgets.dart';
 import 'package:calendar_app/services/create_event_service.dart';
 
+import '../utils/dialog_util.dart';
+
 class CreateEventScreen extends StatefulWidget {
   final DateTime selectedDate;
 
@@ -129,7 +131,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     endTime: _endTime,
                     selectedParticipantIds: _selectedParticipantIds,
                     onSuccess: () => Navigator.of(context).pop(),
-                    showError: (title, msg) => CreateEventWidgets.showErrorDialog(context, title, msg),
+                    showError: (title, msg) => DialogUtil.showErrorDialog(context, title, msg),
                     setLoading: _setLoading,
                   );
                 },

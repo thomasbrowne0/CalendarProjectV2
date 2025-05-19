@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/company_provider.dart';
+import '../utils/dialog_util.dart';
 
 class CreateEmployeeService {
   static Future<void> submit({
@@ -36,24 +37,10 @@ class CreateEmployeeService {
       );
       Navigator.of(context).pop();
     } catch (error) {
-      _showErrorDialog(context, 'Failed to add employee', error.toString());
+      DialogUtil.showErrorDialog(context, 'Failed to add employee', error.toString());
     }
     setLoading(false);
   }
 
-  static void _showErrorDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

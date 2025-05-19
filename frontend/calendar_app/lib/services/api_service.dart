@@ -5,7 +5,6 @@ import 'package:calendar_app/models/employee.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 
 class ApiService {
-  // Update port number to match your running backend
   static const String baseUrl = 'http://localhost:5188/api';
   String? _token;
   String? _companyId;
@@ -28,7 +27,6 @@ class ApiService {
     };
   }
 
-  // Authentication
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/login'),
@@ -103,7 +101,7 @@ class ApiService {
   Future<Company> getCompanyById(String companyId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/companies/$companyId'),
-      headers: _headers, // Ensure headers include auth token
+      headers: _headers,
     );
 
     if (response.statusCode == 200) {

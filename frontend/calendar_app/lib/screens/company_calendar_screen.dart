@@ -7,8 +7,8 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/screens/create_event_screen.dart';
 import 'package:calendar_app/services/company_calendar_service.dart';
 import 'package:calendar_app/widgets/calendar_widgets.dart';
-import 'package:calendar_app/blocs/calendar_cubit.dart';
-import '../blocs/calendar_state.dart';
+import '../cubit/calendar_cubit.dart';
+import '../cubit/calendar_state.dart';
 
 class CompanyCalendarScreen extends StatefulWidget {
   const CompanyCalendarScreen({super.key});

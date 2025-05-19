@@ -20,7 +20,6 @@ class WebSocketService {
     _currentToken = token;
 
     try {
-      // Updated URL to use port 8181 without token in query string
       final wsUrl = Uri.parse('ws://localhost:8181');
       _channel = WebSocketChannel.connect(wsUrl);
       _isConnected = true;
@@ -31,18 +30,15 @@ class WebSocketService {
         (message) {
           print('WebSocket message received: $message');
           final decodedMessage = jsonDecode(message);
-          
-          // Handle authentication result specifically
+
           if (decodedMessage['Type'] == 'AuthenticationResult') {
             if (decodedMessage['Success'] == true) {
               print('WebSocket authentication successful for user: ${decodedMessage['UserId']}');
-              // If we have a company ID stored in the API service, set it now
               if (_apiService.companyId != null && _apiService.companyId!.isNotEmpty) {
                 setCompany(_apiService.companyId!);
               }
             } else {
               print('WebSocket authentication failed: ${decodedMessage['Reason']}');
-              // Potentially reconnect or show an error to the user
             }
           }
           
@@ -51,7 +47,6 @@ class WebSocketService {
         onDone: () {
           print('WebSocket connection closed');
           _isConnected = false;
-          // Attempt reconnect after a delay
           Future.delayed(const Duration(seconds: 5), () => connect(_currentToken!));
         },
         onError: (error) {
@@ -59,16 +54,14 @@ class WebSocketService {
           _isConnected = false;
         },
       );
-      
-      // Send authentication message after connection is established
+
       _sendAuthenticationMessage(token);
     } catch (e) {
       print('Error connecting to WebSocket: $e');
       _isConnected = false;
     }
   }
-  
-  // New method to authenticate with Fleck after connection
+
   void _sendAuthenticationMessage(String token) {
     if (!_isConnected || _channel == null) return;
     
@@ -80,8 +73,7 @@ class WebSocketService {
     _channel!.sink.add(jsonEncode(authMessage));
     print('Sent authentication message to WebSocket server');
   }
-  
-  // Method to set company association
+
   void setCompany(String companyId) {
     if (!_isConnected || _channel == null) {
       print('Cannot set company: WebSocket not connected');
