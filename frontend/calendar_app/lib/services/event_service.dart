@@ -3,7 +3,9 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/providers/calendar_provider.dart';
 import 'package:provider/provider.dart';
 
-class CreateEventService {
+import '../cubit/calendar_cubit.dart';
+
+class EventService {
   static DateTime combineDateAndTime(DateTime date, TimeOfDay time) {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
@@ -71,6 +73,42 @@ class CreateEventService {
     }
     setLoading(false);
   }
+  
+  static Future<void> updateEvent({
+    required BuildContext context,
+    required String eventId,
+    required String title,
+    required String description,
+    required DateTime startDate,
+    required TimeOfDay startTime,
+    required DateTime endDate,
+    required TimeOfDay endTime,
+    required List<String> participantIds,
+    required VoidCallback onSuccess,
+    required Function(String) onError,
+  }) async {
+    try {
+      final companyId = Provider.of<CompanyProvider>(context, listen: false).selectedCompany!.id;
+
+      final startDateTime = combineDateAndTime(startDate, startTime).toUtc();
+      final endDateTime = combineDateAndTime(endDate, endTime).toUtc();
+
+      await context.read<CalendarCubit>().updateEvent(
+        eventId,
+        companyId,
+        title,
+        description,
+        startDateTime,
+        endDateTime,
+        participantIds,
+      );
+
+      onSuccess();
+    } catch (error) {
+      onError(error.toString());
+    }
+  }
+  
   static void showErrorDialog(BuildContext context, String title, String message) {
     showDialog(
       context: context,

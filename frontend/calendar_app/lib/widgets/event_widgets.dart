@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:calendar_app/models/employee.dart';
 
-class CreateEventWidgets {
+class EventWidgets {
   static final dateFormat = DateFormat('MMM dd, yyyy');
 
   static Widget buildTextField({

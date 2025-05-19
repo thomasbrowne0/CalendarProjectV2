@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/providers/company_provider.dart';
-import 'package:calendar_app/widgets/create_event_widgets.dart';
-import 'package:calendar_app/services/create_event_service.dart';
+import 'package:calendar_app/widgets/event_widgets.dart';
 import 'package:calendar_app/cubit/calendar_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../services/event_service.dart';
 import '../utils/dialog_util.dart';
 
 class EditEventScreen extends StatefulWidget {
@@ -72,14 +72,14 @@ class _EditEventScreenState extends State<EditEventScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CreateEventWidgets.buildTextField(
+              EventWidgets.buildTextField(
                 controller: _titleController,
                 label: 'Event Title',
                 validator: (value) =>
                     (value == null || value.isEmpty) ? 'Please enter an event title' : null,
               ),
               const SizedBox(height: 12),
-              CreateEventWidgets.buildTextField(
+              EventWidgets.buildTextField(
                 controller: _descriptionController,
                 label: 'Description',
                 maxLines: 3,
@@ -88,13 +88,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
               const Text('Start Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Text('Date: ${CreateEventWidgets.dateFormat.format(_startDate)}'),
+                child: Text('Date: ${EventWidgets.dateFormat.format(_startDate)}'),
               ),
-              CreateEventWidgets.buildDateTimeRow(
+              EventWidgets.buildDateTimeRow(
                 label: 'Time',
                 displayText: _startTime.format(context),
                 onPressed: () async {
-                  final picked = await CreateEventService.pickTime(context, _startTime);
+                  final picked = await EventService.pickTime(context, _startTime);
                   if (picked != null) setState(() => _startTime = picked);
                 },
               ),
@@ -102,20 +102,20 @@ class _EditEventScreenState extends State<EditEventScreen> {
               const Text('End Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Text('Date: ${CreateEventWidgets.dateFormat.format(_endDate)}'),
-              ),
-              CreateEventWidgets.buildDateTimeRow(
+                child: Text('Date: ${EventWidgets.dateFormat.format(_endDate)}'),
+                ),
+              EventWidgets.buildDateTimeRow(
                 label: 'Time',
                 displayText: _endTime.format(context),
                 onPressed: () async {
-                  final picked = await CreateEventService.pickTime(context, _endTime);
+                  final picked = await EventService.pickTime(context, _endTime);
                   if (picked != null) setState(() => _endTime = picked);
                 },
               ),
               const SizedBox(height: 20),
               const Text('Participants', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              ...CreateEventWidgets.buildParticipantCheckboxes(
+              ...EventWidgets.buildParticipantCheckboxes(
                 employees: employees,
                 selectedIds: _selectedParticipantIds,
                 onChanged: _toggleParticipant,
@@ -139,47 +139,29 @@ class _EditEventScreenState extends State<EditEventScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     _setLoading(true);
-    try {
-      // Combine dates with selected times
-      final startDateTime = DateTime(
-        _startDate.year,
-        _startDate.month,
-        _startDate.day,
-        _startTime.hour,
-        _startTime.minute,
-      );
-
-      final endDateTime = DateTime(
-        _endDate.year,
-        _endDate.month,
-        _endDate.day,
-        _endTime.hour,
-        _endTime.minute,
-      );
-
-      final companyId = Provider.of<CompanyProvider>(context, listen: false).selectedCompany!.id;
-      await context.read<CalendarCubit>().updateEvent(
-        widget.event.id,
-        companyId,
-        _titleController.text,
-        _descriptionController.text,
-        startDateTime.toUtc(),
-        endDateTime.toUtc(),
-        _selectedParticipantIds.toList(),
-      );
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
-    } catch (error) {
-      if (mounted) {
-        DialogUtil.showErrorDialog(
-          context,
-          'Failed to Update Event. Check event times and participants',
-          error.toString(),
-        );
-      }
-    } finally {
-      _setLoading(false);
-    }
+    await EventService.updateEvent(
+      context: context,
+      eventId: widget.event.id,
+      title: _titleController.text,
+      description: _descriptionController.text,
+      startDate: _startDate,
+      startTime: _startTime,
+      endDate: _endDate,
+      endTime: _endTime,
+      participantIds: _selectedParticipantIds.toList(),
+      onSuccess: () {
+        if (mounted) Navigator.of(context).pop(true);
+      },
+      onError: (errorMsg) {
+        if (mounted) {
+          DialogUtil.showErrorDialog(
+            context,
+            'Failed to Update Event. Check event times and participants',
+            errorMsg,
+          );
+        }
+      },
+    );
+    _setLoading(false);
   }
 }
