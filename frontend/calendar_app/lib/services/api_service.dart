@@ -235,4 +235,27 @@ class ApiService {
       throw Exception('Failed to create event');
     }
   }
+
+  Future<void> updateEvent(String companyId, String eventId, Map<String, dynamic> eventData) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/companies/$companyId/events/$eventId'),
+      headers: _headers,
+      body: jsonEncode(eventData),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update event');
+    }
+  }
+
+  Future<void> deleteEvent(String companyId, String eventId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/companies/$companyId/events/$eventId'),
+      headers: _headers,
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete event');
+    }
+  }
 }

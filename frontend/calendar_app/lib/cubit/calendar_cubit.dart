@@ -136,6 +136,40 @@ class CalendarCubit extends Cubit<CalendarState> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
+  Future<void> updateEvent(
+    String eventId,
+    String companyId,
+    String title,
+    String description,
+    DateTime startTime,
+    DateTime endTime,
+    List<String> participantIds,
+  ) async {
+    try {
+      await _apiService.updateEvent(companyId, eventId, {
+        'title': title,
+        'description': description,
+        'startTime': startTime.toIso8601String(),
+        'endTime': endTime.toIso8601String(),
+        'participantIds': participantIds,
+      });
+      // The WebSocket will handle the state update
+    } catch (error) {
+      print('CalendarCubit: Error updating event: $error');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteEvent(String companyId, String eventId) async {
+    try {
+      await _apiService.deleteEvent(companyId, eventId);
+      // The WebSocket will handle the state update
+    } catch (error) {
+      print('CalendarCubit: Error deleting event: $error');
+      rethrow;
+    }
+  }
+
   @override
   Future<void> close() {
     _webSocketSubscription?.cancel();

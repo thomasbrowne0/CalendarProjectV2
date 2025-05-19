@@ -71,12 +71,12 @@ class MyApp extends StatelessWidget {
                   visualDensity: VisualDensity.adaptivePlatformDensity,
                   brightness: Brightness.light,
                 ),
-                darkTheme: ThemeData(
+                /*darkTheme: ThemeData(
                   primarySwatch: Colors.blue,
                   visualDensity: VisualDensity.adaptivePlatformDensity,
                   brightness: Brightness.dark,
                 ),
-                themeMode: ThemeMode.system,
+                themeMode: ThemeMode.system,*/
                 home: auth.isAuth
                     ? (auth.isCompanyOwner
                         ? const CompanyOwnerHomeScreen()
