@@ -111,6 +111,21 @@ namespace API
 
     app.UseHttpsRedirection();
     
+    app.Use(async (context, next) =>
+    {
+        // Handle preflight requests
+        if (context.Request.Method == "OPTIONS")
+        {
+            context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+            context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+            context.Response.StatusCode = 200;
+            return;
+        }
+
+        await next();
+    });
+    
     // Apply CORS policy before routing
     app.UseCors("AllowAll");
     
