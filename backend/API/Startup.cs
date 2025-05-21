@@ -29,18 +29,13 @@ namespace API
             // CORS configuration
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowFlutterApp", builder =>
-                {
-                    builder.WithOrigins("http://localhost:3000") // Update with your Flutter web app URL
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
-                });
+                // Define a CORS policy named "AllowAll"
                 options.AddPolicy("AllowAll", builder =>
                 {
+                    // Allow any origin, method, and header    
                     builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
                 });
             });
 
