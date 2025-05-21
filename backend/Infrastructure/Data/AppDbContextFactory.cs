@@ -9,9 +9,15 @@ namespace Infrastructure.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            // For migrations, use a direct connection string
-            // Replace these credentials with your actual PostgreSQL credentials
-            var connectionString = "Host=localhost;Database=CalendarProjectDb;Username=calendarapp;Password=ilovemilk";
+            // Build configuration from API project's appsettings.json
+            var configPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "API");
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(configPath)
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            // Get connection string from configuration
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
             
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseNpgsql(
