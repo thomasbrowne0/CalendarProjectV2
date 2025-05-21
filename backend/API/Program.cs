@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Infrastructure.Data;
 using Google.Cloud.SecretManager.V1;
 using Google.Api.Gax.ResourceNames;
-using backend.Proxy;
+using API.Proxy;
 
 namespace API
 {
