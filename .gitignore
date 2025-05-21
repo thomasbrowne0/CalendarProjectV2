@@ -1,4 +1,5 @@
 /backend/API/obj
+/backend/api/appsettings.json
 /backend/API/bin
 /backend/Domain/obj
 /backend/Domain/bin
@@ -6,5 +7,5 @@
 /backend/Infrastructure/bin
 /backend/Application/obj
 /backend/Application/bin
-
-
+/backend/connection_string.txt
+backend/API/appsettings.json

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:calendar_app/screens/register_screen.dart';
 import 'package:calendar_app/services/login_service.dart';
 import 'package:calendar_app/widgets/login_widgets.dart';
 
