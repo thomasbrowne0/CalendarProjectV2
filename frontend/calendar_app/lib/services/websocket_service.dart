@@ -20,7 +20,7 @@ class WebSocketService {
     _currentToken = token;
 
     try {
-      final wsUrl = Uri.parse('ws://localhost:8181');
+      final wsUrl = Uri.parse('wss://calendar-api-344773828315.us-central1.run.app/ws');
       _channel = WebSocketChannel.connect(wsUrl);
       _isConnected = true;
       
