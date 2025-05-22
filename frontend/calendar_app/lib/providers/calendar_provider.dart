@@ -59,11 +59,4 @@ class CalendarProvider with ChangeNotifier {
     }
   }
 
-  List<CalendarEvent> getEventsForDay(DateTime day) {
-    return _events.where((event) {
-      return event.startTime.year == day.year &&
-          event.startTime.month == day.month &&
-          event.startTime.day == day.day;
-    }).toList();
-  }
 }

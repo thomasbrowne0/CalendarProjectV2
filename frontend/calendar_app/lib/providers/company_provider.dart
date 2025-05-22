@@ -65,13 +65,9 @@ class CompanyProvider with ChangeNotifier {
             rethrow; // Rethrow to be caught by UI
           }
         } else if (_authProvider!.user != null && _authProvider!.user!.isCompanyOwner) {
-          // User is a COMPANY OWNER. If _companies is empty, fetch their list.
-          // This part of the logic might need refinement if an owner is selecting a company
-          // that somehow wasn't in their initial fetchCompanies list.
           if (_companies.isEmpty) {
              print('CompanyProvider: Owner has no companies in list. Fetching all their companies.');
-             await fetchCompanies(); // This fetches all companies for the owner
-             // Try finding it again after fetching
+             await fetchCompanies();
              final stillMatching = _companies.where((c) => c.id == companyId).toList();
              if (stillMatching.isNotEmpty) {
                companyToSelect = stillMatching.first;
@@ -83,21 +79,20 @@ class CompanyProvider with ChangeNotifier {
 
       if (companyToSelect != null) {
         _selectedCompany = companyToSelect;
-        await fetchEmployees(_selectedCompany!.id); // Fetch employees for the newly selected company
-        
-        // Add this code - update WebSocket with company ID
+        await fetchEmployees(_selectedCompany!.id);
+
         if (_webSocketService != null && _webSocketService!.isConnected) {
           _webSocketService!.setCompany(companyToSelect.id);
         }
         
       } else {
         print('CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
-        _selectedCompany = null; // Clear selection if no company could be set
+        _selectedCompany = null;
       }
       notifyListeners();
     } catch (error) {
       print('CompanyProvider: General error in selectCompany for $companyId: $error');
-      _selectedCompany = null; // Ensure selection is cleared on error
+      _selectedCompany = null;
       notifyListeners();
       rethrow;
     }
