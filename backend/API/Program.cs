@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Infrastructure.Data;
 using Google.Cloud.SecretManager.V1;
 using Google.Api.Gax.ResourceNames;
-using backend.Proxy;
 
 namespace API
 {
@@ -66,23 +65,17 @@ namespace API
             var startup = new Startup(builder.Configuration);
             startup.ConfigureServices(builder.Services);
             
-            builder.Services.AddSingleton<IProxyConfig, ProxyConfig>();
-
-            // Configure Kestrel BEFORE building the app
             Console.WriteLine("Configuring Kestrel...");
             builder.WebHost.ConfigureKestrel(options =>
             {
-                // Listen on the internal port for HTTP
-                options.ListenAnyIP(5000);
+                // Cloud Run injects the PORT environment variable
+                string port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+                Console.WriteLine($"Listening on port {port}");
+                options.ListenAnyIP(int.Parse(port));
             });
             
             Console.WriteLine("Building application...");
             var app = builder.Build();
-            
-            // Start proxy AFTER building the app
-            var proxyConfig = app.Services.GetRequiredService<IProxyConfig>();
-            int publicPort = int.Parse(Environment.GetEnvironmentVariable("PORT") ?? "8080");
-            proxyConfig.StartProxyServer(publicPort, 5000, 8181);
             
             Console.WriteLine("Initializing database...");
             // Initialize the database and seed data
