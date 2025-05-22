@@ -12,8 +12,9 @@ class RegisterWidgets {
     return TextFormField(
       controller: controller,
       decoration: const InputDecoration(labelText: 'First Name'),
-      validator: (value) =>
-      (value == null || value.isEmpty) ? 'Please enter your first name' : null,
+      validator: (value) => (value == null || value.isEmpty)
+          ? 'Please enter your first name'
+          : null,
     );
   }
 
@@ -21,8 +22,9 @@ class RegisterWidgets {
     return TextFormField(
       controller: controller,
       decoration: const InputDecoration(labelText: 'Last Name'),
-      validator: (value) =>
-      (value == null || value.isEmpty) ? 'Please enter your last name' : null,
+      validator: (value) => (value == null || value.isEmpty)
+          ? 'Please enter your last name'
+          : null,
     );
   }
 
@@ -54,8 +56,8 @@ class RegisterWidgets {
     );
   }
 
-  static Widget confirmPasswordField(
-      TextEditingController controller, TextEditingController passwordController) {
+  static Widget confirmPasswordField(TextEditingController controller,
+      TextEditingController passwordController) {
     return TextFormField(
       controller: controller,
       decoration: const InputDecoration(labelText: 'Confirm Password'),

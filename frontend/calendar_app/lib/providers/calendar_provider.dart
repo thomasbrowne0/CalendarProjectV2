@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('CalendarProvider');
 
 class CalendarProvider with ChangeNotifier {
   List<CalendarEvent> _events = [];
@@ -31,7 +34,7 @@ class CalendarProvider with ChangeNotifier {
       _events = events;
       notifyListeners();
     } catch (error) {
-      print('Error fetching events: $error');
+      _logger.severe('Error fetching events: $error');
       // Set events to empty list instead of throwing
       _events = [];
       notifyListeners();
@@ -54,7 +57,7 @@ class CalendarProvider with ChangeNotifier {
       _events.add(event);
       notifyListeners();
     } catch (error) {
-      print('Error creating event: $error');
+      _logger.severe('Error creating event: $error');
       rethrow;
     }
   }

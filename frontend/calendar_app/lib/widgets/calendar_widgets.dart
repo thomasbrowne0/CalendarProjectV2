@@ -31,7 +31,8 @@ class CalendarWidgets {
   }
 
   static Widget buildEventCard(CalendarEvent event, BuildContext context) {
-    final timeRange = CompanyCalendarService().formatTimeRange(event.startTime, event.endTime);
+    final timeRange = CompanyCalendarService()
+        .formatTimeRange(event.startTime, event.endTime);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

@@ -14,7 +14,7 @@ class CompanyCalendarScreen extends StatefulWidget {
   const CompanyCalendarScreen({super.key});
 
   @override
-  _CompanyCalendarScreenState createState() => _CompanyCalendarScreenState();
+  State<CompanyCalendarScreen> createState() => _CompanyCalendarScreenState();
 }
 
 class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
@@ -22,7 +22,6 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
   bool _isLoading = false;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
-
   final CompanyCalendarService _calendarService = CompanyCalendarService();
 
   @override

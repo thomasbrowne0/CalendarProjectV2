@@ -10,7 +10,7 @@ class CompanyOwnerHomeScreen extends StatefulWidget {
   const CompanyOwnerHomeScreen({super.key});
 
   @override
-  _CompanyOwnerHomeScreenState createState() => _CompanyOwnerHomeScreenState();
+  State<CompanyOwnerHomeScreen>createState() => _CompanyOwnerHomeScreenState();
 }
 
 class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {

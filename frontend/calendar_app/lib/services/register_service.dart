@@ -14,12 +14,14 @@ class RegisterService {
     required String confirmPassword,
   }) async {
     if (password != confirmPassword) {
-      DialogUtil.showErrorDialog(context, 'Password mismatch', 'Passwords do not match');
+      DialogUtil.showErrorDialog(
+          context, 'Password mismatch', 'Passwords do not match');
       return false;
     }
 
     try {
-      await Provider.of<AuthProvider>(context, listen: false).registerCompanyOwner(
+      await Provider.of<AuthProvider>(context, listen: false)
+          .registerCompanyOwner(
         firstName.trim(),
         lastName.trim(),
         email.trim(),
@@ -27,7 +29,10 @@ class RegisterService {
       );
       return true;
     } catch (error) {
-      DialogUtil.showErrorDialog(context, 'Registration failed', error.toString());
+      if (context.mounted) {
+        DialogUtil.showErrorDialog(
+            context, 'Registration failed', error.toString());
+      }
       return false;
     }
   }

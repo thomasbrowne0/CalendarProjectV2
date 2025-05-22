@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/widgets/event_widgets.dart';
 import 'package:calendar_app/services/event_service.dart';
-
 import '../utils/dialog_util.dart';
 
 class CreateEventScreen extends StatefulWidget {

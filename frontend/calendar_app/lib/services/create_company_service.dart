@@ -13,18 +13,22 @@ class CreateCompanyService {
   }) async {
     if (!formKey.currentState!.validate()) return;
 
+    final navigator = Navigator.of(context);
+    final companyProvider =
+        Provider.of<CompanyProvider>(context, listen: false);
     setLoading(true);
     try {
-      await Provider.of<CompanyProvider>(context, listen: false).createCompany(
+      await companyProvider.createCompany(
         nameController.text.trim(),
         cvrController.text.trim(),
       );
-      Navigator.of(context).pop();
+      navigator.pop();
     } catch (error) {
-      DialogUtil.showErrorDialog(context, 'Failed to create company', error.toString());
+      if (context.mounted) {
+        DialogUtil.showErrorDialog(
+            context, 'Failed to create company', error.toString());
+      }
     }
     setLoading(false);
   }
-
-
 }

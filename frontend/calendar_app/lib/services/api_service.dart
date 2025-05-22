@@ -3,21 +3,26 @@ import 'package:http/http.dart' as http;
 import 'package:calendar_app/models/company.dart';
 import 'package:calendar_app/models/employee.dart';
 import 'package:calendar_app/models/calendar_event.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('ApiService');
 
 class ApiService {
   static const String baseUrl = 'http://localhost:5188/api';
   String? _token;
   String? _companyId;
+
   String? get token => _token;
+
   String? get companyId => _companyId;
-  
+
   void setToken(String token) {
     _token = token;
   }
 
   void setCompanyContext(String companyId) {
     _companyId = companyId;
-    print('Company context set to: $companyId');
+    _logger.info('Company context set to: $companyId');
   }
 
   Map<String, String> get _headers {
@@ -107,12 +112,11 @@ class ApiService {
     if (response.statusCode == 200) {
       return Company.fromJson(jsonDecode(response.body));
     } else {
-      print('ApiService: Failed to load company $companyId. Status: ${response.statusCode}, Body: ${response.body}');
+      _logger.severe(
+          'ApiService: Failed to load company $companyId. Status: ${response.statusCode}, Body: ${response.body}');
       throw Exception('Failed to load company details for $companyId');
     }
   }
-
-  
 
   // Employees
   Future<List<Employee>> getEmployees(String companyId) async {
@@ -129,7 +133,8 @@ class ApiService {
     }
   }
 
-  Future<Employee> createEmployee(String companyId, Map<String, dynamic> employee) async {
+  Future<Employee> createEmployee(
+      String companyId, Map<String, dynamic> employee) async {
     final response = await http.post(
       Uri.parse('$baseUrl/companies/$companyId/employees'),
       headers: _headers,
@@ -144,14 +149,16 @@ class ApiService {
   }
 
   // Calendar Events
-  Future<List<CalendarEvent>> getEvents(String companyId, DateTime start, DateTime end) async {
+  Future<List<CalendarEvent>> getEvents(
+      String companyId, DateTime start, DateTime end) async {
     try {
       // Format dates as ISO strings without milliseconds for better compatibility
       String startParam = '${start.toUtc().toIso8601String().split('.')[0]}Z';
       String endParam = '${end.toUtc().toIso8601String().split('.')[0]}Z';
 
       final response = await http.get(
-        Uri.parse('$baseUrl/companies/$companyId/events?start=$startParam&end=$endParam'),
+        Uri.parse(
+            '$baseUrl/companies/$companyId/events?start=$startParam&end=$endParam'),
         headers: _headers,
       );
 
@@ -160,63 +167,67 @@ class ApiService {
         if (response.body.isEmpty) {
           return [];
         }
-        
+
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((json) => CalendarEvent.fromJson(json)).toList();
       } else {
-        // Provide more detailed error info
-        print("Error fetching events. Status: ${response.statusCode}, Body: ${response.body}");
+        _logger.severe(
+            "Error fetching events. Status: ${response.statusCode}, Body: ${response.body}");
         throw Exception('Failed to load events (${response.statusCode})');
       }
     } catch (e) {
-      print("Error fetching events: $e");
-      // If an empty list is more appropriate than an exception, use:
-      // return [];
+      _logger.severe("Error fetching events: $e");
       throw Exception('Failed to load events');
     }
   }
 
   Future<CalendarEvent> getEventById(String companyId, String eventId) async {
-  print('ApiService: Fetching event $eventId for company $companyId');
-  try {
-    final response = await http.get(
-      Uri.parse('$baseUrl/companies/$companyId/events/$eventId'),
-      headers: _headers,
-    );
-    
-    if (response.statusCode == 200) {
-      final event = CalendarEvent.fromJson(jsonDecode(response.body));
-      print('ApiService: Successfully fetched event ${event.title}');
-      return event;
-    } else {
-      print('ApiService: Failed to fetch event, status: ${response.statusCode}, body: ${response.body}');
-      throw Exception('Failed to load event (${response.statusCode})');
-    }
-  } catch (e) {
-    print('ApiService: Error fetching event: $e');
-    throw Exception('Failed to load event: $e');
-  }
-}
+    _logger.info('ApiService: Fetching event $eventId for company $companyId');
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/companies/$companyId/events/$eventId'),
+        headers: _headers,
+      );
 
-  Future<CalendarEvent> createEvent(String companyId, Map<String, dynamic> event) async {
+      if (response.statusCode == 200) {
+        final event = CalendarEvent.fromJson(jsonDecode(response.body));
+        _logger.info('ApiService: Successfully fetched event ${event.title}');
+        return event;
+      } else {
+        _logger.severe(
+            'ApiService: Failed to fetch event, status: ${response.statusCode}, body: ${response.body}');
+        throw Exception('Failed to load event (${response.statusCode})');
+      }
+    } catch (e) {
+      _logger.severe('ApiService: Error fetching event: $e');
+      throw Exception('Failed to load event: $e');
+    }
+  }
+
+  Future<CalendarEvent> createEvent(
+      String companyId, Map<String, dynamic> event) async {
     try {
       // Ensure dates are in UTC format without milliseconds
       if (event['startTime'] is DateTime) {
-        event['startTime'] = '${(event['startTime'] as DateTime).toUtc().toIso8601String().split('.')[0]}Z';
+        event['startTime'] =
+            '${(event['startTime'] as DateTime).toUtc().toIso8601String().split('.')[0]}Z';
       }
-      
+
       if (event['endTime'] is DateTime) {
-        event['endTime'] = '${(event['endTime'] as DateTime).toUtc().toIso8601String().split('.')[0]}Z';
+        event['endTime'] =
+            '${(event['endTime'] as DateTime).toUtc().toIso8601String().split('.')[0]}Z';
       }
-      
+
       // Ensure participantIds is an array of strings (not objects)
       if (event['participantIds'] != null && event['participantIds'] is List) {
-        List<String> participantIds = (event['participantIds'] as List).map((id) => id.toString()).toList();
+        List<String> participantIds = (event['participantIds'] as List)
+            .map((id) => id.toString())
+            .toList();
         event['participantIds'] = participantIds;
       }
 
-      print("Event data being sent: ${jsonEncode(event)}");
-      
+      _logger.info("Event data being sent: ${jsonEncode(event)}");
+
       final response = await http.post(
         Uri.parse('$baseUrl/companies/$companyId/events'),
         headers: _headers,
@@ -226,17 +237,18 @@ class ApiService {
       if (response.statusCode == 201) {
         return CalendarEvent.fromJson(jsonDecode(response.body));
       } else {
-        // Provide more detailed error info
-        print("Error creating event. Status: ${response.statusCode}, Body: ${response.body}");
+        _logger.severe(
+            "Error creating event. Status: ${response.statusCode}, Body: ${response.body}");
         throw Exception('Failed to create event (${response.statusCode})');
       }
     } catch (e) {
-      print("Error creating event: $e");
+      _logger.severe("Error creating event: $e");
       throw Exception('Failed to create event');
     }
   }
 
-  Future<void> updateEvent(String companyId, String eventId, Map<String, dynamic> eventData) async {
+  Future<void> updateEvent(
+      String companyId, String eventId, Map<String, dynamic> eventData) async {
     final response = await http.put(
       Uri.parse('$baseUrl/companies/$companyId/events/$eventId'),
       headers: _headers,

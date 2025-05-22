@@ -26,7 +26,9 @@ class CreateEmployeeService {
 
     setLoading(true);
     try {
-      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+      final navigator = Navigator.of(context);
+      final companyProvider =
+          Provider.of<CompanyProvider>(context, listen: false);
       await companyProvider.addEmployee(
         companyProvider.selectedCompany!.id,
         firstNameController.text.trim(),
@@ -35,12 +37,13 @@ class CreateEmployeeService {
         passwordController.text,
         jobTitleController.text.trim(),
       );
-      Navigator.of(context).pop();
+      navigator.pop();
     } catch (error) {
-      DialogUtil.showErrorDialog(context, 'Failed to add employee', error.toString());
+      if (context.mounted) {
+        DialogUtil.showErrorDialog(
+            context, 'Failed to add employee', error.toString());
+      }
     }
     setLoading(false);
   }
-
-
 }

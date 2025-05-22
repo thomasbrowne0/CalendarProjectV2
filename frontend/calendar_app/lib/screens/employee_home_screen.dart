@@ -9,7 +9,7 @@ class EmployeeHomeScreen extends StatefulWidget {
   const EmployeeHomeScreen({super.key});
 
   @override
-  _EmployeeHomeScreenState createState() => _EmployeeHomeScreenState();
+  State<EmployeeHomeScreen> createState() => _EmployeeHomeScreenState();
 }
 
 class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
