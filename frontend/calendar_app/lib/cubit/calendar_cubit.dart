@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:calendar_app/services/websocket_service.dart';
+import 'package:logging/logging.dart';
 
 import 'calendar_state.dart';
 
+final _logger = Logger('CalendarCubit');
 
 class CalendarCubit extends Cubit<CalendarState> {
   final ApiService _apiService;
@@ -22,12 +23,12 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   void setCompanyId(String id) {
     companyId = id;
-    print('CalendarCubit: Company ID set to $id');
+    _logger.info('CalendarCubit: Company ID set to $id');
   }
 
   void _setupWebSocketListener() {
     _webSocketSubscription = _webSocketService.messageStream.listen((message) {
-      print('CalendarCubit received message: ${message['Type']}');
+      _logger.info('CalendarCubit received message: ${message['Type']}');
 
       if (message['Type'] == 'CompanySet' && message['CompanyId'] != null) {
         setCompanyId(message['CompanyId']);
@@ -43,35 +44,35 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   void _handleEventCreated(String eventId) async {
     if (companyId == null) {
-      print('CalendarCubit: Company ID is null, cannot fetch event. Using AuthProvider instead.');
+      _logger.severe('CalendarCubit: Company ID is null, cannot fetch event. Using AuthProvider instead.');
       if (_apiService.companyId != null) {
         companyId = _apiService.companyId;
       } else {
-        print('CalendarCubit: Both local and ApiService companyId are null. Cannot fetch event.');
+        _logger.severe('CalendarCubit: Both local and ApiService companyId are null. Cannot fetch event.');
         return;
       }
     }
 
     try {
-      print('CalendarCubit: Fetching event with ID $eventId for company $companyId');
+      _logger.info('CalendarCubit: Fetching event with ID $eventId for company $companyId');
       final event = await _apiService.getEventById(companyId!, eventId);
-      print('CalendarCubit: Successfully fetched event: ${event.title} on ${event.startTime}');
+      _logger.info('CalendarCubit: Successfully fetched event: ${event.title} on ${event.startTime}');
 
       final updatedEvents = [...state.events, event];
-      print('CalendarCubit: Updating state with new event. Total events: ${updatedEvents.length}');
+      _logger.info('CalendarCubit: Updating state with new event. Total events: ${updatedEvents.length}');
       emit(state.copyWith(events: updatedEvents));
     } catch (e) {
-      print('CalendarCubit: Error handling EventCreated: $e');
+      _logger.severe('CalendarCubit: Error handling EventCreated: $e');
 
       try {
-        print('CalendarCubit: Attempting to refresh all events as fallback');
+        _logger.info('CalendarCubit: Attempting to refresh all events as fallback');
         final startDate = DateTime(state.focusedDay.year, state.focusedDay.month, 1);
         final endDate = DateTime(state.focusedDay.year, state.focusedDay.month + 1, 0);
 
         final events = await _apiService.getEvents(companyId!, startDate, endDate);
         emit(state.copyWith(events: events));
       } catch (fallbackError) {
-        print('CalendarCubit: Fallback refresh also failed: $fallbackError');
+        _logger.severe('CalendarCubit: Fallback refresh also failed: $fallbackError');
       }
     }
   }
@@ -98,7 +99,7 @@ class CalendarCubit extends Cubit<CalendarState> {
 
       emit(state.copyWith(events: updatedEvents));
     } catch (e) {
-      print('CalendarCubit: Error handling EventUpdated: $e');
+      _logger.severe('CalendarCubit: Error handling EventUpdated: $e');
     }
   }
 
@@ -155,7 +156,7 @@ class CalendarCubit extends Cubit<CalendarState> {
       });
       // The WebSocket will handle the state update
     } catch (error) {
-      print('CalendarCubit: Error updating event: $error');
+      _logger.severe('CalendarCubit: Error updating event: $error');
       rethrow;
     }
   }
@@ -165,7 +166,7 @@ class CalendarCubit extends Cubit<CalendarState> {
       await _apiService.deleteEvent(companyId, eventId);
       // The WebSocket will handle the state update
     } catch (error) {
-      print('CalendarCubit: Error deleting event: $error');
+      _logger.severe('CalendarCubit: Error deleting event: $error');
       rethrow;
     }
   }

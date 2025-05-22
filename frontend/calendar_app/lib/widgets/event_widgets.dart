@@ -44,14 +44,14 @@ class EventWidgets {
     return employees
         .map(
           (e) => CheckboxListTile(
-        title: Text('${e.firstName} ${e.lastName}'),
-        subtitle: Text(e.jobTitle),
-        value: selectedIds.contains(e.id),
-        onChanged: (bool? value) {
-          onChanged(e.id, value ?? false);
-        },
-      ),
-    )
+            title: Text('${e.firstName} ${e.lastName}'),
+            subtitle: Text(e.jobTitle),
+            value: selectedIds.contains(e.id),
+            onChanged: (bool? value) {
+              onChanged(e.id, value ?? false);
+            },
+          ),
+        )
         .toList();
   }
 }

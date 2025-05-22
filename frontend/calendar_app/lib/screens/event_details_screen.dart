@@ -17,7 +17,6 @@ class EventDetailsScreen extends StatelessWidget {
     final dateFormat = DateFormat('MMM dd, yyyy');
     final timeFormat = DateFormat('HH:mm');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
 
     final isCompanyOwner = authProvider.user?.isCompanyOwner ?? false;
     final isEventCreator = event.createdById == authProvider.user?.id;

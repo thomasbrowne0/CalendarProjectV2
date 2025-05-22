@@ -4,6 +4,9 @@ import 'package:calendar_app/models/employee.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/services/websocket_service.dart';
+import 'package:logging/logging.dart';
+
+final _logger = Logger('CompanyProvider');
 
 class CompanyProvider with ChangeNotifier {
   List<Company> _companies = [];
@@ -28,14 +31,14 @@ class CompanyProvider with ChangeNotifier {
       _companies = companies;
       notifyListeners();
     } catch (error) {
-      print('Error fetching companies: $error');
+      _logger.severe('Error fetching companies: $error');
       rethrow;
     }
   }
 
   Future<void> selectCompany(String companyId) async {
     if (_apiService == null || _authProvider == null || !_authProvider!.isAuth) {
-      print('CompanyProvider: ApiService or AuthProvider not available, or not authenticated.');
+      _logger.severe('CompanyProvider: ApiService or AuthProvider not available, or not authenticated.');
       return;
     }
     try {
@@ -55,25 +58,25 @@ class CompanyProvider with ChangeNotifier {
         // How we fetch depends on whether the user is an owner or employee.
         if (_authProvider!.user != null && !_authProvider!.user!.isCompanyOwner) {
           // User is an EMPLOYEE, fetch their specific company by ID
-          print('CompanyProvider: Employee needs company $companyId. Fetching specifically.');
+          _logger.info('CompanyProvider: Employee needs company $companyId. Fetching specifically.');
           try {
             companyToSelect = await _apiService!.getCompanyById(companyId);
           } catch (e) {
-            print('CompanyProvider: Error fetching specific company $companyId for employee: $e');
+            _logger.severe('CompanyProvider: Error fetching specific company $companyId for employee: $e');
             _selectedCompany = null; // Clear selection on error
             notifyListeners();
             rethrow; // Rethrow to be caught by UI
           }
         } else if (_authProvider!.user != null && _authProvider!.user!.isCompanyOwner) {
           if (_companies.isEmpty) {
-             print('CompanyProvider: Owner has no companies in list. Fetching all their companies.');
+            _logger.info('CompanyProvider: Owner has no companies in list. Fetching all their companies.');
              await fetchCompanies();
              final stillMatching = _companies.where((c) => c.id == companyId).toList();
              if (stillMatching.isNotEmpty) {
                companyToSelect = stillMatching.first;
              }
           } else {
-             print('CompanyProvider: Owner selecting company $companyId, but it was not in the pre-loaded list of ${_companies.length} companies.');     }
+            _logger.info('CompanyProvider: Owner selecting company $companyId, but it was not in the pre-loaded list of ${_companies.length} companies.');     }
         }
       }
 
@@ -86,12 +89,12 @@ class CompanyProvider with ChangeNotifier {
         }
         
       } else {
-        print('CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
+        _logger.severe('CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
         _selectedCompany = null;
       }
       notifyListeners();
     } catch (error) {
-      print('CompanyProvider: General error in selectCompany for $companyId: $error');
+      _logger.severe('CompanyProvider: General error in selectCompany for $companyId: $error');
       _selectedCompany = null;
       notifyListeners();
       rethrow;
@@ -104,7 +107,7 @@ class CompanyProvider with ChangeNotifier {
       _companies.add(company);
       notifyListeners();
     } catch (error) {
-      print('Error creating company: $error');
+      _logger.severe('Error creating company: $error');
       rethrow;
     }
   }
@@ -115,7 +118,7 @@ class CompanyProvider with ChangeNotifier {
       _employees = employees;
       notifyListeners();
     } catch (error) {
-      print('Error fetching employees: $error');
+      _logger.severe('Error fetching employees: $error');
       rethrow;
     }
   }
@@ -134,7 +137,7 @@ class CompanyProvider with ChangeNotifier {
       _employees.add(employee);
       notifyListeners();
     } catch (error) {
-      print('Error adding employee: $error');
+      _logger.severe('Error adding employee: $error');
       rethrow;
     }
   }
