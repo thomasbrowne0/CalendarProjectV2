@@ -5,7 +5,7 @@ import 'package:calendar_app/models/employee.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5188/api';
+  static const String baseUrl = 'https://calendar-backend-503012500647.europe-north1.run.app/api';
   String? _token;
   String? _companyId;
   String? get token => _token;

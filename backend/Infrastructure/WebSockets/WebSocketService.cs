@@ -8,6 +8,7 @@ using Fleck;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography.X509Certificates;
+using System.Net.WebSockets;
 
 namespace Infrastructure.WebSockets
 {
@@ -29,31 +30,18 @@ namespace Infrastructure.WebSockets
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            // Create proper logger for the connection manager
             _connectionManager = new WebSocketConnectionManager(
                 loggerFactory.CreateLogger<WebSocketConnectionManager>());
 
             // Configure and start the WebSocket server
-            var scheme = _options.SecureConnection ? "wss" : "ws";
-            var serverUrl = $"{scheme}://{_options.Host}:{_options.Port}";
+            var serverUrl = $"ws://{_options.Host}:{_options.Port}";
             _logger.LogInformation($"Starting WebSocket server at {serverUrl}");
 
             _server = new WebSocketServer(serverUrl);
-            
-            if (_options.SecureConnection && !string.IsNullOrEmpty(_options.CertificatePath))
-            {
-                // Use X509Certificate2 with modern approach
-                var loader = new X509Certificate2Collection();
-                var certificate = new X509Certificate2(_options.CertificatePath, _options.CertificatePassword);
-                loader.Add(certificate);
-                _server.Certificate = loader[0];
-                _logger.LogInformation("WebSocket server configured with SSL");
-            }
 
-            // Start the server
+            // Start the Fleck WebSocket server
             _server.Start(socket =>
             {
-                // Set up event handlers
                 socket.OnOpen = () => OnSocketOpened(socket);
                 socket.OnClose = () => OnSocketClosed(socket);
                 socket.OnMessage = message => OnMessageReceived(socket, message);
@@ -349,6 +337,101 @@ namespace Infrastructure.WebSockets
             }
             
             return Task.CompletedTask;
+        }
+
+        public async Task ProxyToFleckAsync(System.Net.WebSockets.WebSocket webSocket, string fleckUrl)
+        {
+            _logger.LogInformation($"Proxying WebSocket connection to Fleck server at {fleckUrl}");
+
+            using var clientWebSocket = new ClientWebSocket();
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            try
+            {
+                // Connect to the Fleck WebSocket server
+                await clientWebSocket.ConnectAsync(new Uri(fleckUrl), cancellationTokenSource.Token);
+
+                var buffer = new byte[8192];
+
+                // Task to receive messages from Fleck and send them to the client
+                var receiveTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        while (clientWebSocket.State == WebSocketState.Open)
+                        {
+                            var result = await clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationTokenSource.Token);
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                _logger.LogInformation("Fleck WebSocket closed the connection.");
+                                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by Fleck", CancellationToken.None);
+                                break;
+                            }
+
+                            await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error receiving data from Fleck WebSocket.");
+                        cancellationTokenSource.Cancel();
+                    }
+                });
+
+                // Task to receive messages from the client and send them to Fleck
+                var sendTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        while (webSocket.State == WebSocketState.Open)
+                        {
+                            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationTokenSource.Token);
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                _logger.LogInformation("Client WebSocket closed the connection.");
+                                await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                                break;
+                            }
+
+                            await clientWebSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error receiving data from client WebSocket.");
+                        cancellationTokenSource.Cancel();
+                    }
+                });
+
+                // Wait for either task to complete
+                await Task.WhenAny(receiveTask, sendTask);
+            }
+            catch (System.Net.WebSockets.WebSocketException ex)
+            {
+                _logger.LogError(ex, "WebSocket exception occurred while proxying.");
+                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "WebSocket error", CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while proxying WebSocket connection.");
+                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Unexpected error", CancellationToken.None);
+            }
+            finally
+            {
+                // Ensure both WebSocket connections are closed
+                if (webSocket.State == WebSocketState.Open || webSocket.State == WebSocketState.CloseReceived)
+                {
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Proxy closed", CancellationToken.None);
+                }
+
+                if (clientWebSocket.State == WebSocketState.Open || clientWebSocket.State == WebSocketState.CloseReceived)
+                {
+                    await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Proxy closed", CancellationToken.None);
+                }
+
+                cancellationTokenSource.Cancel();
+                _logger.LogInformation("WebSocket proxying completed.");
+            }
         }
 
         public void Dispose()

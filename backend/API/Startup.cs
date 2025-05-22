@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Infrastructure;
+using Application.Interfaces;
 
 namespace API
 {
@@ -31,16 +32,10 @@ namespace API
             {
                 options.AddPolicy("AllowFlutterApp", builder =>
                 {
-                    builder.WithOrigins("http://localhost:3000") // Update with your Flutter web app URL
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
-                });
-                options.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
+                    builder.WithOrigins("http://localhost:56599") // Replace with your Flutter app's local URL
                            .AllowAnyMethod()
-                           .AllowAnyHeader();
+                           .AllowAnyHeader()
+                           .AllowCredentials();
                 });
             });
 
@@ -101,38 +96,53 @@ namespace API
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-    if (env.IsDevelopment())
-    {
-        app.UseDeveloperExceptionPage();
-        app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Calendar Project API v1"));
-    }
-    else
-    {
-        app.UseExceptionHandler("/Error");
-        app.UseHsts();
-    }
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Calendar Project API v1"));
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+            }
 
-    app.UseHttpsRedirection();
-    
-    // Apply CORS policy before routing
-    app.UseCors("AllowAll");
-    
-    app.UseRouting();
-    
-    app.UseAuthentication();
-    app.UseAuthorization();
-    
-    // Note: WebSocketMiddleware is no longer needed since Fleck handles its own connections
-    
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-    });
-    
-    // Force instantiation of WebSocketService to start Fleck server
-    var webSocketService = app.ApplicationServices.GetRequiredService<Application.Interfaces.IWebSocketService>();
-    }
+            app.UseHttpsRedirection();
+
+            // Apply the "AllowFlutterApp" CORS policy
+            app.UseCors("AllowFlutterApp");
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseWebSockets();
+
+            // Map the /ws route for WebSocket connections
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.Map("/ws", async context =>
+                {
+                    if (context.WebSockets.IsWebSocketRequest)
+                    {
+                        var fleckUrl = $"ws://{Configuration["WebSockets:Host"]}:{Configuration["WebSockets:Port"]}";
+                        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                        var webSocketService = context.RequestServices.GetRequiredService<IWebSocketService>();
+                        await webSocketService.ProxyToFleckAsync(webSocket, fleckUrl);
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 400; // Bad Request if not a WebSocket request
+                    }
+                });
+            });
+
+            // Force instantiation of WebSocketService to start Fleck server
+            var webSocketService = app.ApplicationServices.GetRequiredService<IWebSocketService>();
+        }
     }
 }

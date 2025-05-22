@@ -13,5 +13,6 @@ namespace Application.Interfaces
         Task NotifyEventDeletedAsync(Guid companyId, Guid eventId);
         Task NotifyEmployeeAddedAsync(Guid companyId, Guid employeeId);
         Task NotifyEmployeeRemovedAsync(Guid companyId, Guid employeeId);
+        Task ProxyToFleckAsync(WebSocket webSocket, string fleckUrl);
     }
 }

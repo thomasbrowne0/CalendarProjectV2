@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Infrastructure.Data;
+using API.Proxy;
 
 namespace API
 {
@@ -47,6 +48,10 @@ namespace API
                 }
             }
             
+            // Start the proxy server
+            var proxyConfig = new ProxyConfig();
+            proxyConfig.StartProxyServer(8081, 5000, 8181); // Cloud Run exposes 8080
+
             // Configure the HTTP request pipeline
             startup.Configure(app, app.Environment);
             
