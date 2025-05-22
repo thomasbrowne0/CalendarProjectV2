@@ -2,7 +2,7 @@ using System.Net;
 using WebSocketProxy;
 using Host = WebSocketProxy.Host;
 
-namespace API.Proxy;
+namespace backend.Proxy;
 
 public class ProxyConfig : IProxyConfig
 {

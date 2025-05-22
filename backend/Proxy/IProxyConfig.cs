@@ -1,4 +1,4 @@
-namespace API.Proxy
+namespace backend.Proxy
 
 public interface IProxyConfig
 {
