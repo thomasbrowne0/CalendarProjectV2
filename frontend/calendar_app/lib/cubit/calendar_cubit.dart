@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/services/api_service.dart';
 import 'package:calendar_app/services/websocket_service.dart';
