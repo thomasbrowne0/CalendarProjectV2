@@ -1,5 +1,4 @@
 using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -7,7 +6,6 @@ using Application.Interfaces;
 using Fleck;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Infrastructure.WebSockets
 {
@@ -18,17 +16,21 @@ namespace Infrastructure.WebSockets
         private readonly WebSocketOptions _options;
         private readonly WebSocketServer _server;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IUserSessionService _userSessionService;
         private bool _disposed = false;
 
         public WebSocketService(
             ILogger<WebSocketService> logger,
             IOptions<WebSocketOptions> options,
             IServiceProvider serviceProvider,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IUserSessionService userSessionService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _userSessionService = userSessionService ?? throw new ArgumentNullException(nameof(userSessionService));
+            
             // Create proper logger for the connection manager
             _connectionManager = new WebSocketConnectionManager(
                 loggerFactory.CreateLogger<WebSocketConnectionManager>());
@@ -43,10 +45,10 @@ namespace Infrastructure.WebSockets
             if (_options.SecureConnection && !string.IsNullOrEmpty(_options.CertificatePath))
             {
                 // Use X509Certificate2 with modern approach
-                var loader = new X509Certificate2Collection();
-                var certificate = new X509Certificate2(_options.CertificatePath, _options.CertificatePassword);
-                loader.Add(certificate);
-                _server.Certificate = loader[0];
+                var certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                    _options.CertificatePath, 
+                    _options.CertificatePassword);
+                _server.Certificate = certificate;
                 _logger.LogInformation("WebSocket server configured with SSL");
             }
 
@@ -63,21 +65,11 @@ namespace Infrastructure.WebSockets
             _logger.LogInformation("WebSocket server started successfully");
         }
 
-        // IWebSocketService implementation - handle a new connection
-        public Task HandleWebSocketConnectionAsync(System.Net.WebSockets.WebSocket webSocket, Guid userId, string userType)
-        {
-            // This method is kept for interface compatibility but is not used with Fleck
-            // Fleck manages connections differently through its event-based system
-            _logger.LogWarning("HandleWebSocketConnectionAsync called but is not implemented with Fleck");
-            return Task.CompletedTask;
-        }
-
         // Event handlers
         private void OnSocketOpened(IWebSocketConnection socket)
         {
             _logger.LogInformation($"WebSocket connection opened: {socket.ConnectionInfo.Id}");
-            // The actual user authentication and connection registration happens when the client sends
-            // an authentication message with their token
+            // The actual user authentication happens when the client sends a session message
         }
 
         private void OnSocketClosed(IWebSocketConnection socket)
@@ -114,8 +106,8 @@ namespace Infrastructure.WebSockets
                     
                     switch (messageType)
                     {
-                        case "authenticate":
-                            HandleAuthenticationMessage(socket, root);
+                        case "session":
+                            HandleSessionMessage(socket, root);
                             break;
                         case "setcompany":
                             HandleSetCompanyMessage(socket, root);
@@ -140,43 +132,37 @@ namespace Infrastructure.WebSockets
             }
         }
 
-        private void HandleAuthenticationMessage(IWebSocketConnection socket, JsonElement messageRoot)
+        // Handle session authentication
+        private void HandleSessionMessage(IWebSocketConnection socket, JsonElement messageRoot)
         {
-            if (messageRoot.TryGetProperty("token", out var tokenElement))
+            if (messageRoot.TryGetProperty("sessionId", out var sessionElement))
             {
-                var token = tokenElement.GetString();
-                if (!string.IsNullOrEmpty(token))
+                var sessionId = sessionElement.GetString();
+                if (!string.IsNullOrEmpty(sessionId) && 
+                    _userSessionService.TryGetUserId(sessionId, out var userId))
                 {
-                    var userInfo = ExtractUserInfoFromToken(token);
-                    if (userInfo.userId != Guid.Empty)
+                    // Register the connection
+                    _connectionManager.AddConnection(socket, userId);
+                    
+                    // Confirm authentication to the client
+                    var response = new
                     {
-                        // Register the connection
-                        _connectionManager.AddConnection(socket, userInfo.userId, userInfo.userType);
-                        
-                        // Confirm authentication to the client
-                        var response = new
-                        {
-                            Type = "AuthenticationResult",
-                            Success = true,
-                            UserId = userInfo.userId
-                        };
-                        
-                        socket.Send(JsonSerializer.Serialize(response));
-                        _logger.LogInformation($"User {userInfo.userId} authenticated successfully");
-                    }
-                    else
-                    {
-                        SendAuthenticationFailure(socket, "Invalid token");
-                    }
+                        Type = "AuthenticationResult",
+                        Success = true,
+                        UserId = userId
+                    };
+                    
+                    socket.Send(JsonSerializer.Serialize(response));
+                    _logger.LogInformation($"User {userId} authenticated successfully via session");
                 }
                 else
                 {
-                    SendAuthenticationFailure(socket, "Token is empty");
+                    SendAuthenticationFailure(socket, "Invalid session ID");
                 }
             }
             else
             {
-                SendAuthenticationFailure(socket, "No token provided");
+                SendAuthenticationFailure(socket, "No session ID provided");
             }
         }
         
@@ -228,40 +214,15 @@ namespace Infrastructure.WebSockets
             }
         }
 
-        private (Guid userId, string userType) ExtractUserInfoFromToken(string token)
+        // Implementation for IWebSocketService interface
+        public Task HandleWebSocketConnectionAsync(System.Net.WebSockets.WebSocket webSocket, Guid userId, string userType)
         {
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                _logger.LogDebug("Attempting to read token in WebSocketService");
-
-                if (tokenHandler.CanReadToken(token))
-                {
-                    var jwtToken = tokenHandler.ReadJwtToken(token);
-                    
-                    // Extract user ID
-                    var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid");
-                    if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
-                    {
-                        // Extract user type
-                        var userTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserType");
-                        string userType = userTypeClaim?.Value ?? "Unknown";
-                        
-                        return (userId, userType);
-                    }
-                }
-                
-                _logger.LogWarning("Failed to extract user information from token");
-                return (Guid.Empty, string.Empty);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Exception during ExtractUserInfoFromToken");
-                return (Guid.Empty, string.Empty);
-            }
+            // Since we're using Fleck directly instead of ASP.NET Core's WebSocket middleware,
+            // this method isn't actually used but is required by the interface.
+            // We log a message but we should never actually reach this code.
+            _logger.LogWarning("HandleWebSocketConnectionAsync called - note that WebSockets are handled by Fleck directly on port 8181");
+            return Task.CompletedTask;
         }
-
-        
 
         // Notification methods
         public async Task NotifyCompanyDataChangedAsync(Guid companyId, string changeType, object data)

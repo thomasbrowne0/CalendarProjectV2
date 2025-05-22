@@ -14,17 +14,20 @@ namespace Application.Services
     {
         private readonly ICompanyRepository _companyRepository;
         private readonly ICompanyOwnerRepository _companyOwnerRepository;
+        private readonly IUserRepository _userRepository; // Add this field
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebSocketService _webSocketService;
 
         public CompanyAppService(
             ICompanyRepository companyRepository,
             ICompanyOwnerRepository companyOwnerRepository,
+            IUserRepository userRepository, // Add this parameter
             IUnitOfWork unitOfWork,
             IWebSocketService webSocketService)
         {
             _companyRepository = companyRepository ?? throw new ArgumentNullException(nameof(companyRepository));
             _companyOwnerRepository = companyOwnerRepository ?? throw new ArgumentNullException(nameof(companyOwnerRepository));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository)); // Initialize it
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _webSocketService = webSocketService ?? throw new ArgumentNullException(nameof(webSocketService));
         }
@@ -97,6 +100,19 @@ namespace Application.Services
                 return false;
 
             return company.CompanyOwnerId == ownerId;
+        }
+
+        public async Task<bool> IsUserCompanyOwner(Guid userId)
+        {
+            try 
+            {
+                var owner = await _companyOwnerRepository.GetByIdAsync(userId);
+                return owner != null;
+            }
+            catch 
+            {
+                return false;
+            }
         }
 
         private CompanyDto MapToCompanyDto(Company company)

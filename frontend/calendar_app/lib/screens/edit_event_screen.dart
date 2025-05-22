@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/widgets/event_widgets.dart';
-import 'package:calendar_app/cubit/calendar_cubit.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/event_service.dart';
 import '../utils/dialog_util.dart';
 

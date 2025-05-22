@@ -6,24 +6,24 @@ import 'package:calendar_app/models/calendar_event.dart';
 
 class ApiService {
   static const String baseUrl = 'http://localhost:5188/api';
-  String? _token;
+  String? _sessionId;
   String? _companyId;
-  String? get token => _token;
+  
+  String? get sessionId => _sessionId;
   String? get companyId => _companyId;
   
-  void setToken(String token) {
-    _token = token;
+  void setSessionId(String sessionId) {
+    _sessionId = sessionId;
   }
 
-  void setCompanyContext(String companyId) {
+  void setCompanyId(String companyId) {
     _companyId = companyId;
-    print('Company context set to: $companyId');
   }
 
   Map<String, String> get _headers {
     return {
       'Content-Type': 'application/json',
-      if (_token != null) 'Authorization': 'Bearer $_token',
+      if (_sessionId != null) 'Session-ID': _sessionId!,
     };
   }
 
@@ -39,7 +39,6 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      _token = data['token'];
       return data;
     } else {
       throw Exception('Failed to login');
@@ -68,18 +67,27 @@ class ApiService {
 
   // Companies
   Future<List<Company>> getCompanies() async {
+  try {
     final response = await http.get(
       Uri.parse('$baseUrl/companies'),
-      headers: _headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'session-id': _sessionId ?? '', // Ensure this is 'session-id' (all lowercase)
+      },
     );
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => Company.fromJson(json)).toList();
     } else {
+      print('Error response body: ${response.body}');
       throw Exception('Failed to load companies');
     }
+  } catch (e) {
+    print('Error fetching companies: $e');
+    throw Exception('Failed to load companies');
   }
+}
 
   Future<Company> createCompany(String name, String cvr) async {
     final response = await http.post(

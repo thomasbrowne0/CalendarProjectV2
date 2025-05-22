@@ -52,6 +52,16 @@ The API includes WebSocket support for real-time updates:
 - POST `/api/companies/{companyId}/events/{id}/participants/{employeeId}` - Add a participant to an event
 - DELETE `/api/companies/{companyId}/events/{id}/participants/{employeeId}` - Remove a participant from an event
 
+## Authentication
+
+All authenticated endpoints require a `session-id` header obtained from the login or registration endpoints.
+
 ## WebSocket Connection
 
-Connect to `/ws?token=YOUR_JWT_TOKEN` to establish a WebSocket connection for real-time updates.
+Connect to `/ws` and send a session message to establish a WebSocket connection for real-time updates:
+```json
+{
+  "type": "session",
+  "sessionId": "YOUR_SESSION_ID"
+}
+```

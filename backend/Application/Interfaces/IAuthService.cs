@@ -7,6 +7,5 @@ namespace Application.Interfaces
     {
         Task<AuthResponseDto> LoginAsync(UserLoginDto loginDto);
         Task<AuthResponseDto> RegisterCompanyOwnerAsync(UserRegistrationDto registrationDto);
-        Task<bool> ValidateTokenAsync(string token);
     }
 }

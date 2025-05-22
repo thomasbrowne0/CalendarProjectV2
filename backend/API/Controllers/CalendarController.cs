@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Application.DTOs;
@@ -11,7 +9,6 @@ using Application.Interfaces;
 namespace API.Controllers
 {
     [ApiController]
-    [Authorize]
     [Route("api/companies/{companyId}/events")]
     public class CalendarController : ControllerBase
     {
@@ -19,28 +16,35 @@ namespace API.Controllers
         private readonly ICompanyAppService _companyService;
         private readonly IEmployeeAppService _employeeService;
         private readonly ILogger<CalendarController> _logger;
+        private readonly IUserSessionService _sessionService;
 
         public CalendarController(
             ICalendarAppService calendarService,
             ICompanyAppService companyService,
             IEmployeeAppService employeeService,
-            ILogger<CalendarController> logger)
+            ILogger<CalendarController> logger,
+            IUserSessionService sessionService)
         {
             _calendarService = calendarService ?? throw new ArgumentNullException(nameof(calendarService));
             _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
             _employeeService = employeeService ?? throw new ArgumentNullException(nameof(employeeService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CalendarEventDto>>> GetEvents(
             Guid companyId, 
             [FromQuery] DateTime? start, 
-            [FromQuery] DateTime? end)
+            [FromQuery] DateTime? end,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+            
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -70,11 +74,15 @@ namespace API.Controllers
             Guid companyId,
             Guid employeeId,
             [FromQuery] DateTime? start,
-            [FromQuery] DateTime? end)
+            [FromQuery] DateTime? end,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+            
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -97,11 +105,17 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CalendarEventDto>> GetEvent(Guid companyId, Guid id)
+        public async Task<ActionResult<CalendarEventDto>> GetEvent(
+            Guid companyId, 
+            Guid id,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+            
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -123,11 +137,17 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CalendarEventDto>> CreateEvent(Guid companyId, CalendarEventCreateDto eventDto)
+        public async Task<ActionResult<CalendarEventDto>> CreateEvent(
+            Guid companyId, 
+            CalendarEventCreateDto eventDto,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+        
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -135,18 +155,17 @@ namespace API.Controllers
                 // Ensure dates are in UTC
                 if (eventDto.StartTime.Kind != DateTimeKind.Utc)
                     eventDto.StartTime = DateTime.SpecifyKind(eventDto.StartTime, DateTimeKind.Utc);
-                    
+            
                 if (eventDto.EndTime.Kind != DateTimeKind.Utc)
                     eventDto.EndTime = DateTime.SpecifyKind(eventDto.EndTime, DateTimeKind.Utc);
 
-                var userId = GetCurrentUserId();
                 _logger.LogInformation(
                     "Creating event. Title: {Title}, Start: {Start}, End: {End}, Participants: {Participants}", 
                     eventDto.Title, 
                     eventDto.StartTime, 
                     eventDto.EndTime, 
                     string.Join(", ", eventDto.ParticipantIds ?? new List<Guid>()));
-                    
+            
                 try
                 {
                     var calendarEvent = await _calendarService.CreateEventAsync(companyId, userId, eventDto);
@@ -166,11 +185,18 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<CalendarEventDto>> UpdateEvent(Guid companyId, Guid id, CalendarEventUpdateDto eventDto)
+        public async Task<ActionResult<CalendarEventDto>> UpdateEvent(
+            Guid companyId, 
+            Guid id, 
+            CalendarEventUpdateDto eventDto,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+            
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -182,11 +208,9 @@ namespace API.Controllers
                     return NotFound();
                 }
 
-                // Check if the user is either the creator of the event or a company owner
-                var userId = GetCurrentUserId();
-                var userType = User.FindFirst("UserType")?.Value;
-                
-                if (userType != "CompanyOwner" && existingEvent.CreatedById != userId)
+                // Only allow update if user is the creator or a company owner
+                var isOwner = await _companyService.IsUserCompanyOwner(userId);
+                if (!isOwner && existingEvent.CreatedById != userId)
                 {
                     return Forbid();
                 }
@@ -202,11 +226,17 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteEvent(Guid companyId, Guid id)
+        public async Task<ActionResult> DeleteEvent(
+            Guid companyId, 
+            Guid id,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+            
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -218,11 +248,9 @@ namespace API.Controllers
                     return NotFound();
                 }
 
-                // Check if the user is either the creator of the event or a company owner
-                var userId = GetCurrentUserId();
-                var userType = User.FindFirst("UserType")?.Value;
-                
-                if (userType != "CompanyOwner" && existingEvent.CreatedById != userId)
+                // Only allow delete if user is the creator or a company owner
+                var isOwner = await _companyService.IsUserCompanyOwner(userId);
+                if (!isOwner && existingEvent.CreatedById != userId)
                 {
                     return Forbid();
                 }
@@ -244,11 +272,18 @@ namespace API.Controllers
         }
 
         [HttpPost("{id}/participants/{employeeId}")]
-        public async Task<ActionResult<CalendarEventDto>> AddParticipant(Guid companyId, Guid id, Guid employeeId)
+        public async Task<ActionResult<CalendarEventDto>> AddParticipant(
+            Guid companyId, 
+            Guid id, 
+            Guid employeeId,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+            
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -278,11 +313,18 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id}/participants/{employeeId}")]
-        public async Task<ActionResult> RemoveParticipant(Guid companyId, Guid id, Guid employeeId)
+        public async Task<ActionResult> RemoveParticipant(
+            Guid companyId, 
+            Guid id, 
+            Guid employeeId,
+            [FromHeader] string sessionId)
         {
             try
             {
-                if (!await CanAccessCompany(companyId))
+                if (!_sessionService.TryGetUserId(sessionId, out var userId))
+                    return Unauthorized();
+            
+                if (!await CanAccessCompany(companyId, userId))
                 {
                     return Forbid();
                 }
@@ -317,33 +359,14 @@ namespace API.Controllers
             }
         }
 
-        private async Task<bool> CanAccessCompany(Guid companyId)
+        private async Task<bool> CanAccessCompany(Guid companyId, Guid userId)
         {
-            var userId = GetCurrentUserId();
-            var userType = User.FindFirst("UserType")?.Value;
+            // Determine if the user is a company owner
+            var isOwner = await _companyService.ValidateCompanyOwnershipAsync(companyId, userId);
+            if (isOwner) return true;
 
-            if (userType == "CompanyOwner")
-            {
-                return await _companyService.ValidateCompanyOwnershipAsync(companyId, userId);
-            }
-            else if (userType == "Employee")
-            {
-                return await _employeeService.ValidateEmployeeCompanyMembershipAsync(userId, companyId);
-            }
-
-            return false;
-        }
-
-        private Guid GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-            {
-                throw new Exception("User ID not found in claims");
-            }
-            
-            return userId;
+            // Or if they're an employee of the company
+            return await _employeeService.ValidateEmployeeCompanyMembershipAsync(userId, companyId);
         }
     }
 }

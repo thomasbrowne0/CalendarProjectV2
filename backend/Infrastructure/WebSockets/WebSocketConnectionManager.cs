@@ -2,48 +2,25 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
 using Fleck;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.WebSockets
 {
     public class WebSocketConnectionManager
     {
-        // Change from private to internal to allow access from WebSocketService
-        internal readonly ConcurrentDictionary<Guid, FleckConnection> _connections = 
-            new ConcurrentDictionary<Guid, FleckConnection>();
         private readonly ILogger<WebSocketConnectionManager> _logger;
-        
+        public readonly ConcurrentDictionary<Guid, UserConnection> _connections = new();
+
         public WebSocketConnectionManager(ILogger<WebSocketConnectionManager> logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-        
-        public FleckConnection? GetConnectionById(Guid id)
-        {
-            _connections.TryGetValue(id, out var connection);
-            return connection;
+            _logger = logger;
         }
 
-        public IEnumerable<FleckConnection> GetConnectionsByCompany(Guid companyId)
+        public void AddConnection(IWebSocketConnection socket, Guid userId)
         {
-            return _connections.Values
-                .Where(c => c.CompanyId == companyId)
-                .ToList(); // Create a snapshot to avoid enumeration issues
-        }
-
-        public void AddConnection(IWebSocketConnection socket, Guid userId, string userType, Guid? companyId = null)
-        {
-            var connection = new FleckConnection
-            {
-                Id = userId,
-                Socket = socket,
-                UserType = userType ?? "Unknown",
-                CompanyId = companyId
-            };
-
-            _connections.AddOrUpdate(userId, connection, (_, _) => connection);
-            _logger.LogInformation($"Added WebSocket connection for user {userId} of type {userType}");
+            _logger.LogInformation($"Adding connection for user {userId}");
+            _connections[userId] = new UserConnection(userId, socket);
         }
 
         public void UpdateCompanyForConnection(Guid userId, Guid companyId)
@@ -51,24 +28,39 @@ namespace Infrastructure.WebSockets
             if (_connections.TryGetValue(userId, out var connection))
             {
                 connection.CompanyId = companyId;
-                _logger.LogInformation($"Updated company to {companyId} for user {userId}");
+                _logger.LogInformation($"Updated company ID to {companyId} for user {userId}");
+            }
+            else
+            {
+                _logger.LogWarning($"Cannot update company: User {userId} not found in connections");
             }
         }
 
-        public void RemoveConnection(Guid id)
+        public void RemoveConnection(Guid userId)
         {
-            if (_connections.TryRemove(id, out var connection))
+            if (_connections.TryRemove(userId, out _))
             {
-                _logger.LogInformation($"Removed WebSocket connection for user {id}");
+                _logger.LogInformation($"Removed connection for user {userId}");
             }
+        }
+
+        public IEnumerable<UserConnection> GetConnectionsByCompany(Guid companyId)
+        {
+            return _connections.Values.Where(c => c.CompanyId == companyId);
         }
     }
 
-    public class FleckConnection
+    public class UserConnection
     {
-        public Guid Id { get; set; }
-        public required IWebSocketConnection Socket { get; set; }
-        public required string UserType { get; set; } = string.Empty;
-        public Guid? CompanyId { get; set; }
+        public Guid Id { get; }
+        public IWebSocketConnection Socket { get; }
+        public Guid CompanyId { get; set; }
+
+        public UserConnection(Guid id, IWebSocketConnection socket)
+        {
+            Id = id;
+            Socket = socket;
+            CompanyId = Guid.Empty; // Default empty company ID
+        }
     }
 }

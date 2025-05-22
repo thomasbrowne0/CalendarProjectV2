@@ -85,9 +85,14 @@ class CompanyProvider with ChangeNotifier {
         _selectedCompany = companyToSelect;
         await fetchEmployees(_selectedCompany!.id); // Fetch employees for the newly selected company
         
-        // Add this code - update WebSocket with company ID
-        if (_webSocketService != null && _webSocketService!.isConnected) {
-          _webSocketService!.setCompany(companyToSelect.id);
+        // Add this debug log and null check
+        print('CompanyProvider: Setting WebSocket company context to: ${companyToSelect.id}');
+        if (_webSocketService != null) {
+          if (_webSocketService!.isConnected) {
+            _webSocketService!.setCompany(companyToSelect.id);
+          } else {
+            print('CompanyProvider: WebSocket not connected, cannot set company context');
+          }
         }
         
       } else {

@@ -6,98 +6,43 @@ The WebSocket implementation uses Fleck to provide real-time communication betwe
 
 ## Connection Details
 
-- **WebSocket URL**: `ws://{server-address}:8181` (or the configured port)
-- **Secure WebSocket**: `wss://{server-address}:8181` (when SecureConnection is enabled)
+- **WebSocket URL**: `ws://localhost:8181` (or configured host/port)
+- **Secure WebSocket**: `wss://localhost:8181` (when SecureConnection is enabled)
+
+Note: The WebSocket server runs directly on the specified port using Fleck, not through the ASP.NET Core middleware.
 
 ## Authentication Protocol
 
-1. **Connect** to the WebSocket server
-2. **Authenticate** by sending a message with your JWT token:
+1. **Connect** to the WebSocket server at port 8181
+2. **Authenticate** by sending a session message:
    ```json
    {
-     "type": "authenticate",
-     "token": "your.jwt.token"
+     "type": "session",
+     "sessionId": "your-session-id-from-login"
    }
    ```
 3. **Set Company Context** after successful authentication:
    ```json
    {
-     "type": "setCompany",
+     "type": "setcompany",
      "data": {
        "companyId": "00000000-0000-0000-0000-000000000000"
      }
    }
    ```
 
-## Received Message Types
+## Message Types
 
-The server will send messages with the following types:
+### Sent from server to client:
 
+- **AuthenticationResult** - Authentication response
 - **EventCreated** - When a new calendar event is created
 - **EventUpdated** - When a calendar event is modified
 - **EventDeleted** - When a calendar event is removed
 - **EmployeeAdded** - When a new employee is added to the company
 - **EmployeeRemoved** - When an employee is removed
-- **EmployeeUpdated** - When employee details are updated
 - **CompanyUpdated** - When company information changes
 
-## Message Format
+## Reconnection Strategy
 
-All messages follow this JSON format:
-
-```json
-{
-  "Type": "MessageType",
-  "Data": {
-    // Message-specific properties
-  }
-}
-```
-
-## Example Client Implementation
-
-```javascript
-// Example JavaScript implementation
-const socket = new WebSocket('ws://localhost:8181');
-
-socket.onopen = () => {
-  console.log('Connected to WebSocket server');
-  // Authenticate with the server
-  socket.send(JSON.stringify({
-    type: 'authenticate',
-    token: 'your.jwt.token'
-  }));
-};
-
-socket.onmessage = (event) => {
-  const message = JSON.parse(event.data);
-  console.log('Received message:', message);
-  
-  switch (message.Type) {
-    case 'AuthenticationResult':
-      if (message.Success) {
-        console.log('Authentication successful');
-        // Set company context
-        socket.send(JSON.stringify({
-          type: 'setCompany',
-          data: {
-            companyId: 'your-company-guid'
-          }
-        }));
-      }
-      break;
-    case 'EventCreated':
-      console.log('New event created:', message.Data.EventId);
-      break;
-    // Handle other message types
-  }
-};
-
-socket.onclose = () => {
-  console.log('Connection closed');
-};
-
-socket.onerror = (error) => {
-  console.error('WebSocket error:', error);
-};
-```
+The Flutter client implements an exponential backoff strategy for reconnection attempts with a maximum of 5 retries.

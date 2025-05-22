@@ -30,8 +30,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login attempt for {Email}", loginDto.Email);
-                return BadRequest(new { message = "Invalid login attempt" });
+                _logger.LogError(ex, "Error during login attempt for {Email}: {Message}", 
+                    loginDto.Email, ex.Message);
+                return BadRequest(new { message = ex.Message }); // Return actual error message for debugging
             }
         }
 

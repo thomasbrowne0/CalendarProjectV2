@@ -2,6 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Domain.IRepositories;
 using Domain.IServices;
 using Application.Interfaces;
@@ -9,6 +10,7 @@ using Application.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.WebSockets;
+using Infrastructure.Services;
 
 namespace Infrastructure
 {
@@ -18,6 +20,9 @@ namespace Infrastructure
             this IServiceCollection services, 
             IConfiguration configuration)
         {
+            // First register session service with fully qualified names to avoid ambiguity
+            services.AddSingleton<Application.Interfaces.IUserSessionService, Infrastructure.Services.UserSessionService>();
+
             // Register DbContext with PostgreSQL
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(
@@ -34,25 +39,26 @@ namespace Infrastructure
             // Register UnitOfWork
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             
-            // Configure WebSocket options
+            // Configure WebSocket options with explicit configuration access
+            var webSocketsSection = configuration.GetSection("WebSockets");
             services.Configure<WebSocketOptions>(options => 
             {
-                options.Host = configuration["WebSockets:Host"] ?? "0.0.0.0";
-                options.Port = int.Parse(configuration["WebSockets:Port"] ?? "8181");
-                options.SecureConnection = bool.Parse(configuration["WebSockets:SecureConnection"] ?? "false");
-                options.CertificatePath = configuration["WebSockets:CertificatePath"];
-                options.CertificatePassword = configuration["WebSockets:CertificatePassword"];
+                options.Host = webSocketsSection["Host"] ?? "0.0.0.0";
+                options.Port = int.Parse(webSocketsSection["Port"] ?? "8181");
+                options.SecureConnection = bool.Parse(webSocketsSection["SecureConnection"] ?? "false");
+                options.CertificatePath = webSocketsSection["CertificatePath"] ?? string.Empty;
+                options.CertificatePassword = webSocketsSection["CertificatePassword"] ?? string.Empty;
             });
             
-            // Register WebSocketService as a singleton
-            services.AddSingleton<IWebSocketService, Infrastructure.WebSockets.WebSocketService>();
-
             // Register Application services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICompanyAppService, CompanyAppService>();
             services.AddScoped<IEmployeeAppService, EmployeeAppService>();
             services.AddScoped<ICalendarAppService, CalendarAppService>();
             
+            // Register WebSocket service with fully qualified names
+            services.AddSingleton<Application.Interfaces.IWebSocketService, Infrastructure.WebSockets.WebSocketService>();
+
             return services;
         }
     }

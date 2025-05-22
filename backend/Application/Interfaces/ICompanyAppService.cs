@@ -13,5 +13,6 @@ namespace Application.Interfaces
         Task<CompanyDto> UpdateCompanyAsync(Guid id, CompanyUpdateDto companyDto);
         Task<bool> DeleteCompanyAsync(Guid id);
         Task<bool> ValidateCompanyOwnershipAsync(Guid companyId, Guid ownerId);
+        Task<bool> IsUserCompanyOwner(Guid userId);
     }
 }

@@ -1,113 +1,102 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:calendar_app/services/api_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:calendar_app/services/api_service.dart';
 
 class WebSocketService {
   WebSocketChannel? _channel;
-  final ApiService _apiService;
-  final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
+  String? _currentSessionId;
   bool _isConnected = false;
-  String? _currentToken;
-
+  StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
+  ApiService? _apiService;
+  
   WebSocketService(this._apiService);
-
+  
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
+  
   bool get isConnected => _isConnected;
 
-  Future<void> connect(String token) async {
+  Future<void> connect(String sessionId) async {
     if (_isConnected) return;
-    _currentToken = token;
-
+    
+    _currentSessionId = sessionId;
+    
     try {
-      final wsUrl = Uri.parse('ws://localhost:8181');
-      _channel = WebSocketChannel.connect(wsUrl);
-      _isConnected = true;
+      // IMPORTANT: Connect DIRECTLY to port 8181 (Fleck) - NO /ws path
+      const String wsHost = 'localhost';
+      const int wsPort = 8181;
+      final wsUrl = Uri.parse('ws://$wsHost:$wsPort');
+      print('WebSocketService: Connecting to WebSocket at $wsUrl');
       
-      print('WebSocket connected to ${wsUrl.toString()}');
+      _channel = WebSocketChannel.connect(wsUrl);
+      print('WebSocketService: Channel created successfully');
+      
+      try {
+        await _channel!.ready;
+        _isConnected = true;
+        print('WebSocketService: Connection established');
 
-      _channel!.stream.listen(
-        (message) {
-          print('WebSocket message received: $message');
-          final decodedMessage = jsonDecode(message);
-
-          if (decodedMessage['Type'] == 'AuthenticationResult') {
-            if (decodedMessage['Success'] == true) {
-              print('WebSocket authentication successful for user: ${decodedMessage['UserId']}');
-              if (_apiService.companyId != null && _apiService.companyId!.isNotEmpty) {
-                setCompany(_apiService.companyId!);
-              }
-            } else {
-              print('WebSocket authentication failed: ${decodedMessage['Reason']}');
+        _channel!.stream.listen(
+          (message) {
+            print('WebSocket message received: $message');
+            try {
+              final Map<String, dynamic> parsedMessage = json.decode(message);
+              _messageController.add(parsedMessage);
+            } catch (e) {
+              print('Error parsing WebSocket message: $e');
             }
-          }
-          
-          _messageController.add(decodedMessage);
-        },
-        onDone: () {
-          print('WebSocket connection closed');
-          _isConnected = false;
-          Future.delayed(const Duration(seconds: 5), () => connect(_currentToken!));
-        },
-        onError: (error) {
-          print('WebSocket Error: $error');
-          _isConnected = false;
-        },
-      );
+          },
+          onDone: () {
+            print('WebSocket connection closed');
+            _isConnected = false;
+          },
+          onError: (error) {
+            print('WebSocket Error: $error');
+            _isConnected = false;
+          },
+        );
 
-      _sendAuthenticationMessage(token);
+        _sendSessionMessage(sessionId);
+      } catch (connectError) {
+        print('WebSocketService: Error establishing connection: $connectError');
+        _isConnected = false;
+      }
     } catch (e) {
-      print('Error connecting to WebSocket: $e');
+      print('WebSocketService: Error creating channel: $e');
       _isConnected = false;
     }
   }
 
-  void _sendAuthenticationMessage(String token) {
+  void _sendSessionMessage(String sessionId) {
     if (!_isConnected || _channel == null) return;
     
-    final authMessage = {
-      'type': 'authenticate',
-      'token': token
+    final message = {
+      'type': 'session',
+      'sessionId': sessionId
     };
     
-    _channel!.sink.add(jsonEncode(authMessage));
-    print('Sent authentication message to WebSocket server');
+    print('Sent session message to WebSocket server');
+    _channel!.sink.add(json.encode(message));
   }
 
   void setCompany(String companyId) {
-    if (!_isConnected || _channel == null) {
-      print('Cannot set company: WebSocket not connected');
-      return;
-    }
+    if (!_isConnected || _channel == null) return;
     
     final message = {
-      'type': 'setcompany',
+      'type': 'setcompany', // Fixed: use lowercase to match server's expectations
       'data': {
         'companyId': companyId
       }
     };
     
-    _channel!.sink.add(jsonEncode(message));
-    print('Associated WebSocket connection with company: $companyId');
-  }
-
-  void sendMessage(String type, Map<String, dynamic> data) {
-    if (!_isConnected || _channel == null) {
-      print('Cannot send message: WebSocket not connected');
-      return;
-    }
-
-    final message = jsonEncode({
-      'type': type,
-      'data': data,
-    });
-    _channel!.sink.add(message);
+    _channel!.sink.add(json.encode(message));
   }
 
   void disconnect() {
-    _channel?.sink.close();
-    _isConnected = false;
-    _currentToken = null;
+    if (_channel != null) {
+      _channel!.sink.close();
+      _isConnected = false;
+    }
   }
 
   void dispose() {
