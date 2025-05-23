@@ -32,7 +32,7 @@ namespace API
             {
                 options.AddPolicy("AllowFlutterApp", builder =>
                 {
-                    builder.WithOrigins("http://localhost:56599") // Replace with your Flutter app's local URL
+                    builder.WithOrigins("https://calendarfrontend-e6233.web.app")
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .AllowCredentials();
