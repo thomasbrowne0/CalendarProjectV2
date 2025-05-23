@@ -131,6 +131,43 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
+                  titleTextStyle: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  leftChevronIcon: Icon(Icons.chevron_left, size: 28),
+                  rightChevronIcon: Icon(Icons.chevron_right, size: 28),
+                ),
+                calendarStyle: CalendarStyle(
+                  markersMaxCount: 3,
+                  markerDecoration: const BoxDecoration(
+                    color: Color(0xFFFF4081),
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  weekendTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  ),
+                  outsideTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onBackground.withOpacity(0.4),
+                  ),
+                ),
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  weekdayStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onBackground,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  weekendStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 eventLoader: (day) => context.read<CalendarCubit>().getEventsForDay(day),
                 selectedDayPredicate: (day) =>
@@ -151,9 +188,6 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                     end: DateTime(focusedDay.year, focusedDay.month + 1, 0),
                   );
                 },
-                calendarStyle: const CalendarStyle(
-                  markersMaxCount: 3,
-                ),
               );
             },
           ),

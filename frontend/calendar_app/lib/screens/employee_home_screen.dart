@@ -4,6 +4,7 @@ import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/screens/company_calendar_screen.dart';
 import 'package:calendar_app/screens/employee_list_screen.dart';
+import 'package:calendar_app/widgets/theme_switch.dart'; // Import the ThemeSwitch widget
 
 class EmployeeHomeScreen extends StatefulWidget {
   const EmployeeHomeScreen({super.key});
@@ -71,10 +72,6 @@ void didChangeDependencies() {
         setState(() {
           _isLoading = false; // Stop loading indicator
         });
-        // Optionally, if not authenticated, you might want to navigate to the login screen
-        // if (!authProvider.isAuth) {
-        //   Navigator.of(context).pushReplacementNamed('/login-screen'); // Example
-        // }
       }
     }
     _isInit = false; // Ensure this logic runs only once
@@ -96,6 +93,7 @@ void didChangeDependencies() {
       appBar: AppBar(
         title: Text(company?.name ?? 'Company Calendar'),
         actions: [
+          const ThemeSwitch(),
           IconButton(
             icon: const Icon(Icons.exit_to_app),
             onPressed: () {

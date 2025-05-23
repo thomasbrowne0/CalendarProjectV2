@@ -8,3 +8,5 @@
 /backend/Application/bin
 
 
+.idea/caches/deviceStreaming.xml
+.idea/misc.xml
