@@ -67,6 +67,7 @@ class MyApp extends StatelessWidget {
             ],
             child: Consumer2<AuthProvider, ThemeProvider>(
               builder: (ctx, auth, themeProvider, _) => MaterialApp(
+                debugShowCheckedModeBanner: false,
                 title: 'Company Calendar',
                 theme: ThemeData(
                   useMaterial3: true,
