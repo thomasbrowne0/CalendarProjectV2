@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/create_company_service.dart';
-import '../widgets/create_company_widgets.dart';
+import '../widgets/company_widgets.dart';
 
 class CreateCompanyScreen extends StatefulWidget {
   const CreateCompanyScreen({super.key});
@@ -49,13 +49,13 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CreateCompanyWidgets.nameField(_nameController),
+              CompanyWidgets.nameField(_nameController),
               const SizedBox(height: 12),
-              CreateCompanyWidgets.cvrField(_cvrController),
+              CompanyWidgets.cvrField(_cvrController),
               const SizedBox(height: 20),
               _isLoading
-                  ? CreateCompanyWidgets.loadingIndicator()
-                  : CreateCompanyWidgets.submitButton(_handleSubmit),
+                  ? CompanyWidgets.loadingIndicator()
+                  : CompanyWidgets.createCompanyButton(_handleSubmit),
             ],
           ),
         ),

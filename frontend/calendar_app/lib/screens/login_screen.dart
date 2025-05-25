@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_app/services/login_service.dart';
-import 'package:calendar_app/widgets/login_widgets.dart';
+import 'package:calendar_app/widgets/auth_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -50,17 +50,17 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  LoginWidgets.title(context),
+                  AuthWidgets.loginTitle(context),
                   const SizedBox(height: 20),
-                  LoginWidgets.emailField(_emailController),
+                  AuthWidgets.emailField(_emailController),
                   const SizedBox(height: 10),
-                  LoginWidgets.passwordField(_passwordController),
+                  AuthWidgets.passwordField(_passwordController),
                   const SizedBox(height: 20),
                   _isLoading
                       ? const CircularProgressIndicator()
-                      : LoginWidgets.loginButton(_submit),
+                      : AuthWidgets.loginButton(_submit),
                   const SizedBox(height: 10),
-                  LoginWidgets.registerLink(context),
+                  AuthWidgets.registerLink(context),
                 ],
               ),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar_app/models/calendar_event.dart';
 import 'package:calendar_app/providers/company_provider.dart';
-import 'package:calendar_app/widgets/event_widgets.dart';
+import 'package:calendar_app/widgets/calendar_widgets.dart';
 import '../services/event_service.dart';
 import '../utils/dialog_util.dart';
 
@@ -70,14 +70,14 @@ class _EditEventScreenState extends State<EditEventScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              EventWidgets.buildTextField(
+              CalendarWidgets.buildTextField(
                 controller: _titleController,
                 label: 'Event Title',
                 validator: (value) =>
                     (value == null || value.isEmpty) ? 'Please enter an event title' : null,
               ),
               const SizedBox(height: 12),
-              EventWidgets.buildTextField(
+              CalendarWidgets.buildTextField(
                 controller: _descriptionController,
                 label: 'Description',
                 maxLines: 3,
@@ -86,9 +86,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
               const Text('Start Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Text('Date: ${EventWidgets.dateFormat.format(_startDate)}'),
+                child: Text('Date: ${CalendarWidgets.dateFormat.format(_startDate)}'),
               ),
-              EventWidgets.buildDateTimeRow(
+              CalendarWidgets.buildDateTimeRow(
                 label: 'Time',
                 displayText: _startTime.format(context),
                 onPressed: () async {
@@ -100,9 +100,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
               const Text('End Time', style: TextStyle(fontWeight: FontWeight.bold)),
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
-                child: Text('Date: ${EventWidgets.dateFormat.format(_endDate)}'),
+                child: Text('Date: ${CalendarWidgets.dateFormat.format(_endDate)}'),
                 ),
-              EventWidgets.buildDateTimeRow(
+              CalendarWidgets.buildDateTimeRow(
                 label: 'Time',
                 displayText: _endTime.format(context),
                 onPressed: () async {
@@ -113,7 +113,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
               const SizedBox(height: 20),
               const Text('Participants', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              ...EventWidgets.buildParticipantCheckboxes(
+              ...CalendarWidgets.buildParticipantCheckboxes(
                 employees: employees,
                 selectedIds: _selectedParticipantIds,
                 onChanged: _toggleParticipant,

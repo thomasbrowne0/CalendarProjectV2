@@ -1,30 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:calendar_app/screens/register_screen.dart';
 
-class RegisterWidgets {
-  static Widget title(BuildContext context) {
+class AuthWidgets {
+  // Login Widgets
+  static Widget loginTitle(BuildContext context) {
     return Text(
-      'Register',
+      'Login',
       style: Theme.of(context).textTheme.headlineSmall,
-    );
-  }
-
-  static Widget firstNameField(TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      decoration: const InputDecoration(labelText: 'First Name'),
-      validator: (value) => (value == null || value.isEmpty)
-          ? 'Please enter your first name'
-          : null,
-    );
-  }
-
-  static Widget lastNameField(TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      decoration: const InputDecoration(labelText: 'Last Name'),
-      validator: (value) => (value == null || value.isEmpty)
-          ? 'Please enter your last name'
-          : null,
     );
   }
 
@@ -53,6 +35,55 @@ class RegisterWidgets {
         }
         return null;
       },
+    );
+  }
+
+  static Widget loginButton(VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 50),
+      ),
+      child: const Text('LOGIN'),
+    );
+  }
+
+  static Widget registerLink(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+        );
+      },
+      child: const Text('Register as Company Owner'),
+    );
+  }
+
+  // Register Widgets
+  static Widget registerTitle(BuildContext context) {
+    return Text(
+      'Register',
+      style: Theme.of(context).textTheme.headlineSmall,
+    );
+  }
+
+  static Widget firstNameField(TextEditingController controller) {
+    return TextFormField(
+      controller: controller,
+      decoration: const InputDecoration(labelText: 'First Name'),
+      validator: (value) => (value == null || value.isEmpty)
+          ? 'Please enter your first name'
+          : null,
+    );
+  }
+
+  static Widget lastNameField(TextEditingController controller) {
+    return TextFormField(
+      controller: controller,
+      decoration: const InputDecoration(labelText: 'Last Name'),
+      validator: (value) => (value == null || value.isEmpty)
+          ? 'Please enter your last name'
+          : null,
     );
   }
 
