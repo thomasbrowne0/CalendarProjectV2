@@ -7,25 +7,23 @@ using System.IO;
 namespace Infrastructure.Data
 {
     public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
-    {
-        public AppDbContext CreateDbContext(string[] args)
+    {        public AppDbContext CreateDbContext(string[] args)
         {
-            // Build configuration from API project's appsettings.json
+            /* We need to build configuration from the API project because Entity Framework
+               migrations run from the Infrastructure project but need API settings */
             var configPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "API");
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(configPath)
                 .AddJsonFile("appsettings.json")
-                .AddUserSecrets("3f69dba4-2104-432d-91c4-13ba49674b1c") // Using API project's user secrets ID
+                .AddUserSecrets("3f69dba4-2104-432d-91c4-13ba49674b1c")
                 .AddEnvironmentVariables()
                 .Build();
 
-            // Get connection string from configuration
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             
             if (string.IsNullOrEmpty(connectionString))
             {
                 Console.WriteLine("WARNING: Connection string not found in configuration. Using fallback for migrations.");
-                // You may want to provide a fallback connection string here
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();

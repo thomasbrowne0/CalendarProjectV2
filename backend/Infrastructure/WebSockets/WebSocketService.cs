@@ -29,17 +29,16 @@ namespace Infrastructure.WebSockets
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _connectionManager = new WebSocketConnectionManager(
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));            _connectionManager = new WebSocketConnectionManager(
                 loggerFactory.CreateLogger<WebSocketConnectionManager>());
 
-            // Configure and start the WebSocket server
+            /* We need to configure the WebSocket server with proper URL binding
+               to handle real-time communication for calendar updates */
             var serverUrl = $"ws://{_options.Host}:{_options.Port}";
             _logger.LogInformation($"Starting WebSocket server at {serverUrl}");
 
             _server = new WebSocketServer(serverUrl);
 
-            // Start the Fleck WebSocket server
             _server.Start(socket =>
             {
                 socket.OnOpen = () => OnSocketOpened(socket);
@@ -51,21 +50,19 @@ namespace Infrastructure.WebSockets
             _logger.LogInformation("WebSocket server started successfully");
         }
 
-        // IWebSocketService implementation - handle a new connection
         public Task HandleWebSocketConnectionAsync(System.Net.WebSockets.WebSocket webSocket, Guid userId, string userType)
         {
-            // This method is kept for interface compatibility but is not used with Fleck
-            // Fleck manages connections differently through its event-based system
+            /* We need to keep this method for interface compatibility but Fleck
+               manages connections through its event-based system instead */
             _logger.LogWarning("HandleWebSocketConnectionAsync called but is not implemented with Fleck");
             return Task.CompletedTask;
         }
 
-        // Event handlers
         private void OnSocketOpened(IWebSocketConnection socket)
         {
             _logger.LogInformation($"WebSocket connection opened: {socket.ConnectionInfo.Id}");
-            // The actual user authentication and connection registration happens when the client sends
-            // an authentication message with their token
+            /* We need to wait for client authentication message because connections
+               are not authenticated until the client sends their JWT token */
         }
 
         private void OnSocketClosed(IWebSocketConnection socket)

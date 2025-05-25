@@ -11,9 +11,7 @@ namespace Infrastructure.Repositories
     {
         public UserRepository(AppDbContext context) : base(context)
         {
-        }
-
-        public async Task<User> GetByEmailAsync(string email)
+        }        public async Task<User> GetByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email cannot be empty", nameof(email));
@@ -25,9 +23,7 @@ namespace Infrastructure.Repositories
                 throw new KeyNotFoundException($"User with email {email} not found");
                 
             return user;
-        }
-
-        public async Task<bool> ExistsByEmailAsync(string email)
+        }        public async Task<bool> ExistsByEmailAsync(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email cannot be empty", nameof(email));

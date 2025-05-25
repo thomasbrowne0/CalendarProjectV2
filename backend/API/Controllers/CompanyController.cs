@@ -40,7 +40,10 @@ namespace API.Controllers
             }
         }
 
+
         [HttpGet("{id}")]
+        /* We need this complex authorization logic because employees and company owners
+           have different access patterns and we must validate ownership/membership properly */
         public async Task<ActionResult<CompanyDto>> GetCompany(Guid id)
         {
             try
@@ -48,7 +51,6 @@ namespace API.Controllers
                 var userId = GetCurrentUserId();
                 var userType = User.FindFirst("UserType")?.Value;
 
-                // If user is an employee, check if they belong to the company
                 if (userType == "Employee")
                 {
                     var companyIdClaim = User.FindFirst("CompanyId")?.Value;
@@ -57,7 +59,6 @@ namespace API.Controllers
                         return Forbid();
                     }
                 }
-                // If user is a company owner, check if they own the company
                 else if (userType == "CompanyOwner")
                 {
                     var isOwner = await _companyService.ValidateCompanyOwnershipAsync(id, userId);

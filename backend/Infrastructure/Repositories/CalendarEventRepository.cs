@@ -33,6 +33,10 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /*
+         * We need this complex date range query because events can span multiple days,
+         * so we must check if they overlap with the requested range in any way
+         */
         public async Task<IEnumerable<CalendarEvent>> GetEventsByDateRangeAsync(Guid companyId, DateTime start, DateTime end)
         {
             return await _context.CalendarEvents
@@ -45,6 +49,10 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /*
+         * We need to eagerly load all related entities here because this is typically
+         * used for event detail views where complete information is required
+         */
         public async Task<CalendarEvent> GetEventWithParticipantsAsync(Guid eventId)
         {
             return await _context.CalendarEvents

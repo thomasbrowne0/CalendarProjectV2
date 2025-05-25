@@ -5,12 +5,9 @@ namespace Domain.Entities
 {
     public class CompanyOwner : User
     {
-        public virtual ICollection<Company> OwnedCompanies { get; private set; }
+        public virtual ICollection<Company> OwnedCompanies { get; private set; }        private CompanyOwner() : base() { }
 
-        // For EF Core
-        private CompanyOwner() : base() { }
-
-        public CompanyOwner(string firstName, string lastName, string email, string passwordHash) 
+        public CompanyOwner(string firstName, string lastName, string email, string passwordHash)
             : base(firstName, lastName, email, passwordHash)
         {
             OwnedCompanies = new List<Company>();

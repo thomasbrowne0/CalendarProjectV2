@@ -33,13 +33,12 @@ namespace Application.Services
         }
 
         public async Task<AuthResponseDto> LoginAsync(UserLoginDto loginDto)
-        {
-            var user = await _userRepository.GetByEmailAsync(loginDto.Email);
+        {            var user = await _userRepository.GetByEmailAsync(loginDto.Email);
             if (user == null)
                 throw new Exception("User not found");
 
-            // In a real app, you'd hash the password and compare with the stored hash
-            // This is a simplified version
+            /* We need to implement proper password hashing using BCrypt or similar
+               instead of plain text comparison for production security */
             if (user.PasswordHash != loginDto.Password)
                 throw new Exception("Invalid credentials");
 
@@ -53,11 +52,11 @@ namespace Application.Services
 
         public async Task<AuthResponseDto> RegisterCompanyOwnerAsync(UserRegistrationDto registrationDto)
         {
-            var exists = await _userRepository.ExistsByEmailAsync(registrationDto.Email);
-            if (exists)
+            var exists = await _userRepository.ExistsByEmailAsync(registrationDto.Email);            if (exists)
                 throw new Exception("Email already registered");
 
-            // In a real app, you'd hash the password before storing
+            /* We need to hash passwords using BCrypt before storing them
+               for production security compliance */
             var companyOwner = new CompanyOwner(
                 registrationDto.FirstName,
                 registrationDto.LastName,
@@ -116,10 +115,10 @@ namespace Application.Services
                 new Claim(ClaimTypes.GivenName, user.FirstName),
                 new Claim(ClaimTypes.Surname, user.LastName),
                 new Claim("UserType", userType),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())            };
 
-            // If the user is an Employee, add CompanyId claim
+            /* We need to add company context for employees because they should only
+               see data within their own company scope */
             if (user is Employee employee)
             {
                 var companyClaim = new Claim("CompanyId", employee.CompanyId.ToString());

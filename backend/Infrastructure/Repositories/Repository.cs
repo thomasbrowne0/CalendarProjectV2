@@ -17,12 +17,10 @@ namespace Infrastructure.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = context.Set<T>();
-        }
-
-        public async Task<T> GetByIdAsync(Guid id)
+        }        public async Task<T> GetByIdAsync(Guid id)
         {
-            // Using null-forgiving operator (!) to satisfy the non-nullable constraint
-            // In practice, callers should check for null returns
+            /* We need to handle the case where entity is not found properly
+               because callers should be able to check for null returns */
             return await _dbSet.FindAsync(id) ?? throw new KeyNotFoundException($"Entity with ID {id} not found");
         }
 

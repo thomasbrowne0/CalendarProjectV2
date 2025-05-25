@@ -5,7 +5,8 @@ using Host = WebSocketProxy.Host;
 namespace API.Proxy
 {
     public class ProxyConfig : IProxyConfig
-    {
+    {        /* We need this proxy configuration because our architecture separates the REST API
+           from the WebSocket server, and clients need a single endpoint for both protocols */
         public void StartProxyServer(int publicPort, int restPort, int wsPort)
         {
             var proxyConfiguration = new TcpProxyConfiguration
@@ -27,7 +28,6 @@ namespace API.Proxy
                 }
             };
 
-            // Start the proxy server
             new TcpProxyServer(proxyConfiguration).Start();
         }
     }

@@ -71,13 +71,12 @@ class MyApp extends StatelessWidget {
                 title: 'Company Calendar',
                 theme: ThemeData(
                   useMaterial3: true,
-                  colorScheme: ColorScheme.light(
-                    primary: const Color(0xFF3F51B5),
-                    secondary: const Color(0xFFFF4081),
-                    background: Colors.white,
-                    onBackground: const Color(0xFF212121),
+                  colorScheme: const ColorScheme.light(
+                    primary: Color(0xFF3F51B5),
+                    secondary: Color(0xFFFF4081),
+                    onBackground: Color(0xFF212121),
                     surface: Colors.white,
-                    onSurface: const Color(0xFF212121),
+                    onSurface: Color(0xFF212121),
                   ),
                   textTheme: const TextTheme(
                     bodyLarge: TextStyle(color: Color(0xFF212121)),
@@ -132,12 +131,11 @@ class MyApp extends StatelessWidget {
                 ),
                 darkTheme: ThemeData(
                   useMaterial3: true,
-                  colorScheme: ColorScheme.dark(
-                    primary: const Color(0xFF3F51B5),
-                    secondary: const Color(0xFFFF4081),
-                    background: const Color(0xFF121212),
-                    onBackground: Colors.white,
-                    surface: const Color(0xFF1E1E1E),
+                  colorScheme: const ColorScheme.dark(
+                    primary: Color(0xFF3F51B5),
+                    secondary: Color(0xFFFF4081),
+                    background: Color(0xFF121212),
+                    surface: Color(0xFF1E1E1E),
                     onSurface: Colors.white,
                   ),
                   textTheme: const TextTheme(

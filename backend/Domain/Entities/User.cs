@@ -8,10 +8,7 @@ namespace Domain.Entities
         public string FirstName { get; protected set; }
         public string LastName { get; protected set; }
         public string Email { get; protected set; }
-        public string PasswordHash { get; protected set; }
-
-        // For EF Core
-        protected User() { }
+        public string PasswordHash { get; protected set; }        protected User() { }
 
         protected User(string firstName, string lastName, string email, string passwordHash)
         {

@@ -13,9 +13,7 @@ namespace Infrastructure.Repositories
     {
         public CompanyRepository(AppDbContext context) : base(context)
         {
-        }
-
-        public async Task<Company> GetByIdWithDetailsAsync(Guid id)
+        }        public async Task<Company> GetByIdWithDetailsAsync(Guid id)
         {
             var company = await _dbSet
                 .Include(c => c.CompanyOwner)
@@ -26,9 +24,7 @@ namespace Infrastructure.Repositories
                 throw new KeyNotFoundException($"Company with ID {id} not found");
                 
             return company;
-        }
-
-        public async Task<Company> GetByCVRAsync(string cvr)
+        }        public async Task<Company> GetByCVRAsync(string cvr)
         {
             if (string.IsNullOrWhiteSpace(cvr))
                 throw new ArgumentException("CVR cannot be empty", nameof(cvr));
@@ -48,9 +44,7 @@ namespace Infrastructure.Repositories
                 .Include(c => c.Employees)
                 .Where(c => c.CompanyOwnerId == ownerId)
                 .ToListAsync();
-        }
-
-        public async Task<bool> ExistsByCVRAsync(string cvr)
+        }        public async Task<bool> ExistsByCVRAsync(string cvr)
         {
             if (string.IsNullOrWhiteSpace(cvr))
                 throw new ArgumentException("CVR cannot be empty", nameof(cvr));

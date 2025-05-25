@@ -23,8 +23,7 @@ namespace API.Controllers
             IEmployeeAppService employeeService, 
             ICompanyAppService companyService, 
             ILogger<EmployeeController> logger)
-        {
-            _employeeService = employeeService ?? throw new ArgumentNullException(nameof(employeeService));
+        {            _employeeService = employeeService ?? throw new ArgumentNullException(nameof(employeeService));
             _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -50,6 +49,8 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
+        /* We need this validation to ensure employees can only be accessed within their company context
+           because employee IDs are not globally unique identifiers */
         public async Task<ActionResult<EmployeeDto>> GetEmployee(Guid companyId, Guid id)
         {
             try
@@ -69,8 +70,7 @@ namespace API.Controllers
                 return Ok(employee);
             }
             catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving employee {EmployeeId} for company {CompanyId}", id, companyId);
+            {                _logger.LogError(ex, "Error retrieving employee {EmployeeId} for company {CompanyId}", id, companyId);
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -93,8 +93,7 @@ namespace API.Controllers
                 return CreatedAtAction(nameof(GetEmployee), new { companyId = companyId, id = employee.Id }, employee);
             }
             catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating employee for company {CompanyId}", companyId);
+            {                _logger.LogError(ex, "Error creating employee for company {CompanyId}", companyId);
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -124,8 +123,7 @@ namespace API.Controllers
                 return Ok(updatedEmployee);
             }
             catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating employee {EmployeeId} for company {CompanyId}", id, companyId);
+            {                _logger.LogError(ex, "Error updating employee {EmployeeId} for company {CompanyId}", id, companyId);
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -161,12 +159,13 @@ namespace API.Controllers
                 return NoContent();
             }
             catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting employee {EmployeeId} for company {CompanyId}", id, companyId);
+            {                _logger.LogError(ex, "Error deleting employee {EmployeeId} for company {CompanyId}", id, companyId);
                 return BadRequest(new { message = ex.Message });
             }
         }
 
+        /* We need this authorization pattern to handle both company owners and employees
+           accessing employee data, with different validation rules for each user type */
         private async Task<bool> CanAccessCompany(Guid companyId)
         {
             var userId = GetCurrentUserId();

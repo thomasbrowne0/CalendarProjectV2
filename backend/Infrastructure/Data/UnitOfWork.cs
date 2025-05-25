@@ -20,6 +20,10 @@ namespace Infrastructure.Data
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+        /*
+         * We use lazy loading pattern here because repositories are expensive to create
+         * and we only want to instantiate them when they're actually needed
+         */
         public ICompanyRepository Companies => 
             _companyRepository ??= new CompanyRepository(_context);
 
@@ -40,6 +44,10 @@ namespace Infrastructure.Data
             return await _context.SaveChangesAsync();
         }
 
+        /*
+         * We need to suppress finalization because we're properly disposing
+         * the DbContext in the Dispose method, making the finalizer unnecessary
+         */
         public void Dispose()
         {
             _context.Dispose();

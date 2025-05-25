@@ -14,12 +14,9 @@ namespace Domain.Entities
         public virtual User CreatedBy { get; private set; }
         public Guid CompanyId { get; private set; }
         public virtual Company Company { get; private set; }
-        public virtual ICollection<Employee> Participants { get; private set; }
-
-        // For EF Core
-        private CalendarEvent() { }
+        public virtual ICollection<Employee> Participants { get; private set; }        private CalendarEvent() { }
         
-        public CalendarEvent(string title, string description, DateTime startTime, DateTime endTime, 
+        public CalendarEvent(string title, string description, DateTime startTime, DateTime endTime,
                             Guid createdById, Guid companyId)
         {
             if (string.IsNullOrWhiteSpace(title))
@@ -69,7 +66,10 @@ namespace Domain.Entities
                 EndTime = endTime.Value;
             }
         }
-        
+          /*
+         * We need to enforce company boundary here because employees from different
+         * companies shouldn't be able to participate in each other's events
+         */
         public void AddParticipant(Employee employee)
         {
             if (employee == null)
@@ -78,7 +78,6 @@ namespace Domain.Entities
             if (employee.CompanyId != CompanyId)
                 throw new InvalidOperationException("Employee must belong to the same company as the event");
                 
-            // Use a collection that properly handles this check
             if (!Participants.Contains(employee))
                 Participants.Add(employee);
         }

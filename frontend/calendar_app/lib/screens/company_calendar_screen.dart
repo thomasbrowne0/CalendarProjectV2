@@ -156,12 +156,12 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                     color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
                   ),
                   outsideTextStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onBackground.withOpacity(0.4),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                   ),
                 ),
                 daysOfWeekStyle: DaysOfWeekStyle(
                   weekdayStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onBackground,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
                   ),
                   weekendStyle: TextStyle(

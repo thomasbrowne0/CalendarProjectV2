@@ -8,24 +8,22 @@ using Domain.Entities;
 namespace Infrastructure.Data
 {
     public static class DbInitializer
-    {
-        public static async Task SeedAsync(AppDbContext context)
+    {        public static async Task SeedAsync(AppDbContext context)
         {
-            // Ensure database is created
             await context.Database.EnsureCreatedAsync();
 
-            // Only seed if no users exist
             if (await context.Users.AnyAsync())
             {
-                return; // Database already has data
+                return;
             }
 
-            // Create company owners
+            /* We need to use proper password hashing in production instead of 
+               plain text passwords for security compliance */
             var owner1 = new CompanyOwner(
                 "John", 
                 "Smith", 
                 "owner@example.com", 
-                "Password123"); // In production, use a proper password hash
+                "Password123");
 
             var owner2 = new CompanyOwner(
                 "Sarah", 
@@ -36,14 +34,11 @@ namespace Infrastructure.Data
             await context.CompanyOwners.AddRangeAsync(owner1, owner2);
             await context.SaveChangesAsync();
 
-            // Create companies
             var company1 = new Company("Acme Corp", "123456789", owner1.Id);
             var company2 = new Company("Tech Solutions", "987654321", owner2.Id);
             
-            await context.Companies.AddRangeAsync(company1, company2);
-            await context.SaveChangesAsync();
+            await context.Companies.AddRangeAsync(company1, company2);            await context.SaveChangesAsync();
 
-            // Create employees for Acme Corp
             var employees1 = new List<Employee>
             {
                 new Employee("Michael", "Brown", "michael@acme.com", "Password123", company1.Id, "Developer"),
@@ -51,7 +46,6 @@ namespace Infrastructure.Data
                 new Employee("David", "Wilson", "david@acme.com", "Password123", company1.Id, "Project Manager")
             };
 
-            // Create employees for Tech Solutions
             var employees2 = new List<Employee>
             {
                 new Employee("Robert", "Jones", "robert@techsolutions.com", "Password123", company2.Id, "Engineer"),
@@ -62,24 +56,24 @@ namespace Infrastructure.Data
             await context.Employees.AddRangeAsync(employees2);
             await context.SaveChangesAsync();
 
-            // Create calendar events
-            var now = DateTime.UtcNow; // Change from DateTime.Now to DateTime.UtcNow
+            /* We need to use UTC for all calendar events to ensure consistent
+               time handling across different timezones */
+            var now = DateTime.UtcNow;
             
             var events1 = new List<CalendarEvent>
             {
                 new CalendarEvent(
                     "Team Meeting", 
                     "Weekly team sync", 
-                    now.AddDays(1).Date.AddHours(10).ToUniversalTime(), // Convert to UTC
-                    now.AddDays(1).Date.AddHours(11).ToUniversalTime(), // Convert to UTC
+                    now.AddDays(1).Date.AddHours(10).ToUniversalTime(),
+                    now.AddDays(1).Date.AddHours(11).ToUniversalTime(),
                     owner1.Id, 
                     company1.Id),
                     
                 new CalendarEvent(
                     "Project Review", 
-                    "End of sprint review", 
-                    now.AddDays(3).Date.AddHours(14).ToUniversalTime(), // Convert to UTC
-                    now.AddDays(3).Date.AddHours(16).ToUniversalTime(), // Convert to UTC
+                    "End of sprint review",                    now.AddDays(3).Date.AddHours(14).ToUniversalTime(),
+                    now.AddDays(3).Date.AddHours(16).ToUniversalTime(),
                     employees1[2].Id, 
                     company1.Id)
             };
@@ -88,9 +82,8 @@ namespace Infrastructure.Data
             {
                 new CalendarEvent(
                     "Product Launch", 
-                    "New product introduction", 
-                    now.AddDays(5).Date.AddHours(9).ToUniversalTime(), // Convert to UTC
-                    now.AddDays(5).Date.AddHours(12).ToUniversalTime(), // Convert to UTC
+                    "New product introduction",                    now.AddDays(5).Date.AddHours(9).ToUniversalTime(),
+                    now.AddDays(5).Date.AddHours(12).ToUniversalTime(),
                     owner2.Id, 
                     company2.Id)
             };

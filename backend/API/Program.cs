@@ -19,12 +19,10 @@ namespace API
 
             try
             {
-                // Add user secrets
                 builder.Configuration.AddUserSecrets<Program>();
 
                 Console.WriteLine("Loading secrets from Google Cloud Secret Manager...");
                 
-                // Load connection string from Secret Manager
                 string connectionString = GetSecret(projectId, "AppDb");
                 if (!string.IsNullOrEmpty(connectionString))
                 {
@@ -36,16 +34,13 @@ namespace API
                     Console.WriteLine("Warning: Failed to load database connection string from Secret Manager, using appsettings.json");
                 }
 
-                // Add services to the container
                 var startup = new Startup(builder.Configuration);
                 startup.ConfigureServices(builder.Services);
                 
                 var app = builder.Build();
                 
-                // Configure the HTTP request pipeline FIRST
                 startup.Configure(app, app.Environment);
 
-                // Start the proxy server (non-blocking)
                 try
                 {
                     var proxyConfig = new ProxyConfig();
@@ -55,10 +50,8 @@ namespace API
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Warning: Failed to start proxy server: {ex.Message}");
-                    // Don't throw - continue without proxy
-                }
-
-                // Initialize database in background (non-blocking)
+                }                /* We need this background initialization to prevent the app from failing to start
+                   if database operations take too long during the startup phase */
                 _ = Task.Run(async () =>
                 {
                     try
@@ -70,10 +63,8 @@ namespace API
                         
                         Console.WriteLine("Starting database initialization...");
                         
-                        // Apply migrations if any are pending
                         await context.Database.MigrateAsync();
                         
-                        // Seed initial data
                         await DbInitializer.SeedAsync(context);
                         
                         logger.LogInformation("Database initialization and seeding completed successfully");
@@ -81,7 +72,6 @@ namespace API
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Database initialization failed: {ex.Message}");
-                        // Log but don't crash the app
                     }
                 });
                 
@@ -93,7 +83,6 @@ namespace API
                 Console.WriteLine($"Application failed to start: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 
-                // Try to start a minimal app that just responds to health checks
                 try
                 {
                     var minimalApp = builder.Build();
@@ -105,8 +94,8 @@ namespace API
                     Environment.Exit(1);
                 }
             }
-        }
-
+        }        /* We need this secret retrieval method because database passwords should never be
+           stored in configuration files and Google Cloud Secret Manager provides secure access */
         public static string GetSecret(string projectId, string secretName)
         {
             try

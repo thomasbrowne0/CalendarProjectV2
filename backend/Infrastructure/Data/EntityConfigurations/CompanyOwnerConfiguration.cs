@@ -5,10 +5,8 @@ using Domain.Entities;
 namespace Infrastructure.Data.EntityConfigurations
 {
     public class CompanyOwnerConfiguration : IEntityTypeConfiguration<CompanyOwner>
-    {
-        public void Configure(EntityTypeBuilder<CompanyOwner> builder)
+    {        public void Configure(EntityTypeBuilder<CompanyOwner> builder)
         {
-            // Configure navigation properties
             builder.HasMany(o => o.OwnedCompanies)
                 .WithOne(c => c.CompanyOwner)
                 .HasForeignKey(c => c.CompanyOwnerId)

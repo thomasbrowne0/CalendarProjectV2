@@ -67,12 +67,9 @@ namespace Application.Services
             if (company == null)
                 throw new Exception($"Company with ID {id} not found");
 
-            company.UpdateDetails(companyDto.Name, companyDto.CVR);
-
-            await _companyRepository.UpdateAsync(company);
+            company.UpdateDetails(companyDto.Name, companyDto.CVR);            await _companyRepository.UpdateAsync(company);
             await _unitOfWork.SaveChangesAsync();
 
-            // Notify connected clients about company update
             await _webSocketService.NotifyCompanyDataChangedAsync(company.Id, "CompanyUpdated", MapToCompanyDto(company));
 
             return MapToCompanyDto(company);

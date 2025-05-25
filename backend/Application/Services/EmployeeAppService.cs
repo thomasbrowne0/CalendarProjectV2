@@ -50,12 +50,10 @@ namespace Application.Services
             if (company == null)
                 throw new Exception($"Company with ID {companyId} not found");
             
-            var exists = await _employeeRepository.ExistsByEmailAsync(employeeCreateDto.Email);
-            if (exists)
+            var exists = await _employeeRepository.ExistsByEmailAsync(employeeCreateDto.Email);            if (exists)
                 throw new Exception($"Employee with email {employeeCreateDto.Email} already exists");
 
-
-            // In a real app, you'd hash the password
+            /* We need to implement proper password hashing */
             var employee = new Employee(
                 employeeCreateDto.FirstName,
                 employeeCreateDto.LastName,
@@ -64,13 +62,9 @@ namespace Application.Services
                 companyId,
                 employeeCreateDto.JobTitle,
                 employeeCreateDto.MobilePhone
-            );
-
-            await _employeeRepository.AddAsync(employee);
+            );            await _employeeRepository.AddAsync(employee);
             await _unitOfWork.SaveChangesAsync();
-            
 
-            // Notify connected clients about new employee
             await _webSocketService.NotifyEmployeeAddedAsync(companyId, employee.Id);
 
             return MapToEmployeeDto(employee);
@@ -86,15 +80,12 @@ namespace Application.Services
                 employeeUpdateDto.FirstName,
                 employeeUpdateDto.LastName,
                 employeeUpdateDto.Email
-            );
-
-            employee.UpdateJobTitle(employeeUpdateDto.JobTitle);
-            employee.UpdateMobilePhone(employeeUpdateDto.MobilePhone); // Update mobile phone
+            );            employee.UpdateJobTitle(employeeUpdateDto.JobTitle);
+            employee.UpdateMobilePhone(employeeUpdateDto.MobilePhone);
 
             await _employeeRepository.UpdateAsync(employee);
             await _unitOfWork.SaveChangesAsync();
 
-            // Notify connected clients about employee update
             await _webSocketService.NotifyCompanyDataChangedAsync(
                 employee.CompanyId, 
                 "EmployeeUpdated", 
@@ -109,12 +100,9 @@ namespace Application.Services
             if (employee == null)
                 return false;
 
-            var companyId = employee.CompanyId;
-
-            await _employeeRepository.DeleteAsync(employee);
+            var companyId = employee.CompanyId;            await _employeeRepository.DeleteAsync(employee);
             await _unitOfWork.SaveChangesAsync();
 
-            // Notify connected clients about employee removal
             await _webSocketService.NotifyEmployeeRemovedAsync(companyId, id);
 
             return true;
@@ -138,9 +126,8 @@ namespace Application.Services
                 LastName = employee.LastName,
                 Email = employee.Email,
                 JobTitle = employee.JobTitle,
-                CompanyId = employee.CompanyId,
-                CompanyName = employee.Company?.Name ?? string.Empty,
-                MobilePhone = employee.MobilePhone // Map mobile phone
+                CompanyId = employee.CompanyId,                CompanyName = employee.Company?.Name ?? string.Empty,
+                MobilePhone = employee.MobilePhone
             };
         }
     }

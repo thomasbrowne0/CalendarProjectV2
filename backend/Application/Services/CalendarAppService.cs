@@ -61,38 +61,32 @@ namespace Application.Services
         }
 
         public async Task<IEnumerable<CalendarEventDto>> GetEventsByEmployeeIdAsync(Guid employeeId, DateTime? startDate, DateTime? endDate)
-        {
-            var events = await _eventRepository.GetEventsByEmployeeIdAsync(employeeId);
+        {            var events = await _eventRepository.GetEventsByEmployeeIdAsync(employeeId);
             
-            // Apply date filtering if specified
             if (startDate.HasValue && endDate.HasValue)
             {
                 events = events.Where(e => e.StartTime <= endDate.Value && e.EndTime >= startDate.Value);
             }
             
             return events.Select(MapToCalendarEventDto);
-        }
-
-        public async Task<CalendarEventDto> CreateEventAsync(Guid companyId, Guid creatorId, CalendarEventCreateDto eventDto)
+        }        public async Task<CalendarEventDto> CreateEventAsync(Guid companyId, Guid creatorId, CalendarEventCreateDto eventDto)
         {
-            // Validate company exists
             var company = await _companyRepository.GetByIdAsync(companyId);
             if (company == null)
                 throw new Exception($"Company with ID {companyId} not found");
 
-            // Validate creator exists
             var creator = await _userRepository.GetByIdAsync(creatorId);
             if (creator == null)
                 throw new Exception($"User with ID {creatorId} not found");
 
-            // Ensure dates are UTC
+            /* We need to ensure all event times are stored in UTC to avoid timezone
+               confusion when displaying events across different user locations */
             if (eventDto.StartTime.Kind != DateTimeKind.Utc)
                 eventDto.StartTime = DateTime.SpecifyKind(eventDto.StartTime, DateTimeKind.Utc);
                 
             if (eventDto.EndTime.Kind != DateTimeKind.Utc)
                 eventDto.EndTime = DateTime.SpecifyKind(eventDto.EndTime, DateTimeKind.Utc);
 
-            // Create event
             var calendarEvent = new CalendarEvent(
                 eventDto.Title,
                 eventDto.Description,
@@ -100,11 +94,10 @@ namespace Application.Services
                 eventDto.EndTime,
                 creatorId,
                 companyId
-            );
-
-            try
+            );            try
             {
-                // Add participants if any
+                /* We need to validate that participants belong to the same company
+                   to maintain data isolation between different organizations */
                 if (eventDto.ParticipantIds != null && eventDto.ParticipantIds.Any())
                 {
                     foreach (var participantId in eventDto.ParticipantIds)
@@ -120,7 +113,8 @@ namespace Application.Services
                 await _eventRepository.AddAsync(calendarEvent);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Notify via WebSocket
+                /* We need WebSocket notifications to provide real-time updates
+                   when events are created so all connected users see changes immediately */
                 await _webSocketService.NotifyEventCreatedAsync(companyId, calendarEvent.Id);
 
                 return MapToCalendarEventDto(calendarEvent);
@@ -133,11 +127,9 @@ namespace Application.Services
 
         public async Task<CalendarEventDto> UpdateEventAsync(Guid id, CalendarEventUpdateDto eventDto)
         {
-            var calendarEvent = await _eventRepository.GetEventWithParticipantsAsync(id);
-            if (calendarEvent == null)
+            var calendarEvent = await _eventRepository.GetEventWithParticipantsAsync(id);            if (calendarEvent == null)
                 throw new Exception($"Event with ID {id} not found");
 
-            // Update event details
             calendarEvent.UpdateEventDetails(
                 eventDto.Title,
                 eventDto.Description,
@@ -145,27 +137,23 @@ namespace Application.Services
                 eventDto.EndTime
             );
 
-            // Update participants if specified
+            /* We need to handle participant updates separately because they require
+               validation to ensure all participants belong to the same company */
             if (eventDto.ParticipantIds != null)
             {
-                // Get current participant IDs
                 var currentParticipantIds = calendarEvent.Participants.Select(p => p.Id).ToList();
                 
-                // Determine which participants to add and which to remove
                 var participantsToAdd = eventDto.ParticipantIds.Except(currentParticipantIds);
                 var participantsToRemove = currentParticipantIds.Except(eventDto.ParticipantIds);
 
-                // Add new participants
                 foreach (var participantId in participantsToAdd)
                 {
                     var employee = await _employeeRepository.GetByIdAsync(participantId);
                     if (employee != null && employee.CompanyId == calendarEvent.CompanyId)
                     {
-                        calendarEvent.AddParticipant(employee);
-                    }
+                        calendarEvent.AddParticipant(employee);                    }
                 }
 
-                // Remove participants
                 foreach (var participantId in participantsToRemove)
                 {
                     var employee = calendarEvent.Participants.FirstOrDefault(p => p.Id == participantId);
@@ -179,7 +167,6 @@ namespace Application.Services
             await _eventRepository.UpdateAsync(calendarEvent);
             await _unitOfWork.SaveChangesAsync();
 
-            // Notify via WebSocket
             await _webSocketService.NotifyEventUpdatedAsync(calendarEvent.CompanyId, calendarEvent.Id);
 
             return MapToCalendarEventDto(calendarEvent);
@@ -192,11 +179,9 @@ namespace Application.Services
                 return false;
 
             var companyId = calendarEvent.CompanyId;
-            
-            await _eventRepository.DeleteAsync(calendarEvent);
+              await _eventRepository.DeleteAsync(calendarEvent);
             await _unitOfWork.SaveChangesAsync();
 
-            // Notify via WebSocket
             await _webSocketService.NotifyEventDeletedAsync(companyId, id);
 
             return true;
@@ -213,14 +198,11 @@ namespace Application.Services
                 throw new Exception($"Employee with ID {employeeId} not found");
 
             if (employee.CompanyId != calendarEvent.CompanyId)
-                throw new Exception("Employee does not belong to the same company as the event");
-
-            calendarEvent.AddParticipant(employee);
+                throw new Exception("Employee does not belong to the same company as the event");            calendarEvent.AddParticipant(employee);
             
             await _eventRepository.UpdateAsync(calendarEvent);
             await _unitOfWork.SaveChangesAsync();
 
-            // Notify via WebSocket
             await _webSocketService.NotifyEventUpdatedAsync(calendarEvent.CompanyId, calendarEvent.Id);
 
             return MapToCalendarEventDto(calendarEvent);
@@ -234,14 +216,11 @@ namespace Application.Services
 
             var employee = calendarEvent.Participants.FirstOrDefault(p => p.Id == employeeId);
             if (employee == null)
-                return false;
-
-            calendarEvent.RemoveParticipant(employee);
+                return false;            calendarEvent.RemoveParticipant(employee);
             
             await _eventRepository.UpdateAsync(calendarEvent);
             await _unitOfWork.SaveChangesAsync();
 
-            // Notify via WebSocket
             await _webSocketService.NotifyEventUpdatedAsync(calendarEvent.CompanyId, calendarEvent.Id);
 
             return true;

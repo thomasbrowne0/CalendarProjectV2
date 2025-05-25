@@ -30,9 +30,11 @@ namespace API.Controllers
             _companyService = companyService ?? throw new ArgumentNullException(nameof(companyService));
             _employeeService = employeeService ?? throw new ArgumentNullException(nameof(employeeService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
+        }  
+        
         [HttpGet]
+        /* We need this to handle date range filtering with sensible defaults because clients 
+           might not always specify date ranges and we want to prevent loading too much data */
         public async Task<ActionResult<IEnumerable<CalendarEventDto>>> GetEvents(
             Guid companyId, 
             [FromQuery] DateTime? start, 
@@ -45,11 +47,9 @@ namespace API.Controllers
                     return Forbid();
                 }
 
-                // Use default date range if not provided
                 var startDate = start ?? DateTime.UtcNow.Date.AddMonths(-1);
                 var endDate = end ?? DateTime.UtcNow.Date.AddMonths(1);
 
-                // Ensure dates are in UTC
                 if (startDate.Kind != DateTimeKind.Utc)
                     startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
                 if (endDate.Kind != DateTimeKind.Utc)
@@ -63,9 +63,11 @@ namespace API.Controllers
                 _logger.LogError(ex, "Error retrieving events for company {CompanyId}", companyId);
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
+        }       
+        
         [HttpGet("employee/{employeeId}")]
+        /* We need this validation to prevent data leakage between companies because 
+           employee IDs alone aren't enough to ensure proper authorization */
         public async Task<ActionResult<IEnumerable<CalendarEventDto>>> GetEmployeeEvents(
             Guid companyId,
             Guid employeeId,
@@ -79,7 +81,6 @@ namespace API.Controllers
                     return Forbid();
                 }
 
-                // Make sure the employee belongs to the company
                 var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
                 if (employee == null || employee.CompanyId != companyId)
                 {
@@ -120,9 +121,11 @@ namespace API.Controllers
                 _logger.LogError(ex, "Error retrieving event {EventId} for company {CompanyId}", id, companyId);
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
+        }       
+        
         [HttpPost]
+        /* We need this complex validation because events must be properly timezone-normalized
+           and we require detailed logging for debugging calendar creation issues */
         public async Task<ActionResult<CalendarEventDto>> CreateEvent(Guid companyId, CalendarEventCreateDto eventDto)
         {
             try
@@ -132,7 +135,6 @@ namespace API.Controllers
                     return Forbid();
                 }
 
-                // Ensure dates are in UTC
                 if (eventDto.StartTime.Kind != DateTimeKind.Utc)
                     eventDto.StartTime = DateTime.SpecifyKind(eventDto.StartTime, DateTimeKind.Utc);
                     
@@ -155,7 +157,7 @@ namespace API.Controllers
                 catch (Exception innerEx)
                 {
                     _logger.LogError(innerEx, "Detailed error creating event");
-                    throw; // Re-throw to be caught by outer catch
+                    throw;
                 }
             }
             catch (Exception ex)
@@ -163,9 +165,12 @@ namespace API.Controllers
                 _logger.LogError(ex, "Error creating event for company {CompanyId}", companyId);
                 return BadRequest(new { message = ex.Message, details = ex.ToString() });
             }
-        }
+        }     
+        
 
         [HttpPut("{id}")]
+        /* We need this authorization check because only event creators or company owners
+           should be able to modify events to maintain data integrity */
         public async Task<ActionResult<CalendarEventDto>> UpdateEvent(Guid companyId, Guid id, CalendarEventUpdateDto eventDto)
         {
             try
@@ -182,7 +187,6 @@ namespace API.Controllers
                     return NotFound();
                 }
 
-                // Check if the user is either the creator of the event or a company owner
                 var userId = GetCurrentUserId();
                 var userType = User.FindFirst("UserType")?.Value;
                 
@@ -201,7 +205,10 @@ namespace API.Controllers
             }
         }
 
+
         [HttpDelete("{id}")]
+        /* We need this same authorization pattern as updates because deleting events
+           should follow the same security model as modifying them */
         public async Task<ActionResult> DeleteEvent(Guid companyId, Guid id)
         {
             try
@@ -218,7 +225,6 @@ namespace API.Controllers
                     return NotFound();
                 }
 
-                // Check if the user is either the creator of the event or a company owner
                 var userId = GetCurrentUserId();
                 var userType = User.FindFirst("UserType")?.Value;
                 
@@ -243,7 +249,10 @@ namespace API.Controllers
             }
         }
 
+
         [HttpPost("{id}/participants/{employeeId}")]
+        /* We need this double validation to ensure participants can only be added to events
+           within their own company and that the employee actually exists */
         public async Task<ActionResult<CalendarEventDto>> AddParticipant(Guid companyId, Guid id, Guid employeeId)
         {
             try
@@ -260,7 +269,6 @@ namespace API.Controllers
                     return NotFound();
                 }
 
-                // Make sure the employee belongs to the company
                 var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
                 if (employee == null || employee.CompanyId != companyId)
                 {
@@ -276,6 +284,7 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
 
         [HttpDelete("{id}/participants/{employeeId}")]
         public async Task<ActionResult> RemoveParticipant(Guid companyId, Guid id, Guid employeeId)
@@ -294,7 +303,6 @@ namespace API.Controllers
                     return NotFound();
                 }
 
-                // Make sure the employee belongs to the company
                 var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
                 if (employee == null || employee.CompanyId != companyId)
                 {
@@ -315,8 +323,8 @@ namespace API.Controllers
                 _logger.LogError(ex, "Error removing participant {EmployeeId} from event {EventId} in company {CompanyId}", employeeId, id, companyId);
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
+        }        /* We need this complex authorization logic because different user types
+           have different access patterns and we must prevent cross-company data access */
         private async Task<bool> CanAccessCompany(Guid companyId)
         {
             var userId = GetCurrentUserId();

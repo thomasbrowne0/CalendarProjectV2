@@ -10,10 +10,7 @@ namespace Domain.Entities
         public string CVR { get; private set; }
         public Guid CompanyOwnerId { get; private set; }
         public virtual CompanyOwner CompanyOwner { get; private set; }
-        public virtual ICollection<Employee> Employees { get; private set; }
-
-        // For EF Core
-        private Company() { }
+        public virtual ICollection<Employee> Employees { get; private set; }        private Company() { }
 
         public Company(string name, string cvr, Guid companyOwnerId)
         {

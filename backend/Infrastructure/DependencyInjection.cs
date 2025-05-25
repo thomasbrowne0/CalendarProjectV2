@@ -13,28 +13,27 @@ using Infrastructure.WebSockets;
 namespace Infrastructure
 {
     public static class DependencyInjection
-    {
-        public static IServiceCollection AddInfrastructure(
+    {        public static IServiceCollection AddInfrastructure(
             this IServiceCollection services, 
             IConfiguration configuration)
         {
-            // Register DbContext with PostgreSQL
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
-            // Register repositories
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICompanyOwnerRepository, CompanyOwnerRepository>();
             services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<ICalendarEventRepository, CalendarEventRepository>();
             
-            // Register UnitOfWork
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             
-            // Configure WebSocket options
+            /*
+             * We need WebSocket configuration from appsettings.json because the WebSocket server
+             * runs independently from the main web API and requires specific host/port settings
+             */
             services.Configure<WebSocketOptions>(options => 
             {
                 options.Host = configuration["WebSockets:Host"] ?? "0.0.0.0";
@@ -44,10 +43,8 @@ namespace Infrastructure
                 options.CertificatePassword = configuration["WebSockets:CertificatePassword"];
             });
             
-            // Register WebSocketService as a singleton
             services.AddSingleton<IWebSocketService, Infrastructure.WebSockets.WebSocketService>();
 
-            // Register Application services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICompanyAppService, CompanyAppService>();
             services.AddScoped<IEmployeeAppService, EmployeeAppService>();

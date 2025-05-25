@@ -23,16 +23,17 @@ namespace Infrastructure.Data.EntityConfigurations
             builder.Property(u => u.Email)
                 .IsRequired()
                 .HasMaxLength(100);
-                
-            builder.Property(u => u.PasswordHash)
+                  builder.Property(u => u.PasswordHash)
                 .IsRequired();
-                
-            // Add discriminator for the inheritance
+
+            /* We need discriminator for Table Per Hierarchy inheritance to distinguish
+               between CompanyOwner and Employee entities in the same table */
             builder.HasDiscriminator<string>("UserType")
                 .HasValue<CompanyOwner>("CompanyOwner")
                 .HasValue<Employee>("Employee");
-                
-            // Create index on email to improve query performance
+
+            /* We need unique index on email because it's used for login and
+               must be unique across all users in the system */
             builder.HasIndex(u => u.Email)
                 .IsUnique();
         }

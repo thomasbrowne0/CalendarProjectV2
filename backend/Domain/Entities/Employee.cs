@@ -12,11 +12,9 @@ namespace Domain.Entities
         public string MobilePhone { get; private set; } 
 
         public virtual ICollection<CalendarEvent> Events { get; private set; }
+          private Employee() : base() { }
         
-        // For EF Core
-        private Employee() : base() { }
-        
-        public Employee(string firstName, string lastName, string email, string passwordHash, 
+        public Employee(string firstName, string lastName, string email, string passwordHash,
                       Guid companyId, string jobTitle, string mobilePhone = "") 
             : base(firstName, lastName, email, passwordHash)
         {

@@ -24,10 +24,8 @@ namespace API
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add infrastructure services
             services.AddInfrastructure(Configuration);
 
-            // CORS configuration
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowFlutterApp", builder =>
@@ -39,7 +37,6 @@ namespace API
                 });
             });
 
-            // JWT Authentication
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -56,17 +53,14 @@ namespace API
                     };
                 });
 
-            // Authorization policies
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("CompanyOwnerOnly", policy =>
                     policy.RequireClaim("UserType", "CompanyOwner"));
             });
 
-            // Add controllers
             services.AddControllers();
 
-            // Swagger/OpenAPI
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Calendar Project API", Version = "v1" });
@@ -93,8 +87,8 @@ namespace API
                     }
                 });
             });
-        }
-
+        }        /* We need this specific WebSocket mapping because the frontend expects a /ws endpoint
+           and we're proxying to our Fleck WebSocket server for real-time notifications */
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -111,7 +105,6 @@ namespace API
 
             app.UseHttpsRedirection();
 
-            // Apply the "AllowFlutterApp" CORS policy
             app.UseCors("AllowFlutterApp");
 
             app.UseRouting();
@@ -121,7 +114,6 @@ namespace API
 
             app.UseWebSockets();
 
-            // Map the /ws route for WebSocket connections
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -136,12 +128,11 @@ namespace API
                     }
                     else
                     {
-                        context.Response.StatusCode = 400; // Bad Request if not a WebSocket request
+                        context.Response.StatusCode = 400;
                     }
                 });
             });
 
-            // Force instantiation of WebSocketService to start Fleck server
             var webSocketService = app.ApplicationServices.GetRequiredService<IWebSocketService>();
         }
     }

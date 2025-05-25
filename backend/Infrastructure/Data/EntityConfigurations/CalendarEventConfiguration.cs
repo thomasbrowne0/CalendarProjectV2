@@ -21,11 +21,9 @@ namespace Infrastructure.Data.EntityConfigurations
                 
             builder.Property(e => e.StartTime)
                 .IsRequired();
-                
-            builder.Property(e => e.EndTime)
+                  builder.Property(e => e.EndTime)
                 .IsRequired();
-                
-            // Configure navigation properties
+
             builder.HasOne(e => e.CreatedBy)
                 .WithMany()
                 .HasForeignKey(e => e.CreatedById)
@@ -39,8 +37,9 @@ namespace Infrastructure.Data.EntityConfigurations
             builder.HasMany(e => e.Participants)
                 .WithMany(e => e.Events)
                 .UsingEntity(j => j.ToTable("EmployeeEvents"));
-                
-            // Create indexes for common queries
+
+            /* We need these indexes because calendar queries frequently filter by
+               company and date ranges for performance optimization */
             builder.HasIndex(e => e.CompanyId);
             builder.HasIndex(e => e.StartTime);
             builder.HasIndex(e => e.EndTime);

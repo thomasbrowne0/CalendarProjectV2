@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 using Fleck;
 
 namespace Infrastructure.WebSockets
-{
-    public class WebSocketConnectionManager
+{    public class WebSocketConnectionManager
     {
-        // Change from private to internal to allow access from WebSocketService
+        /* We need internal access for WebSocketService to directly manage
+           connections because Fleck handles connection lifecycle differently */
         internal readonly ConcurrentDictionary<Guid, FleckConnection> _connections = 
             new ConcurrentDictionary<Guid, FleckConnection>();
         private readonly ILogger<WebSocketConnectionManager> _logger;
@@ -23,13 +23,11 @@ namespace Infrastructure.WebSockets
         {
             _connections.TryGetValue(id, out var connection);
             return connection;
-        }
-
-        public IEnumerable<FleckConnection> GetConnectionsByCompany(Guid companyId)
+        }        public IEnumerable<FleckConnection> GetConnectionsByCompany(Guid companyId)
         {
             return _connections.Values
                 .Where(c => c.CompanyId == companyId)
-                .ToList(); // Create a snapshot to avoid enumeration issues
+                .ToList();
         }
 
         public void AddConnection(IWebSocketConnection socket, Guid userId, string userType, Guid? companyId = null)
