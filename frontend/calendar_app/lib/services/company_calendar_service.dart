@@ -1,5 +1,6 @@
 // lib/services/company_calendar_service.dart
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 
 class CompanyCalendarService {
   String formatTimeRange(DateTime start, DateTime end) {
@@ -23,5 +24,24 @@ class CompanyCalendarService {
 
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  CalendarFormat getNextCalendarFormat(CalendarFormat currentFormat) {
+    switch (currentFormat) {
+      case CalendarFormat.month:
+        return CalendarFormat.twoWeeks;
+      case CalendarFormat.twoWeeks:
+        return CalendarFormat.week;
+      case CalendarFormat.week:
+        return CalendarFormat.month;
+    }
+  }
+
+  String formatDateForEvents(DateTime date) {
+    return DateFormat('MMMM d, yyyy').format(date);
+  }
+
+  String getEventsHeaderText(DateTime date) {
+    return 'Events for ${formatDateForEvents(date)}';
   }
 }
