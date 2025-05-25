@@ -9,12 +9,14 @@ import 'package:calendar_app/services/company_calendar_service.dart';
 import 'package:calendar_app/widgets/calendar_widgets.dart';
 import '../cubit/calendar_cubit.dart';
 import '../cubit/calendar_state.dart';
+import '../models/calendar_event.dart';
+import 'package:intl/intl.dart';
 
 class CompanyCalendarScreen extends StatefulWidget {
   const CompanyCalendarScreen({super.key});
 
   @override
-  _CompanyCalendarScreenState createState() => _CompanyCalendarScreenState();
+  State<CompanyCalendarScreen> createState() => _CompanyCalendarScreenState();
 }
 
 class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
@@ -22,7 +24,6 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
   bool _isLoading = false;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
-
   final CompanyCalendarService _calendarService = CompanyCalendarService();
 
   @override
@@ -132,6 +133,45 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                 headerStyle: const HeaderStyle(
                   formatButtonVisible: false,
                   titleCentered: true,
+                  titleTextStyle: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  leftChevronIcon: Icon(Icons.chevron_left, size: 28),
+                  rightChevronIcon: Icon(Icons.chevron_right, size: 28),
+                ),
+                calendarStyle: CalendarStyle(
+                  markersMaxCount: 3,
+                  markerDecoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark 
+                      ? const Color(0xFFFF4081)  // Pink in dark mode
+                      : Theme.of(context).colorScheme.onBackground,  // Black in light mode
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  weekendTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  ),
+                  outsideTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onBackground.withOpacity(0.4),
+                  ),
+                ),
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  weekdayStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onBackground,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  weekendStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 eventLoader: (day) => context.read<CalendarCubit>().getEventsForDay(day),
                 selectedDayPredicate: (day) =>
@@ -152,9 +192,6 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                     end: DateTime(focusedDay.year, focusedDay.month + 1, 0),
                   );
                 },
-                calendarStyle: const CalendarStyle(
-                  markersMaxCount: 3,
-                ),
               );
             },
           ),
@@ -167,16 +204,60 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
                 final events =
                 context.read<CalendarCubit>().getEventsForDay(state.focusedDay);
 
-                if (events.isEmpty) {
-                  return const Center(
-                    child: Text('No events for this day.'),
-                  );
-                }
-
-                return ListView.builder(
-                  itemCount: events.length,
-                  itemBuilder: (ctx, index) =>
-                      CalendarWidgets.buildEventCard(events[index], context),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.event,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Events for ${DateFormat('MMMM d, yyyy').format(state.focusedDay)}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (events.isEmpty)
+                      Expanded(
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.event_busy,
+                                size: 64,
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No events for this day',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: events.length,
+                          itemBuilder: (ctx, index) =>
+                              CalendarWidgets.buildEventCard(events[index], context),
+                        ),
+                      ),
+                  ],
                 );
               },
             ),

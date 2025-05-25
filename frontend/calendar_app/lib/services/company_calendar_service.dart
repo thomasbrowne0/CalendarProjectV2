@@ -3,8 +3,10 @@ import 'package:table_calendar/table_calendar.dart';
 
 class CompanyCalendarService {
   String formatTimeRange(DateTime start, DateTime end) {
-    final startTime = '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')}';
-    final endTime = '${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
+    final startTime =
+        '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')}';
+    final endTime =
+        '${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
     return '$startTime - $endTime';
   }
 
@@ -16,8 +18,6 @@ class CompanyCalendarService {
         return '2 Weeks View';
       case CalendarFormat.week:
         return 'Week View';
-      default:
-        return '';
     }
   }
 

@@ -20,7 +20,8 @@ class EventService {
     );
   }
 
-  static Future<TimeOfDay?> pickTime(BuildContext context, TimeOfDay initialTime) {
+  static Future<TimeOfDay?> pickTime(
+      BuildContext context, TimeOfDay initialTime) {
     return showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -55,7 +56,9 @@ class EventService {
 
     setLoading(true);
     try {
-      final companyId = Provider.of<CompanyProvider>(context, listen: false).selectedCompany!.id;
+      final companyId = Provider.of<CompanyProvider>(context, listen: false)
+          .selectedCompany!
+          .id;
       final participantIds = selectedParticipantIds.toList();
 
       await Provider.of<CalendarProvider>(context, listen: false).createEvent(
@@ -73,7 +76,7 @@ class EventService {
     }
     setLoading(false);
   }
-  
+
   static Future<void> updateEvent({
     required BuildContext context,
     required String eventId,
@@ -88,40 +91,26 @@ class EventService {
     required Function(String) onError,
   }) async {
     try {
-      final companyId = Provider.of<CompanyProvider>(context, listen: false).selectedCompany!.id;
+      final companyId = Provider.of<CompanyProvider>(context, listen: false)
+          .selectedCompany!
+          .id;
 
       final startDateTime = combineDateAndTime(startDate, startTime).toUtc();
       final endDateTime = combineDateAndTime(endDate, endTime).toUtc();
 
       await context.read<CalendarCubit>().updateEvent(
-        eventId,
-        companyId,
-        title,
-        description,
-        startDateTime,
-        endDateTime,
-        participantIds,
-      );
+            eventId,
+            companyId,
+            title,
+            description,
+            startDateTime,
+            endDateTime,
+            participantIds,
+          );
 
       onSuccess();
     } catch (error) {
       onError(error.toString());
     }
-  }
-  
-  static void showErrorDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }

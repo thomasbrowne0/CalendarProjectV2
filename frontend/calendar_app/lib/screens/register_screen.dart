@@ -6,7 +6,7 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
@@ -29,6 +29,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _submit() async {
+
+    final navigator =Navigator.of(context);
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -44,7 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = false);
 
-    if (success) Navigator.of(context).pop();
+    if (success) navigator.pop();
   }
 
   @override

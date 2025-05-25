@@ -18,7 +18,9 @@ class CreateEmployeeWidgets {
   }
 
   static Widget spacing() => const SizedBox(height: 12);
-  static Widget loadingIndicator() => const Center(child: CircularProgressIndicator());
+
+  static Widget loadingIndicator() =>
+      const Center(child: CircularProgressIndicator());
 
   static Widget submitButton(VoidCallback onPressed) {
     return ElevatedButton(

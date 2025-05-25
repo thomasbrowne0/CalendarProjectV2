@@ -16,7 +16,10 @@ class LoginService {
         password.trim(),
       );
     } catch (error) {
-      DialogUtil.showErrorDialog(context, 'Authentication failed', error.toString());
+      if (context.mounted) {
+        DialogUtil.showErrorDialog(
+            context, 'Authentication failed', error.toString());
+      }
     }
   }
 }

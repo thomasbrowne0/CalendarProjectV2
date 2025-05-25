@@ -6,7 +6,7 @@ class CreateEmployeeScreen extends StatefulWidget {
   const CreateEmployeeScreen({super.key});
 
   @override
-  _CreateEmployeeScreenState createState() => _CreateEmployeeScreenState();
+  State<CreateEmployeeScreen> createState() => _CreateEmployeeScreenState();
 }
 
 class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {

@@ -5,12 +5,15 @@ import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/screens/company_calendar_screen.dart';
 import 'package:calendar_app/screens/employee_list_screen.dart';
 import 'package:calendar_app/screens/create_company_screen.dart';
+import 'package:calendar_app/widgets/theme_switch.dart';
+
+import '../widgets/theme_switch.dart';
 
 class CompanyOwnerHomeScreen extends StatefulWidget {
   const CompanyOwnerHomeScreen({super.key});
 
   @override
-  _CompanyOwnerHomeScreenState createState() => _CompanyOwnerHomeScreenState();
+  State<CompanyOwnerHomeScreen>createState() => _CompanyOwnerHomeScreenState();
 }
 
 class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
@@ -50,6 +53,7 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
       appBar: AppBar(
         title: const Text('Company Calendar'),
         actions: [
+          const ThemeSwitch(),
           DropdownButton<String>(
             underline: Container(),
             icon: const Icon(Icons.business, color: Colors.black),
