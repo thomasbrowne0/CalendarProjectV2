@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:calendar_app/models/employee.dart';
+import 'event_form/text_field_widget.dart';
+import 'event_form/date_time_row_widget.dart';
+import 'event_form/participants_selector.dart';
 
 class EventWidgets {
   static final dateFormat = DateFormat('MMM dd, yyyy');
@@ -11,9 +14,9 @@ class EventWidgets {
     String? Function(String?)? validator,
     int maxLines = 1,
   }) {
-    return TextFormField(
+    return EventTextField(
       controller: controller,
-      decoration: InputDecoration(labelText: label),
+      label: label,
       validator: validator,
       maxLines: maxLines,
     );
@@ -24,11 +27,10 @@ class EventWidgets {
     required String displayText,
     required VoidCallback onPressed,
   }) {
-    return Row(
-      children: [
-        Expanded(child: Text(displayText)),
-        TextButton(onPressed: onPressed, child: Text('Change $label')),
-      ],
+    return DateTimeRowWidget(
+      label: label,
+      displayText: displayText,
+      onPressed: onPressed,
     );
   }
 
@@ -41,17 +43,12 @@ class EventWidgets {
       return [const Text('No employees available')];
     }
 
-    return employees
-        .map(
-          (e) => CheckboxListTile(
-            title: Text('${e.firstName} ${e.lastName}'),
-            subtitle: Text(e.jobTitle),
-            value: selectedIds.contains(e.id),
-            onChanged: (bool? value) {
-              onChanged(e.id, value ?? false);
-            },
-          ),
-        )
-        .toList();
+    return [
+      ParticipantsSelector(
+        employees: employees,
+        selectedIds: selectedIds,
+        onChanged: onChanged,
+      )
+    ];
   }
 }
