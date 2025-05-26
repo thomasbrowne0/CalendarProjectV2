@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
-import 'package:calendar_app/screens/create_employee_screen.dart';
+import 'package:calendar_app/screens/employee/create_employee_screen.dart';
 
 class EmployeeListScreen extends StatelessWidget {
   const EmployeeListScreen({super.key});

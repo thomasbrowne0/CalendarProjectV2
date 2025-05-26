@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_app/services/register_service.dart';
-import 'package:calendar_app/widgets/auth_widgets.dart';
+import 'package:calendar_app/widgets/auth/auth_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

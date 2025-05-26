@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/calendar_cubit.dart';
-import '../cubit/calendar_state.dart';
-import '../widgets/calendar_widgets.dart';
-import '../services/company_calendar_service.dart';
+import '../../cubit/calendar_cubit.dart';
+import '../../cubit/calendar_state.dart';
+import '../calendar/calendar_widgets.dart';
+import '../../services/company_calendar_service.dart';
 
 class EventsListView extends StatelessWidget {
   const EventsListView({super.key});

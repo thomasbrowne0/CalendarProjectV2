@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/theme_provider.dart';
+import '../../providers/theme_provider.dart';
 
 class ThemeSwitch extends StatelessWidget {
   const ThemeSwitch({super.key});
@@ -11,7 +11,7 @@ class ThemeSwitch extends StatelessWidget {
       builder: (context, themeProvider, _) => Switch(
         value: themeProvider.themeMode == ThemeMode.dark,
         onChanged: (_) => themeProvider.toggleTheme(),
-        activeColor: const Color(0xFFFF4081),
+        activeColor: const Color(0xFFFFFFFF),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:calendar_app/screens/register_screen.dart';
+import 'package:calendar_app/screens/auth/register_screen.dart';
 
 class AuthWidgets {
   // Login Widgets

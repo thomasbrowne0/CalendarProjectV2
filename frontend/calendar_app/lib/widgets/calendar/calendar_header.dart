@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../services/company_calendar_service.dart';
+import '../../services/company_calendar_service.dart';
 
 class CalendarHeader extends StatelessWidget {
   final CalendarFormat calendarFormat;

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
-import 'package:calendar_app/screens/company_calendar_screen.dart';
-import 'package:calendar_app/screens/employee_list_screen.dart';
-import 'package:calendar_app/screens/create_company_screen.dart';
-import 'package:calendar_app/widgets/theme_switch.dart';
-
-import '../widgets/theme_switch.dart';
+import 'package:calendar_app/screens/company/company_calendar_screen.dart';
+import 'package:calendar_app/screens/employee/employee_list_screen.dart';
+import 'package:calendar_app/screens/company/create_company_screen.dart';
+import 'package:calendar_app/widgets/display/home_screen.dart';
 
 class CompanyOwnerHomeScreen extends StatefulWidget {
   const CompanyOwnerHomeScreen({super.key});
@@ -53,79 +51,52 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
       appBar: AppBar(
         title: const Text('Company Calendar'),
         actions: [
-          const ThemeSwitch(),
-          DropdownButton<String>(
-            underline: Container(),
-            icon: const Icon(Icons.business, color: Colors.black),
-            items: companies.map((company) {
-              return DropdownMenuItem<String>(
-                value: company.id,
-                child: Text(company.name),
-              );
-            }).toList(),
-            onChanged: (companyId) {
-              if (companyId != null) {
-                companyProvider.selectCompany(companyId);
-              }
-            },
-            hint: Text(
-              selectedCompany?.name ?? 'Select Company',
-              style: const TextStyle(color: Colors.black),
-            ),
-          ),
-          DropdownButton<String>(
-            underline: Container(),
-            icon: Row(
+          AppBarActions(
+            additionalAction: Row(
               children: [
+                DropdownButton<String>(
+                  underline: Container(),
+                  icon: const Icon(Icons.business, color: Colors.black),
+                  items: companies.map((company) {
+                    return DropdownMenuItem<String>(
+                      value: company.id,
+                      child: Text(company.name),
+                    );
+                  }).toList(),
+                  onChanged: (companyId) {
+                    if (companyId != null) {
+                      companyProvider.selectCompany(companyId);
+                    }
+                  },
+                  hint: Text(
+                    selectedCompany?.name ?? 'Select Company',
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ),
+                const SizedBox(width: 16),
                 const Icon(Icons.account_circle, color: Colors.black),
-                const SizedBox(width: 3),
+                const SizedBox(width: 8),
                 Text(
                   '${user?.firstName} ${user?.lastName}',
                   style: const TextStyle(color: Colors.black),
                 ),
+                const SizedBox(width: 16),
               ],
             ),
-            items: const [
-              DropdownMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.exit_to_app),
-                    SizedBox(width: 3),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
-            onChanged: (value) {
-              if (value == 'logout') {
-                Provider.of<AuthProvider>(context, listen: false).logout();
-              }
-            },
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingIndicator()
           : pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+      bottomNavigationBar: CalendarBottomNavigation(
+        selectedIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Employees',
-          ),
-        ],
+        employeesLabel: 'Employees',
       ),
       floatingActionButton: selectedCompany == null
           ? FloatingActionButton(

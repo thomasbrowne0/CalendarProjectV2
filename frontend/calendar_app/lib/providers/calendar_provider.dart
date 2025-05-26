@@ -35,11 +35,9 @@ class CalendarProvider with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       _logger.severe('Error fetching events: $error');
-      // Set events to empty list instead of throwing
       _events = [];
       notifyListeners();
-      // Optionally rethrow if you want the UI to handle it
-      // throw error;
+
     }
   }
 

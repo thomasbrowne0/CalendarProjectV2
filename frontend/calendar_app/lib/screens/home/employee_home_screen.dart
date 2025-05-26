@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
-import 'package:calendar_app/screens/company_calendar_screen.dart';
-import 'package:calendar_app/screens/employee_list_screen.dart';
-import 'package:calendar_app/widgets/theme_switch.dart'; // Import the ThemeSwitch widget
+import 'package:calendar_app/screens/company/company_calendar_screen.dart';
+import 'package:calendar_app/screens/employee/employee_list_screen.dart';
+import 'package:calendar_app/widgets/display/home_screen.dart';
 
 class EmployeeHomeScreen extends StatefulWidget {
   const EmployeeHomeScreen({super.key});
@@ -22,33 +22,27 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
 void didChangeDependencies() {
   if (_isInit) {
     setState(() {
-      _isLoading = true; // Start loading indicator
+      _isLoading = true;
     });
     
-    // Get the AuthProvider instance (listen: false because we only need to read values once here)
     final authProvider = Provider.of<AuthProvider>(context, listen: false); 
     
-    // Check if the user is authenticated, has user data, and is an employee
     if (authProvider.isAuth && authProvider.user != null && !authProvider.user!.isCompanyOwner) {
-      // Retrieve the companyId stored in AuthProvider (this was set during login/auto-login)
       final String? employeeCompanyId = authProvider.companyId; 
 
       if (employeeCompanyId != null && employeeCompanyId.isNotEmpty) {
-        // If companyId is available, tell CompanyProvider to select this company
         Provider.of<CompanyProvider>(context, listen: false)
             .selectCompany(employeeCompanyId) 
             .then((_) {
-          // After company selection is complete
-          if (mounted) { // Check if the widget is still part of the widget tree
+          if (mounted) {
             setState(() {
-              _isLoading = false; // Stop loading indicator
+              _isLoading = false;
             });
           }
         }).catchError((error) {
-          // If there was an error selecting the company
           if (mounted) {
             setState(() {
-              _isLoading = false; // Stop loading indicator
+              _isLoading = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Failed to load company data: ${error.toString()}')),
@@ -56,10 +50,9 @@ void didChangeDependencies() {
           }
         });
       } else {
-        // Employee is logged in, but their companyId is missing or empty
         if (mounted) {
           setState(() {
-            _isLoading = false; // Stop loading indicator
+            _isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Your company information is missing. Please log in again.')),
@@ -67,14 +60,13 @@ void didChangeDependencies() {
         }
       }
     } else {
-      // User is not an employee, not authenticated, or user data is null
       if (mounted) {
         setState(() {
-          _isLoading = false; // Stop loading indicator
+          _isLoading = false;
         });
       }
     }
-    _isInit = false; // Ensure this logic runs only once
+    _isInit = false;
   }
   super.didChangeDependencies();
 }
@@ -83,6 +75,7 @@ void didChangeDependencies() {
   Widget build(BuildContext context) {
     final companyProvider = Provider.of<CompanyProvider>(context);
     final company = companyProvider.selectedCompany;
+    final user = Provider.of<AuthProvider>(context).user;
 
     List<Widget> pages = [
       company == null ? _buildNoCompanyFound() : const CompanyCalendarScreen(),
@@ -93,35 +86,31 @@ void didChangeDependencies() {
       appBar: AppBar(
         title: Text(company?.name ?? 'Company Calendar'),
         actions: [
-          const ThemeSwitch(),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-            },
+          AppBarActions(
+            additionalAction: Row(
+              children: [
+                const Icon(Icons.account_circle, color: Colors.black),
+                const SizedBox(width: 8),
+                Text(
+                  '${user?.firstName} ${user?.lastName}',
+                  style: const TextStyle(color: Colors.black),
+                ),
+                const SizedBox(width: 16),
+              ],
+            ),
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingIndicator()
           : pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+      bottomNavigationBar: CalendarBottomNavigation(
+        selectedIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Colleagues',
-          ),
-        ],
       ),
     );
   }

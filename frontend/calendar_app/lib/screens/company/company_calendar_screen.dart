@@ -3,12 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:calendar_app/providers/auth_provider.dart';
 import 'package:calendar_app/providers/company_provider.dart';
-import 'package:calendar_app/screens/create_event_screen.dart';
-import 'package:calendar_app/widgets/calendar_widgets.dart';
-import 'package:calendar_app/widgets/company_calendar_view.dart';
-import 'package:calendar_app/widgets/calendar_header.dart';
-import 'package:calendar_app/widgets/events_list_view.dart';
-import '../cubit/calendar_cubit.dart';
+import 'package:calendar_app/screens/event/create_event_screen.dart';
+import 'package:calendar_app/widgets/calendar/calendar_widgets.dart';
+import 'package:calendar_app/widgets/calendar/company_calendar_view.dart';
+import 'package:calendar_app/widgets/calendar/calendar_header.dart';
+import 'package:calendar_app/widgets/events/events_list_view.dart';
+import '../../cubit/calendar_cubit.dart';
 import 'package:calendar_app/services/company_calendar_service.dart';
 
 class CompanyCalendarScreen extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/create_employee_service.dart';
-import '../widgets/company_widgets.dart';
+import '../../services/create_employee_service.dart';
+import '../../widgets/company/company_widgets.dart';
 
 class CreateEmployeeScreen extends StatefulWidget {
   const CreateEmployeeScreen({super.key});

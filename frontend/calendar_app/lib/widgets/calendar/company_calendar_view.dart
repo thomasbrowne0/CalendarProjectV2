@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../cubit/calendar_cubit.dart';
-import '../cubit/calendar_state.dart';
-import '../services/company_calendar_service.dart';
+import '../../cubit/calendar_cubit.dart';
+import '../../cubit/calendar_state.dart';
+import '../../services/company_calendar_service.dart';
 
 class CompanyCalendarView extends StatefulWidget {
   final String companyId;
@@ -52,7 +52,7 @@ class _CompanyCalendarViewState extends State<CompanyCalendarView> {
             markersMaxCount: 3,
             markerDecoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark 
-                ? const Color(0xFFFF4081)
+                ? const Color(0xFF128A03)
                 : Theme.of(context).colorScheme.onBackground,
               shape: BoxShape.circle,
             ),
