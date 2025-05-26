@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calendar_app/services/register_service.dart';
-import 'package:calendar_app/widgets/register_widgets.dart';
+import 'package:calendar_app/widgets/auth/auth_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -29,8 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _submit() async {
-
-    final navigator =Navigator.of(context);
+    final navigator = Navigator.of(context);
 
     if (!_formKey.currentState!.validate()) return;
 
@@ -64,26 +63,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  RegisterWidgets.title(context),
+                  AuthWidgets.registerTitle(context),
                   const SizedBox(height: 20),
-                  RegisterWidgets.firstNameField(_firstNameController),
+                  AuthWidgets.firstNameField(_firstNameController),
                   const SizedBox(height: 10),
-                  RegisterWidgets.lastNameField(_lastNameController),
+                  AuthWidgets.lastNameField(_lastNameController),
                   const SizedBox(height: 10),
-                  RegisterWidgets.emailField(_emailController),
+                  AuthWidgets.emailField(_emailController),
                   const SizedBox(height: 10),
-                  RegisterWidgets.passwordField(_passwordController),
+                  AuthWidgets.passwordField(_passwordController),
                   const SizedBox(height: 10),
-                  RegisterWidgets.confirmPasswordField(
+                  AuthWidgets.confirmPasswordField(
                     _confirmPasswordController,
                     _passwordController,
                   ),
                   const SizedBox(height: 20),
                   _isLoading
                       ? const CircularProgressIndicator()
-                      : RegisterWidgets.registerButton(_submit),
+                      : AuthWidgets.registerButton(_submit),
                   const SizedBox(height: 10),
-                  RegisterWidgets.backToLoginButton(context),
+                  AuthWidgets.backToLoginButton(context),
                 ],
               ),
             ),

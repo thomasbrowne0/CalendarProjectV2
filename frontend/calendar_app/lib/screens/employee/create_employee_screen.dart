@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/create_employee_service.dart';
-import '../widgets/create_employee_widgets.dart';
+import '../../services/create_employee_service.dart';
+import '../../widgets/company/company_widgets.dart';
 
 class CreateEmployeeScreen extends StatefulWidget {
   const CreateEmployeeScreen({super.key});
@@ -61,51 +61,51 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CreateEmployeeWidgets.textField(
+              CompanyWidgets.textField(
                 controller: _firstNameController,
                 label: 'First Name',
                 validator: (v) => (v == null || v.isEmpty) ? 'Please enter first name' : null,
               ),
-              CreateEmployeeWidgets.spacing(),
-              CreateEmployeeWidgets.textField(
+              CompanyWidgets.spacing(),
+              CompanyWidgets.textField(
                 controller: _lastNameController,
                 label: 'Last Name',
                 validator: (v) => (v == null || v.isEmpty) ? 'Please enter last name' : null,
               ),
-              CreateEmployeeWidgets.spacing(),
-              CreateEmployeeWidgets.textField(
+              CompanyWidgets.spacing(),
+              CompanyWidgets.textField(
                 controller: _emailController,
                 label: 'Email',
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) =>
                 (v == null || v.isEmpty || !v.contains('@')) ? 'Please enter a valid email' : null,
               ),
-              CreateEmployeeWidgets.spacing(),
-              CreateEmployeeWidgets.textField(
+              CompanyWidgets.spacing(),
+              CompanyWidgets.textField(
                 controller: _passwordController,
                 label: 'Password',
                 obscure: true,
                 validator: (v) =>
                 (v == null || v.isEmpty || v.length < 6) ? 'Password must be at least 6 characters' : null,
               ),
-              CreateEmployeeWidgets.spacing(),
-              CreateEmployeeWidgets.textField(
+              CompanyWidgets.spacing(),
+              CompanyWidgets.textField(
                 controller: _confirmPasswordController,
                 label: 'Confirm Password',
                 obscure: true,
                 validator: (v) =>
                 (v == null || v.isEmpty) ? 'Please confirm password' : null,
               ),
-              CreateEmployeeWidgets.spacing(),
-              CreateEmployeeWidgets.textField(
+              CompanyWidgets.spacing(),
+              CompanyWidgets.textField(
                 controller: _jobTitleController,
                 label: 'Job Title',
                 validator: (v) => (v == null || v.isEmpty) ? 'Please enter job title' : null,
               ),
               const SizedBox(height: 20),
               _isLoading
-                  ? CreateEmployeeWidgets.loadingIndicator()
-                  : CreateEmployeeWidgets.submitButton(_handleSubmit),
+                  ? CompanyWidgets.loadingIndicator()
+                  : CompanyWidgets.addEmployeeButton(_handleSubmit),
             ],
           ),
         ),
