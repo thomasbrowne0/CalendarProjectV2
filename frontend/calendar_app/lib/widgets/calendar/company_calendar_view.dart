@@ -53,7 +53,7 @@ class _CompanyCalendarViewState extends State<CompanyCalendarView> {
             markerDecoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark 
                 ? const Color(0xFF128A03)
-                : Theme.of(context).colorScheme.onBackground,
+                : Theme.of(context).colorScheme.onSurface,
               shape: BoxShape.circle,
             ),
             todayDecoration: BoxDecoration(
@@ -68,12 +68,12 @@ class _CompanyCalendarViewState extends State<CompanyCalendarView> {
               color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
             ),
             outsideTextStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.4),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
             ),
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
             weekdayStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.bold,
             ),
             weekendStyle: TextStyle(
