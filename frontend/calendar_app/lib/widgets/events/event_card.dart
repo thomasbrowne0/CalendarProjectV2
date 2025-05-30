@@ -14,17 +14,25 @@ class EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final canEdit = authProvider.user?.isCompanyOwner == true || 
-                   event.createdById == authProvider.user?.id;
+    final canEdit = authProvider.user?.isCompanyOwner == true ||
+        event.createdById == authProvider.user?.id;
 
     return Card(
       elevation: 3,
-      shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.2),
+      shadowColor: Theme
+          .of(context)
+          .colorScheme
+          .shadow
+          .withOpacity(0.2),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          color: Theme
+              .of(context)
+              .colorScheme
+              .outline
+              .withOpacity(0.1),
           width: 1,
         ),
       ),
@@ -33,7 +41,10 @@ class EventCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border(
             left: BorderSide(
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
               width: 4,
             ),
           ),

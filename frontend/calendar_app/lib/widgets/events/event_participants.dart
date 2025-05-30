@@ -30,7 +30,10 @@ class ParticipantsHeader extends StatelessWidget {
       'Participants ($count):',
       style: TextStyle(
         fontWeight: FontWeight.w500,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: Theme
+            .of(context)
+            .colorScheme
+            .onSurface,
       ),
     );
   }
@@ -66,7 +69,10 @@ class ParticipantChip extends StatelessWidget {
         vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: Theme
+            .of(context)
+            .colorScheme
+            .primaryContainer,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -93,11 +99,17 @@ class ParticipantAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 12,
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme
+          .of(context)
+          .colorScheme
+          .primary,
       child: Text(
         firstName[0],
         style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimary,
+          color: Theme
+              .of(context)
+              .colorScheme
+              .onPrimary,
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
@@ -121,7 +133,10 @@ class ParticipantName extends StatelessWidget {
     return Text(
       '$firstName $lastName',
       style: TextStyle(
-        color: Theme.of(context).colorScheme.onPrimaryContainer,
+        color: Theme
+            .of(context)
+            .colorScheme
+            .onPrimaryContainer,
         fontWeight: FontWeight.w500,
       ),
     );

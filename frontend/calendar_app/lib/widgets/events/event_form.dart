@@ -45,7 +45,8 @@ class EventFormWidgets {
 
     return employees
         .map(
-          (e) => CheckboxListTile(
+          (e) =>
+          CheckboxListTile(
             title: Text('${e.firstName} ${e.lastName}'),
             subtitle: Text(e.jobTitle),
             value: selectedIds.contains(e.id),
@@ -53,7 +54,7 @@ class EventFormWidgets {
               onChanged(e.id, value ?? false);
             },
           ),
-        )
+    )
         .toList();
   }
 
@@ -68,7 +69,10 @@ class EventFormWidgets {
         buildTextField(
           controller: titleController,
           label: 'Event Title',
-          validator: (value) => (value == null || value.isEmpty) ? 'Please enter an event title' : null,
+          validator: (value) =>
+          (value == null || value.isEmpty)
+              ? 'Please enter an event title'
+              : null,
         ),
         const SizedBox(height: 12),
         buildTextField(
@@ -115,7 +119,8 @@ class EventFormWidgets {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Participants', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+            'Participants', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         ...buildParticipantCheckboxes(
           employees: employees.cast<Employee>(),
@@ -134,8 +139,8 @@ class EventFormWidgets {
     return isLoading
         ? const Center(child: CircularProgressIndicator())
         : ElevatedButton(
-            onPressed: onPressed,
-            child: Text(buttonText),
-          );
+      onPressed: onPressed,
+      child: Text(buttonText),
+    );
   }
 }

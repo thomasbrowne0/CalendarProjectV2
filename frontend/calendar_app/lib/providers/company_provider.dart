@@ -12,7 +12,7 @@ class CompanyProvider with ChangeNotifier {
   List<Company> _companies = [];
   Company? _selectedCompany;
   List<Employee> _employees = [];
-  
+
   final ApiService? _apiService;
   final AuthProvider? _authProvider;
   final WebSocketService? _webSocketService;
@@ -20,12 +20,14 @@ class CompanyProvider with ChangeNotifier {
   CompanyProvider(this._apiService, this._authProvider, this._webSocketService);
 
   List<Company> get companies => [..._companies];
+
   Company? get selectedCompany => _selectedCompany;
+
   List<Employee> get employees => [..._employees];
 
   Future<void> fetchCompanies() async {
     if (!_authProvider!.isAuth) return;
-    
+
     try {
       final companies = await _apiService!.getCompanies();
       _companies = companies;
@@ -37,8 +39,10 @@ class CompanyProvider with ChangeNotifier {
   }
 
   Future<void> selectCompany(String companyId) async {
-    if (_apiService == null || _authProvider == null || !_authProvider!.isAuth) {
-      _logger.severe('CompanyProvider: ApiService or AuthProvider not available, or not authenticated.');
+    if (_apiService == null || _authProvider == null ||
+        !_authProvider!.isAuth) {
+      _logger.severe(
+          'CompanyProvider: ApiService or AuthProvider not available, or not authenticated.');
       return;
     }
     try {
@@ -50,33 +54,45 @@ class CompanyProvider with ChangeNotifier {
       Company? companyToSelect;
 
       // Try to find in existing list first
-      final matchingCompaniesInList = _companies.where((c) => c.id == companyId).toList();
+      final matchingCompaniesInList = _companies
+          .where((c) => c.id == companyId)
+          .toList();
       if (matchingCompaniesInList.isNotEmpty) {
         companyToSelect = matchingCompaniesInList.first;
       } else {
         // If not found in the list, we need to fetch it.
         // How we fetch depends on whether the user is an owner or employee.
-        if (_authProvider!.user != null && !_authProvider!.user!.isCompanyOwner) {
+        if (_authProvider!.user != null &&
+            !_authProvider!.user!.isCompanyOwner) {
           // User is an EMPLOYEE, fetch their specific company by ID
-          _logger.info('CompanyProvider: Employee needs company $companyId. Fetching specifically.');
+          _logger.info(
+              'CompanyProvider: Employee needs company $companyId. Fetching specifically.');
           try {
             companyToSelect = await _apiService!.getCompanyById(companyId);
           } catch (e) {
-            _logger.severe('CompanyProvider: Error fetching specific company $companyId for employee: $e');
+            _logger.severe(
+                'CompanyProvider: Error fetching specific company $companyId for employee: $e');
             _selectedCompany = null; // Clear selection on error
             notifyListeners();
             rethrow; // Rethrow to be caught by UI
           }
-        } else if (_authProvider!.user != null && _authProvider!.user!.isCompanyOwner) {
+        } else if (_authProvider!.user != null &&
+            _authProvider!.user!.isCompanyOwner) {
           if (_companies.isEmpty) {
-            _logger.info('CompanyProvider: Owner has no companies in list. Fetching all their companies.');
-             await fetchCompanies();
-             final stillMatching = _companies.where((c) => c.id == companyId).toList();
-             if (stillMatching.isNotEmpty) {
-               companyToSelect = stillMatching.first;
-             }
+            _logger.info(
+                'CompanyProvider: Owner has no companies in list. Fetching all their companies.');
+            await fetchCompanies();
+            final stillMatching = _companies
+                .where((c) => c.id == companyId)
+                .toList();
+            if (stillMatching.isNotEmpty) {
+              companyToSelect = stillMatching.first;
+            }
           } else {
-            _logger.info('CompanyProvider: Owner selecting company $companyId, but it was not in the pre-loaded list of ${_companies.length} companies.');     }
+            _logger.info(
+                'CompanyProvider: Owner selecting company $companyId, but it was not in the pre-loaded list of ${_companies
+                    .length} companies.');
+          }
         }
       }
 
@@ -87,14 +103,15 @@ class CompanyProvider with ChangeNotifier {
         if (_webSocketService != null && _webSocketService!.isConnected) {
           _webSocketService!.setCompany(companyToSelect.id);
         }
-        
       } else {
-        _logger.severe('CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
+        _logger.severe(
+            'CompanyProvider: Could not find or fetch company with ID: $companyId. Clearing selection.');
         _selectedCompany = null;
       }
       notifyListeners();
     } catch (error) {
-      _logger.severe('CompanyProvider: General error in selectCompany for $companyId: $error');
+      _logger.severe(
+          'CompanyProvider: General error in selectCompany for $companyId: $error');
       _selectedCompany = null;
       notifyListeners();
       rethrow;
@@ -123,8 +140,8 @@ class CompanyProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addEmployee(
-      String companyId, String firstName, String lastName, String email, String password, String jobTitle) async {
+  Future<void> addEmployee(String companyId, String firstName, String lastName,
+      String email, String password, String jobTitle) async {
     try {
       final employee = await _apiService!.createEmployee(companyId, {
         'firstName': firstName,
@@ -133,7 +150,7 @@ class CompanyProvider with ChangeNotifier {
         'password': password,
         'jobTitle': jobTitle,
       });
-      
+
       _employees.add(employee);
       notifyListeners();
     } catch (error) {

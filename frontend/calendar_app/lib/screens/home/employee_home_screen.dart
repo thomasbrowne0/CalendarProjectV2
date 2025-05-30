@@ -19,63 +19,68 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
   int _selectedIndex = 0;
 
   @override
-void didChangeDependencies() {
-  if (_isInit) {
-    setState(() {
-      _isLoading = true;
-    });
-    
-    final authProvider = Provider.of<AuthProvider>(context, listen: false); 
-    
-    if (authProvider.isAuth && authProvider.user != null && !authProvider.user!.isCompanyOwner) {
-      final String? employeeCompanyId = authProvider.companyId; 
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
 
-      if (employeeCompanyId != null && employeeCompanyId.isNotEmpty) {
-        Provider.of<CompanyProvider>(context, listen: false)
-            .selectCompany(employeeCompanyId) 
-            .then((_) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        }).catchError((error) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      if (authProvider.isAuth && authProvider.user != null &&
+          !authProvider.user!.isCompanyOwner) {
+        final String? employeeCompanyId = authProvider.companyId;
+
+        if (employeeCompanyId != null && employeeCompanyId.isNotEmpty) {
+          Provider.of<CompanyProvider>(context, listen: false)
+              .selectCompany(employeeCompanyId)
+              .then((_) {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          }).catchError((error) {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(
+                    'Failed to load company data: ${error.toString()}')),
+              );
+            }
+          });
+        } else {
           if (mounted) {
             setState(() {
               _isLoading = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to load company data: ${error.toString()}')),
+              const SnackBar(content: Text(
+                  'Your company information is missing. Please log in again.')),
             );
           }
-        });
+        }
       } else {
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Your company information is missing. Please log in again.')),
-          );
         }
       }
-    } else {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      _isInit = false;
     }
-    _isInit = false;
+    super.didChangeDependencies();
   }
-  super.didChangeDependencies();
-}
 
   @override
   Widget build(BuildContext context) {
     final companyProvider = Provider.of<CompanyProvider>(context);
     final company = companyProvider.selectedCompany;
-    final user = Provider.of<AuthProvider>(context).user;
+    final user = Provider
+        .of<AuthProvider>(context)
+        .user;
 
     List<Widget> pages = [
       company == null ? _buildNoCompanyFound() : const CompanyCalendarScreen(),
@@ -117,7 +122,8 @@ void didChangeDependencies() {
 
   Widget _buildNoCompanyFound() {
     return const Center(
-      child: Text('No company information found. Please contact your administrator.'),
+      child: Text(
+          'No company information found. Please contact your administrator.'),
     );
   }
 }

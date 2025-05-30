@@ -16,6 +16,7 @@ class ApiService {
   String? _companyId;
 
   String? get token => _token;
+
   String? get companyId => _companyId;
 
   void setToken(String token) => _token = token;
@@ -25,10 +26,11 @@ class ApiService {
     _logger.info('Company context set to: $companyId');
   }
 
-  Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    if (_token != null) 'Authorization': 'Bearer $_token',
-  };
+  Map<String, String> get _headers =>
+      {
+        'Content-Type': 'application/json',
+        if (_token != null) 'Authorization': 'Bearer $_token',
+      };
 
   // ───────────────────── AUTH ─────────────────────
 
@@ -48,8 +50,8 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> registerCompanyOwner(
-      String firstName, String lastName, String email, String password) async {
+  Future<Map<String, dynamic>> registerCompanyOwner(String firstName,
+      String lastName, String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register-company-owner'),
       headers: _headers,
@@ -108,7 +110,8 @@ class ApiService {
       return Company.fromJson(jsonDecode(response.body));
     } else {
       _logger.severe(
-        'Failed to load company $companyId. Status: ${response.statusCode}, Body: ${response.body}',
+        'Failed to load company $companyId. Status: ${response
+            .statusCode}, Body: ${response.body}',
       );
       throw Exception('Failed to load company details');
     }
@@ -130,8 +133,8 @@ class ApiService {
     }
   }
 
-  Future<Employee> createEmployee(
-      String companyId, Map<String, dynamic> employee) async {
+  Future<Employee> createEmployee(String companyId,
+      Map<String, dynamic> employee) async {
     final response = await http.post(
       Uri.parse('$baseUrl/companies/$companyId/employees'),
       headers: _headers,
@@ -147,14 +150,15 @@ class ApiService {
 
   // ───────────────────── EVENTS ─────────────────────
 
-  Future<List<CalendarEvent>> getEvents(
-      String companyId, DateTime start, DateTime end) async {
+  Future<List<CalendarEvent>> getEvents(String companyId, DateTime start,
+      DateTime end) async {
     try {
       final startParam = _formatDate(start);
       final endParam = _formatDate(end);
 
       final response = await http.get(
-        Uri.parse('$baseUrl/companies/$companyId/events?start=$startParam&end=$endParam'),
+        Uri.parse(
+            '$baseUrl/companies/$companyId/events?start=$startParam&end=$endParam'),
         headers: _headers,
       );
 
@@ -163,7 +167,8 @@ class ApiService {
         final data = jsonDecode(response.body) as List;
         return data.map((json) => CalendarEvent.fromJson(json)).toList();
       } else {
-        _logger.severe('Error fetching events. Status: ${response.statusCode}, Body: ${response.body}');
+        _logger.severe('Error fetching events. Status: ${response
+            .statusCode}, Body: ${response.body}');
         throw Exception('Failed to load events');
       }
     } catch (e) {
@@ -184,7 +189,8 @@ class ApiService {
       if (response.statusCode == 200) {
         return CalendarEvent.fromJson(jsonDecode(response.body));
       } else {
-        _logger.severe('Failed to fetch event. Status: ${response.statusCode}, Body: ${response.body}');
+        _logger.severe('Failed to fetch event. Status: ${response
+            .statusCode}, Body: ${response.body}');
         throw Exception('Failed to fetch event');
       }
     } catch (e) {
@@ -193,8 +199,8 @@ class ApiService {
     }
   }
 
-  Future<CalendarEvent> createEvent(
-      String companyId, Map<String, dynamic> event) async {
+  Future<CalendarEvent> createEvent(String companyId,
+      Map<String, dynamic> event) async {
     try {
       _sanitizeEvent(event);
 
@@ -209,7 +215,8 @@ class ApiService {
       if (response.statusCode == 201) {
         return CalendarEvent.fromJson(jsonDecode(response.body));
       } else {
-        _logger.severe("Error creating event. Status: ${response.statusCode}, Body: ${response.body}");
+        _logger.severe("Error creating event. Status: ${response
+            .statusCode}, Body: ${response.body}");
         throw Exception('Failed to create event');
       }
     } catch (e) {
@@ -218,8 +225,8 @@ class ApiService {
     }
   }
 
-  Future<void> updateEvent(
-      String companyId, String eventId, Map<String, dynamic> eventData) async {
+  Future<void> updateEvent(String companyId, String eventId,
+      Map<String, dynamic> eventData) async {
     final response = await http.put(
       Uri.parse('$baseUrl/companies/$companyId/events/$eventId'),
       headers: _headers,

@@ -11,7 +11,8 @@ final _logger = Logger('WebSocketService');
 class WebSocketService {
   final ApiService _apiService;
   WebSocketChannel? _channel;
-  final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
+  final StreamController<
+      Map<String, dynamic>> _messageController = StreamController.broadcast();
 
   bool _isConnected = false;
   String? _currentToken;
@@ -28,7 +29,8 @@ class WebSocketService {
     if (_isConnected) return;
 
     _currentToken = token;
-    final wsUrl = Uri.parse('wss://calendar-backend-503012500647.europe-north1.run.app/ws');
+    final wsUrl = Uri.parse(
+        'wss://calendar-backend-503012500647.europe-north1.run.app/ws');
 
     try {
       _channel = WebSocketChannel.connect(wsUrl);
@@ -58,7 +60,8 @@ class WebSocketService {
     // Handle authentication response
     if (decodedMessage['Type'] == 'AuthenticationResult') {
       if (decodedMessage['Success'] == true) {
-        _logger.info('WebSocket authentication successful for user: ${decodedMessage['UserId']}');
+        _logger.info(
+            'WebSocket authentication successful for user: ${decodedMessage['UserId']}');
 
         // Automatically associate with company after successful auth
         final companyId = _apiService.companyId;
@@ -66,7 +69,8 @@ class WebSocketService {
           setCompany(companyId);
         }
       } else {
-        _logger.severe('WebSocket authentication failed: ${decodedMessage['Reason']}');
+        _logger.severe(
+            'WebSocket authentication failed: ${decodedMessage['Reason']}');
       }
     }
 

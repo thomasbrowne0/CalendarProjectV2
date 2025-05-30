@@ -15,7 +15,7 @@ class CreateCompanyService {
 
     final navigator = Navigator.of(context);
     final companyProvider =
-        Provider.of<CompanyProvider>(context, listen: false);
+    Provider.of<CompanyProvider>(context, listen: false);
     setLoading(true);
     try {
       await companyProvider.createCompany(

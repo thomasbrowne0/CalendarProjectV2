@@ -80,13 +80,20 @@ class EventTimeDisplay extends StatelessWidget {
         Icon(
           Icons.access_time,
           size: 16,
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme
+              .of(context)
+              .colorScheme
+              .primary,
         ),
         const SizedBox(width: 8),
         Text(
-          '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm').format(endTime)}',
+          '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm')
+              .format(endTime)}',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
+            color: Theme
+                .of(context)
+                .colorScheme
+                .primary,
             fontWeight: FontWeight.w500,
           ),
         ),

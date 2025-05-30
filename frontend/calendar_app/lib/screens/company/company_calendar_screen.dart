@@ -36,7 +36,8 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
   void _initializeCalendar() {
     setState(() => _isLoading = true);
 
-    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+    final companyProvider = Provider.of<CompanyProvider>(
+        context, listen: false);
     if (companyProvider.selectedCompany != null) {
       final companyId = companyProvider.selectedCompany!.id;
 
@@ -71,7 +72,10 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
   }
 
   void _navigateToCreateEvent() {
-    final focusedDate = context.read<CalendarCubit>().state.focusedDay;
+    final focusedDate = context
+        .read<CalendarCubit>()
+        .state
+        .focusedDay;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => CreateEventScreen(selectedDate: focusedDate),
@@ -103,25 +107,25 @@ class _CompanyCalendarScreenState extends State<CompanyCalendarScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
-              children: [
-                CalendarHeader(
-                  calendarFormat: _calendarFormat,
-                  onFormatToggle: _toggleCalendarFormat,
-                ),
-                CompanyCalendarView(
-                  companyId: selectedCompany.id,
-                  calendarFormat: _calendarFormat,
-                  onFormatChanged: _onCalendarFormatChanged,
-                ),
-                const Expanded(child: EventsListView()),
-              ],
-            ),
+        children: [
+          CalendarHeader(
+            calendarFormat: _calendarFormat,
+            onFormatToggle: _toggleCalendarFormat,
+          ),
+          CompanyCalendarView(
+            companyId: selectedCompany.id,
+            calendarFormat: _calendarFormat,
+            onFormatChanged: _onCalendarFormatChanged,
+          ),
+          const Expanded(child: EventsListView()),
+        ],
+      ),
       floatingActionButton: isCompanyOwner
           ? FloatingActionButton(
-              onPressed: _navigateToCreateEvent,
-              tooltip: 'Create Event',
-              child: const Icon(Icons.add),
-            )
+        onPressed: _navigateToCreateEvent,
+        tooltip: 'Create Event',
+        child: const Icon(Icons.add),
+      )
           : null,
     );
   }

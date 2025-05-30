@@ -40,13 +40,10 @@ class CalendarCubit extends Cubit<CalendarState> {
 
       if (message['Type'] == 'CompanySet' && message['CompanyId'] != null) {
         setCompanyId(message['CompanyId']);
-
       } else if (message['Type'] == 'EventCreated') {
         _handleEventCreated(message['Data']['EventId']);
-
       } else if (message['Type'] == 'EventUpdated') {
         _handleEventUpdated(message['Data']['EventId']);
-
       } else if (message['Type'] == 'EventDeleted') {
         _handleEventDeleted(message['Data']['EventId']);
       }
@@ -57,11 +54,13 @@ class CalendarCubit extends Cubit<CalendarState> {
   /// Fetches full event data from the API and updates the state.
   void _handleEventCreated(String eventId) async {
     if (companyId == null) {
-      _logger.severe('CalendarCubit: Company ID is null, cannot fetch event. Using AuthProvider instead.');
+      _logger.severe(
+          'CalendarCubit: Company ID is null, cannot fetch event. Using AuthProvider instead.');
       if (_apiService.companyId != null) {
         companyId = _apiService.companyId;
       } else {
-        _logger.severe('CalendarCubit: Both local and ApiService companyId are null. Cannot fetch event.');
+        _logger.severe(
+            'CalendarCubit: Both local and ApiService companyId are null. Cannot fetch event.');
         return;
       }
     }
@@ -70,19 +69,22 @@ class CalendarCubit extends Cubit<CalendarState> {
       final event = await _apiService.getEventById(companyId!, eventId);
       final updatedEvents = [...state.events, event];
       emit(state.copyWith(events: updatedEvents));
-
     } catch (e) {
       _logger.severe('CalendarCubit: Error handling EventCreated: $e');
 
       try {
         // Fallback: refetch all events
-        final startDate = DateTime(state.focusedDay.year, state.focusedDay.month, 1);
-        final endDate = DateTime(state.focusedDay.year, state.focusedDay.month + 1, 0);
+        final startDate = DateTime(
+            state.focusedDay.year, state.focusedDay.month, 1);
+        final endDate = DateTime(
+            state.focusedDay.year, state.focusedDay.month + 1, 0);
 
-        final events = await _apiService.getEvents(companyId!, startDate, endDate);
+        final events = await _apiService.getEvents(
+            companyId!, startDate, endDate);
         emit(state.copyWith(events: events));
       } catch (fallbackError) {
-        _logger.severe('CalendarCubit: Fallback refresh also failed: $fallbackError');
+        _logger.severe(
+            'CalendarCubit: Fallback refresh also failed: $fallbackError');
       }
     }
   }
@@ -109,7 +111,6 @@ class CalendarCubit extends Cubit<CalendarState> {
       }
 
       emit(state.copyWith(events: updatedEvents));
-
     } catch (e) {
       _logger.severe('CalendarCubit: Error handling EventUpdated: $e');
     }
@@ -127,15 +128,17 @@ class CalendarCubit extends Cubit<CalendarState> {
   }
 
   /// Fetches events for a company between `start` and `end` date (default is current month).
-  Future<void> fetchEvents(String companyId, {DateTime? start, DateTime? end}) async {
+  Future<void> fetchEvents(String companyId,
+      {DateTime? start, DateTime? end}) async {
     emit(state.copyWith(isLoading: true, error: null));
     try {
-      final startDate = start ?? DateTime(state.focusedDay.year, state.focusedDay.month, 1);
-      final endDate = end ?? DateTime(state.focusedDay.year, state.focusedDay.month + 1, 0);
+      final startDate = start ??
+          DateTime(state.focusedDay.year, state.focusedDay.month, 1);
+      final endDate = end ??
+          DateTime(state.focusedDay.year, state.focusedDay.month + 1, 0);
 
       final events = await _apiService.getEvents(companyId, startDate, endDate);
       emit(state.copyWith(events: events, isLoading: false));
-
     } catch (e) {
       emit(state.copyWith(error: e.toString(), isLoading: false));
     }
@@ -157,15 +160,13 @@ class CalendarCubit extends Cubit<CalendarState> {
 
   /// Sends updated event details to the API.
   /// WebSocket message will trigger state update.
-  Future<void> updateEvent(
-      String eventId,
+  Future<void> updateEvent(String eventId,
       String companyId,
       String title,
       String description,
       DateTime startTime,
       DateTime endTime,
-      List<String> participantIds,
-      ) async {
+      List<String> participantIds,) async {
     try {
       await _apiService.updateEvent(companyId, eventId, {
         'title': title,
@@ -174,7 +175,6 @@ class CalendarCubit extends Cubit<CalendarState> {
         'endTime': endTime.toIso8601String(),
         'participantIds': participantIds,
       });
-
     } catch (error) {
       _logger.severe('CalendarCubit: Error updating event: $error');
       rethrow;

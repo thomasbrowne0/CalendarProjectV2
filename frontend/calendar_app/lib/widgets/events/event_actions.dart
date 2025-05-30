@@ -32,13 +32,17 @@ class EditEventButton extends StatelessWidget {
     return IconButton(
       icon: Icon(
         Icons.edit,
-        color: Theme.of(context).colorScheme.inverseSurface,
+        color: Theme
+            .of(context)
+            .colorScheme
+            .inverseSurface,
       ),
-      onPressed: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => EditEventScreen(event: event),
-        ),
-      ),
+      onPressed: () =>
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => EditEventScreen(event: event),
+            ),
+          ),
     );
   }
 }
@@ -53,7 +57,10 @@ class DeleteEventButton extends StatelessWidget {
     return IconButton(
       icon: Icon(
         Icons.delete,
-        color: Theme.of(context).colorScheme.secondary,
+        color: Theme
+            .of(context)
+            .colorScheme
+            .secondary,
       ),
       onPressed: () => _showDeleteDialog(context),
     );
@@ -67,14 +74,16 @@ class DeleteEventButton extends StatelessWidget {
 
     if (confirm == true && context.mounted) {
       try {
-        final companyId = Provider.of<CompanyProvider>(context, listen: false)
+        final companyId = Provider
+            .of<CompanyProvider>(context, listen: false)
             .selectedCompany!
             .id;
         await context.read<CalendarCubit>().deleteEvent(companyId, event.id);
       } catch (error) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete event: ${error.toString()}')),
+            SnackBar(
+                content: Text('Failed to delete event: ${error.toString()}')),
           );
         }
       }
@@ -98,7 +107,10 @@ class DeleteEventDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(true),
           style: TextButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme
+                .of(context)
+                .colorScheme
+                .error,
           ),
           child: const Text('DELETE'),
         ),

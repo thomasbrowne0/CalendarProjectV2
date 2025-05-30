@@ -1,12 +1,11 @@
 using System.Threading.Tasks;
 using Application.DTOs;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface IAuthService
 {
-    public interface IAuthService
-    {
-        Task<AuthResponseDto> LoginAsync(UserLoginDto loginDto);
-        Task<AuthResponseDto> RegisterCompanyOwnerAsync(UserRegistrationDto registrationDto);
-        Task<bool> ValidateTokenAsync(string token);
-    }
+    Task<AuthResponseDto> LoginAsync(UserLoginDto loginDto);
+    Task<AuthResponseDto> RegisterCompanyOwnerAsync(UserRegistrationDto registrationDto);
+    Task<bool> ValidateTokenAsync(string token);
 }

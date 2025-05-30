@@ -2,11 +2,14 @@
 
 ## Overview
 
-The API layer serves as the entry point for our Calendar Project V2, implementing Clean Architecture (Onion Architecture) principles. It exposes RESTful endpoints for our Flutter frontend and provides real-time WebSocket communication for instant updates.
+The API layer serves as the entry point for our Calendar Project V2, implementing Clean Architecture (Onion
+Architecture) principles. It exposes RESTful endpoints for our Flutter frontend and provides real-time WebSocket
+communication for instant updates.
 
 ## Architecture
 
 This layer follows the **Presentation Layer** pattern in Clean Architecture, handling:
+
 - HTTP request/response handling
 - Input validation and model binding
 - Authentication and authorization
@@ -31,6 +34,7 @@ This layer follows the **Presentation Layer** pattern in Clean Architecture, han
 ### Real-time Features
 
 The API includes WebSocket support using Fleck for instant updates:
+
 - Calendar event creation/updates/deletion
 - Employee additions/removals
 - Company changes
@@ -39,10 +43,12 @@ The API includes WebSocket support using Fleck for instant updates:
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/login` - User authentication with JWT token generation
 - `POST /api/auth/register-company-owner` - Company owner registration
 
 ### Companies
+
 - `GET /api/companies` - Get all companies owned by authenticated user
 - `GET /api/companies/{id}` - Get specific company details
 - `POST /api/companies` - Create new company (CVR validation included)
@@ -50,6 +56,7 @@ The API includes WebSocket support using Fleck for instant updates:
 - `DELETE /api/companies/{id}` - Delete company and all related data
 
 ### Employees
+
 - `GET /api/companies/{companyId}/employees` - Get all company employees
 - `GET /api/companies/{companyId}/employees/{id}` - Get specific employee
 - `POST /api/companies/{companyId}/employees` - Create new employee
@@ -57,6 +64,7 @@ The API includes WebSocket support using Fleck for instant updates:
 - `DELETE /api/companies/{companyId}/employees/{id}` - Remove employee
 
 ### Calendar Events
+
 - `GET /api/companies/{companyId}/events` - Get all company events with date filtering
 - `GET /api/companies/{companyId}/events/employee/{employeeId}` - Get employee-specific events
 - `GET /api/companies/{companyId}/events/{id}` - Get detailed event information
@@ -69,12 +77,14 @@ The API includes WebSocket support using Fleck for instant updates:
 ## Security Features
 
 ### Authentication & Authorization
+
 - JWT-based authentication with configurable expiration
 - Role-based access control (Company Owner vs Employee)
 - Company-scoped data access (users can only access their company's data)
 - Secure password hashing using BCrypt
 
 ### Data Protection
+
 - CORS configuration for frontend integration
 - Input validation on all endpoints
 - SQL injection prevention through Entity Framework
@@ -97,6 +107,7 @@ ws.onmessage = function(event) {
 ## Error Handling
 
 The API implements comprehensive error handling:
+
 - Standardized error responses with meaningful messages
 - Proper HTTP status codes
 - Validation error details for client-side feedback
@@ -105,6 +116,7 @@ The API implements comprehensive error handling:
 ## Configuration
 
 Key configuration settings in `appsettings.json`:
+
 - Database connection strings
 - JWT authentication settings
 - WebSocket server configuration

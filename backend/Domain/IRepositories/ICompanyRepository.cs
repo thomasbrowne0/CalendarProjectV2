@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Entities;
 
-namespace Domain.IRepositories
+namespace Domain.IRepositories;
+
+public interface ICompanyRepository : IRepository<Company>
 {
-    public interface ICompanyRepository : IRepository<Company>
-    {
-        Task<Company> GetByIdWithDetailsAsync(Guid id);
-        Task<Company> GetByCVRAsync(string cvr);
-        Task<IEnumerable<Company>> GetCompaniesByOwnerIdAsync(Guid ownerId);
-        Task<bool> ExistsByCVRAsync(string cvr);
-    }
+    Task<Company> GetByIdWithDetailsAsync(Guid id);
+    Task<Company> GetByCVRAsync(string cvr);
+    Task<IEnumerable<Company>> GetCompaniesByOwnerIdAsync(Guid ownerId);
+    Task<bool> ExistsByCVRAsync(string cvr);
 }

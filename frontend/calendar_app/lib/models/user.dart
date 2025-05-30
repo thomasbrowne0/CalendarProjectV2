@@ -3,7 +3,8 @@ class User {
   final String firstName;
   final String lastName;
   final String email;
- // final String mobilePhone;
+
+  // final String mobilePhone;
   final String userType;
 
   User({
@@ -11,7 +12,7 @@ class User {
     required this.firstName,
     required this.lastName,
     required this.email,
-   // required this.mobilePhone,
+    // required this.mobilePhone,
     required this.userType,
   });
 
@@ -21,7 +22,7 @@ class User {
       firstName: json['firstName'],
       lastName: json['lastName'],
       email: json['email'],
-    //  mobilePhone: json['mobilePhone'],
+      //  mobilePhone: json['mobilePhone'],
       userType: json['userType'],
     );
   }
@@ -32,7 +33,7 @@ class User {
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
-     // 'mobilePhone': mobilePhone,
+      // 'mobilePhone': mobilePhone,
       'userType': userType,
     };
   }

@@ -28,7 +28,7 @@ class CreateEmployeeService {
     try {
       final navigator = Navigator.of(context);
       final companyProvider =
-          Provider.of<CompanyProvider>(context, listen: false);
+      Provider.of<CompanyProvider>(context, listen: false);
       await companyProvider.addEmployee(
         companyProvider.selectedCompany!.id,
         firstNameController.text.trim(),

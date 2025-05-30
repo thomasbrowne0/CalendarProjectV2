@@ -6,53 +6,54 @@ using Microsoft.EntityFrameworkCore;
 using Domain.IRepositories;
 using Infrastructure.Data;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Repositories;
+
+public class Repository<T> : IRepository<T> where T : class
 {
-    public class Repository<T> : IRepository<T> where T : class
+    protected readonly AppDbContext _context;
+    protected readonly DbSet<T> _dbSet;
+
+    public Repository(AppDbContext context)
     {
-        protected readonly AppDbContext _context;
-        protected readonly DbSet<T> _dbSet;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _dbSet = context.Set<T>();
+    }
 
-        public Repository(AppDbContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _dbSet = context.Set<T>();
-        }        public async Task<T> GetByIdAsync(Guid id)
-        {
-            /* We need to handle the case where entity is not found properly
-               because callers should be able to check for null returns */
-            return await _dbSet.FindAsync(id) ?? throw new KeyNotFoundException($"Entity with ID {id} not found");
-        }
+    public async Task<T> GetByIdAsync(Guid id)
+    {
+        /* We need to handle the case where entity is not found properly
+           because callers should be able to check for null returns */
+        return await _dbSet.FindAsync(id) ?? throw new KeyNotFoundException($"Entity with ID {id} not found");
+    }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            return await _dbSet.ToListAsync();
-        }
+    public async Task<IEnumerable<T>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
 
-        public async Task AddAsync(T entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-                
-            await _dbSet.AddAsync(entity);
-        }
+    public async Task AddAsync(T entity)
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
 
-        public Task UpdateAsync(T entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-                
-            _context.Entry(entity).State = EntityState.Modified;
-            return Task.CompletedTask;
-        }
+        await _dbSet.AddAsync(entity);
+    }
 
-        public Task DeleteAsync(T entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-                
-            _dbSet.Remove(entity);
-            return Task.CompletedTask;
-        }
+    public Task UpdateAsync(T entity)
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+
+        _context.Entry(entity).State = EntityState.Modified;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(T entity)
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+
+        _dbSet.Remove(entity);
+        return Task.CompletedTask;
     }
 }

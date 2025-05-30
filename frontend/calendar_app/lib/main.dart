@@ -30,7 +30,8 @@ class MyApp extends StatelessWidget {
         builder: (context) {
           // Access services from providers
           final apiService = Provider.of<ApiService>(context, listen: false);
-          final webSocketService = Provider.of<WebSocketService>(context, listen: false);
+          final webSocketService = Provider.of<WebSocketService>(
+              context, listen: false);
 
           return MultiBlocProvider(
             providers: [
@@ -40,14 +41,15 @@ class MyApp extends StatelessWidget {
               ),
             ],
             child: Consumer2<AuthProvider, ThemeProvider>(
-              builder: (ctx, auth, themeProvider, _) => MaterialApp(
-                debugShowCheckedModeBanner: false,
-                title: 'Company Calendar',
-                theme: ThemeConfig.lightTheme,
-                darkTheme: ThemeConfig.darkTheme,
-                themeMode: themeProvider.themeMode,
-                home: _buildHome(auth),
-              ),
+              builder: (ctx, auth, themeProvider, _) =>
+                  MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    title: 'Company Calendar',
+                    theme: ThemeConfig.lightTheme,
+                    darkTheme: ThemeConfig.darkTheme,
+                    themeMode: themeProvider.themeMode,
+                    home: _buildHome(auth),
+                  ),
             ),
           );
         },

@@ -8,11 +8,12 @@ class ThemeSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, _) => Switch(
-        value: themeProvider.themeMode == ThemeMode.dark,
-        onChanged: (_) => themeProvider.toggleTheme(),
-        activeColor: const Color(0xFFFFFFFF),
-      ),
+      builder: (context, themeProvider, _) =>
+          Switch(
+            value: themeProvider.themeMode == ThemeMode.dark,
+            onChanged: (_) => themeProvider.toggleTheme(),
+            activeColor: const Color(0xFFFFFFFF),
+          ),
     );
   }
 }

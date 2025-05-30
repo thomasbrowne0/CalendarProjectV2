@@ -11,10 +11,10 @@ class ThemeConfig {
 
       // Color scheme for light mode
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFF3F51B5),       // Primary color (AppBar, Buttons)
-        secondary: Color(0xFFB52D08),     // Secondary color (Accents)
-        surface: Colors.white,            // Background surface
-        onSurface: Color(0xFF212121),     // Text color on surface
+        primary: Color(0xFF3F51B5), // Primary color (AppBar, Buttons)
+        secondary: Color(0xFFB52D08), // Secondary color (Accents)
+        surface: Colors.white, // Background surface
+        onSurface: Color(0xFF212121), // Text color on surface
       ),
 
       // Text style definitions
@@ -26,8 +26,8 @@ class ThemeConfig {
 
       // AppBar styling
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF3F51B5),  // AppBar background
-        foregroundColor: Colors.white,       // AppBar text/icon color
+        backgroundColor: Color(0xFF3F51B5), // AppBar background
+        foregroundColor: Colors.white, // AppBar text/icon color
         elevation: 0,
       ),
 
@@ -42,8 +42,10 @@ class ThemeConfig {
       // ElevatedButton styling
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3F51B5),  // Button background
-          foregroundColor: Colors.white,             // Text color
+          backgroundColor: const Color(0xFF3F51B5),
+          // Button background
+          foregroundColor: Colors.white,
+          // Text color
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -62,7 +64,7 @@ class ThemeConfig {
       ),
 
       // Input fields (TextField, etc.) styling
-      inputDecorationTheme: _inputDecorationTheme(false),  // false = light theme
+      inputDecorationTheme: _inputDecorationTheme(false), // false = light theme
     );
   }
 
@@ -73,10 +75,10 @@ class ThemeConfig {
 
       // Color scheme for dark mode
       colorScheme: const ColorScheme.dark(
-        primary: Color(0xFFB52D08),       // Primary color (AppBar, Buttons)
-        secondary: Color(0xFF750B0B),     // Secondary color (Accents)
-        surface: Color(0xFF1E1E1E),       // Background surface
-        onSurface: Colors.white,          // Text color on surface
+        primary: Color(0xFFB52D08), // Primary color (AppBar, Buttons)
+        secondary: Color(0xFF750B0B), // Secondary color (Accents)
+        surface: Color(0xFF1E1E1E), // Background surface
+        onSurface: Colors.white, // Text color on surface
       ),
 
       // Text style definitions
@@ -88,8 +90,8 @@ class ThemeConfig {
 
       // AppBar styling
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF750B0B),  // AppBar background
-        foregroundColor: Colors.white,       // AppBar text/icon color
+        backgroundColor: Color(0xFF750B0B), // AppBar background
+        foregroundColor: Colors.white, // AppBar text/icon color
         elevation: 0,
       ),
 
@@ -124,7 +126,7 @@ class ThemeConfig {
       ),
 
       // Input fields (TextField, etc.) styling
-      inputDecorationTheme: _inputDecorationTheme(true),  // true = dark theme
+      inputDecorationTheme: _inputDecorationTheme(true), // true = dark theme
     );
   }
 
@@ -133,7 +135,8 @@ class ThemeConfig {
   static InputDecorationTheme _inputDecorationTheme(bool isDark) {
     return InputDecorationTheme(
       filled: true,
-      fillColor: isDark ? Colors.grey[850] : Colors.grey[50], // Background for input fields
+      fillColor: isDark ? Colors.grey[850] : Colors.grey[50],
+      // Background for input fields
 
       // Default border with no side (flat look)
       border: OutlineInputBorder(

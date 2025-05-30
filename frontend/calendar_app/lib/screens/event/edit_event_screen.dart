@@ -30,12 +30,14 @@ class _EditEventScreenState extends State<EditEventScreen> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.event.title);
-    _descriptionController = TextEditingController(text: widget.event.description);
+    _descriptionController =
+        TextEditingController(text: widget.event.description);
     _startDate = widget.event.startTime;
     _startTime = TimeOfDay.fromDateTime(widget.event.startTime);
     _endDate = widget.event.endTime;
     _endTime = TimeOfDay.fromDateTime(widget.event.endTime);
-    _selectedParticipantIds = widget.event.participants.map((e) => e.id).toSet();
+    _selectedParticipantIds =
+        widget.event.participants.map((e) => e.id).toSet();
   }
 
   @override
@@ -59,7 +61,9 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final employees = Provider.of<CompanyProvider>(context).employees;
+    final employees = Provider
+        .of<CompanyProvider>(context)
+        .employees;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Edit Event')),

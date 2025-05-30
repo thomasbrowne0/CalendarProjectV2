@@ -11,7 +11,7 @@ class CompanyOwnerHomeScreen extends StatefulWidget {
   const CompanyOwnerHomeScreen({super.key});
 
   @override
-  State<CompanyOwnerHomeScreen>createState() => _CompanyOwnerHomeScreenState();
+  State<CompanyOwnerHomeScreen> createState() => _CompanyOwnerHomeScreenState();
 }
 
 class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
@@ -40,11 +40,17 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
     final companyProvider = Provider.of<CompanyProvider>(context);
     final companies = companyProvider.companies;
     final selectedCompany = companyProvider.selectedCompany;
-    final user = Provider.of<AuthProvider>(context).user;
+    final user = Provider
+        .of<AuthProvider>(context)
+        .user;
 
     List<Widget> pages = [
-      selectedCompany == null ? _buildNoCompanySelected() : const CompanyCalendarScreen(),
-      selectedCompany == null ? _buildNoCompanySelected() : const EmployeeListScreen(),
+      selectedCompany == null
+          ? _buildNoCompanySelected()
+          : const CompanyCalendarScreen(),
+      selectedCompany == null
+          ? _buildNoCompanySelected()
+          : const EmployeeListScreen(),
     ];
 
     return Scaffold(
@@ -100,20 +106,22 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
       ),
       floatingActionButton: selectedCompany == null
           ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const CreateCompanyScreen()),
-                );
-              },
-              tooltip: 'Create Company',
-              child: const Icon(Icons.add),
-            )
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CreateCompanyScreen()),
+          );
+        },
+        tooltip: 'Create Company',
+        child: const Icon(Icons.add),
+      )
           : null,
     );
   }
 
   Widget _buildNoCompanySelected() {
-    final companies = Provider.of<CompanyProvider>(context).companies;
+    final companies = Provider
+        .of<CompanyProvider>(context)
+        .companies;
 
     return Center(
       child: Column(
@@ -125,7 +133,8 @@ class _CompanyOwnerHomeScreenState extends State<CompanyOwnerHomeScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const CreateCompanyScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const CreateCompanyScreen()),
                 );
               },
               child: const Text('Create Company'),

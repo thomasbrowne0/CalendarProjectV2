@@ -1,21 +1,25 @@
 # Calendar Project V2
 
-A comprehensive company calendar management system built with Clean Architecture principles, featuring real-time collaboration through WebSocket communication.
+A comprehensive company calendar management system built with Clean Architecture principles, featuring real-time
+collaboration through WebSocket communication.
 
 Running backend deployment:  https://calendar-backend-503012500647.europe-north1.run.app
 Running frontend deployment: https://calendarfrontend-e6233.web.app/
 
 ## 🏗️ Architecture Overview
 
-This project implements **Clean Architecture (Onion Architecture)** with clear separation of concerns across multiple layers:
+This project implements **Clean Architecture (Onion Architecture)** with clear separation of concerns across multiple
+layers:
 
 ### Backend (.NET 9)
+
 - **API Layer**: RESTful endpoints and WebSocket communication
-- **Application Layer**: Business logic orchestration and use cases  
+- **Application Layer**: Business logic orchestration and use cases
 - **Domain Layer**: Core business entities and rules
 - **Infrastructure Layer**: Data persistence and external services
 
 ### Frontend (Flutter)
+
 - **Presentation Layer**: Flutter widgets and screens
 - **State Management**: BLoC/Cubit pattern with Provider
 - **Services Layer**: API communication and WebSocket handling
@@ -24,6 +28,7 @@ This project implements **Clean Architecture (Onion Architecture)** with clear s
 ## 🚀 Key Features
 
 ### Core Functionality
+
 - **Multi-Company Support**: Company owners can manage multiple companies
 - **Employee Management**: Role-based access control (Company Owners vs Employees)
 - **Calendar Events**: Create, update, and delete calendar events with participant management
@@ -32,11 +37,13 @@ This project implements **Clean Architecture (Onion Architecture)** with clear s
 - **Responsive Design**: Modern Flutter UI that works across devices
 
 ### Authentication & Authorization
+
 - **JWT-based Authentication**: Secure token-based authentication
 - **Role-based Access**: Company owners and employees have different permissions
 - **Company Boundary Enforcement**: Users can only access data within their company scope
 
 ### Real-time Communication
+
 - **WebSocket Integration**: Live updates for calendar events and employee changes
 - **Company-scoped Messaging**: Notifications are delivered only to relevant company members
 - **Connection Management**: Automatic reconnection and connection state handling
@@ -44,6 +51,7 @@ This project implements **Clean Architecture (Onion Architecture)** with clear s
 ## 🛠️ Technology Stack
 
 ### Backend
+
 - **.NET 9**: Modern C# web API framework
 - **Entity Framework Core**: ORM with PostgreSQL database
 - **Fleck**: WebSocket server implementation
@@ -51,6 +59,7 @@ This project implements **Clean Architecture (Onion Architecture)** with clear s
 - **PostgreSQL**: Production-ready relational database
 
 ### Frontend
+
 - **Flutter**: Cross-platform UI framework
 - **BLoC/Cubit**: State management pattern
 - **Provider**: Dependency injection and state sharing
@@ -83,6 +92,7 @@ CalendarProjectV2/
 ## 🔧 Setup & Installation
 
 ### Prerequisites
+
 - .NET 9 SDK
 - Flutter SDK (>=3.0.0)
 - PostgreSQL Database
@@ -134,6 +144,7 @@ CalendarProjectV2/
 ## 🎯 Usage
 
 ### Company Owner Workflow
+
 1. **Register** as a company owner
 2. **Create Companies** with unique CVR numbers
 3. **Add Employees** to companies
@@ -141,6 +152,7 @@ CalendarProjectV2/
 5. **Real-time Monitoring** of all company activities
 
 ### Employee Workflow
+
 1. **Login** with credentials provided by company owner
 2. **View Company Calendar** events
 3. **See Colleagues** within the same company
@@ -158,18 +170,22 @@ CalendarProjectV2/
 ## 🌐 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/login` - User authentication
 - `POST /api/auth/register` - Company owner registration
 
 ### Company Management
+
 - `GET /api/companies/{ownerId}` - Get companies by owner
 - `GET /api/companies/{id}` - Get company details
 
 ### Employee Management
+
 - `GET /api/companies/{companyId}/employees` - Get company employees
 - `POST /api/companies/{companyId}/employees` - Add new employee
 
 ### Calendar Events
+
 - `GET /api/companies/{companyId}/events` - Get company events (with date filtering)
 - `POST /api/companies/{companyId}/events` - Create new event
 - `PUT /api/companies/{companyId}/events/{id}` - Update event
@@ -178,11 +194,13 @@ CalendarProjectV2/
 ## 📡 WebSocket Communication
 
 ### Connection
+
 - **URL**: `ws://localhost:8181`
 - **Authentication**: JWT token required
 - **Scope**: Company-based message filtering
 
 ### Message Types
+
 - `event_created` - New calendar event notifications
 - `event_updated` - Calendar event modifications
 - `event_deleted` - Calendar event removals
@@ -192,12 +210,14 @@ CalendarProjectV2/
 ## 🧪 Development Patterns
 
 ### Clean Architecture Benefits
+
 - **Testability**: Business logic is isolated and easily testable
 - **Maintainability**: Clear separation of concerns
 - **Flexibility**: Easy to swap implementations (database, UI, etc.)
 - **Scalability**: Well-organized codebase that grows maintainably
 
 ### State Management
+
 - **BLoC Pattern**: Predictable state management with clear events and states
 - **Provider**: Dependency injection and widget state sharing
 - **Real-time Integration**: WebSocket messages automatically update UI state
@@ -205,11 +225,13 @@ CalendarProjectV2/
 ## 🚀 Deployment
 
 ### Backend Deployment
+
 - Containerized with Docker support
 - PostgreSQL database configuration
 - Environment-specific settings (Development/Production)
 
 ### Frontend Deployment
+
 - Firebase Hosting for web deployment
 - Optimized Flutter web build
 - Progressive Web App (PWA) capabilities

@@ -11,24 +11,29 @@ class EventsListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final calendarService = CompanyCalendarService();
-    
+
     return BlocBuilder<CalendarCubit, CalendarState>(
       buildWhen: (previous, current) =>
-          previous.events != current.events ||
+      previous.events != current.events ||
           previous.focusedDay != current.focusedDay,
       builder: (context, state) {
-        final events = context.read<CalendarCubit>().getEventsForDay(state.focusedDay);
+        final events = context.read<CalendarCubit>().getEventsForDay(
+            state.focusedDay);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0, vertical: 8.0),
               child: Row(
                 children: [
                   Icon(
                     Icons.event,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme
+                        .of(context)
+                        .colorScheme
+                        .primary,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -50,14 +55,22 @@ class EventsListView extends StatelessWidget {
                       Icon(
                         Icons.event_busy,
                         size: 64,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.5),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No events for this day',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme
+                              .of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                       ),
                     ],

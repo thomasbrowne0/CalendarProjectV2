@@ -20,8 +20,8 @@ class EventService {
     );
   }
 
-  static Future<TimeOfDay?> pickTime(
-      BuildContext context, TimeOfDay initialTime) {
+  static Future<TimeOfDay?> pickTime(BuildContext context,
+      TimeOfDay initialTime) {
     return showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -56,7 +56,8 @@ class EventService {
 
     setLoading(true);
     try {
-      final companyId = Provider.of<CompanyProvider>(context, listen: false)
+      final companyId = Provider
+          .of<CompanyProvider>(context, listen: false)
           .selectedCompany!
           .id;
       final participantIds = selectedParticipantIds.toList();
@@ -91,7 +92,8 @@ class EventService {
     required Function(String) onError,
   }) async {
     try {
-      final companyId = Provider.of<CompanyProvider>(context, listen: false)
+      final companyId = Provider
+          .of<CompanyProvider>(context, listen: false)
           .selectedCompany!
           .id;
 
@@ -99,14 +101,14 @@ class EventService {
       final endDateTime = combineDateAndTime(endDate, endTime).toUtc();
 
       await context.read<CalendarCubit>().updateEvent(
-            eventId,
-            companyId,
-            title,
-            description,
-            startDateTime,
-            endDateTime,
-            participantIds,
-          );
+        eventId,
+        companyId,
+        title,
+        description,
+        startDateTime,
+        endDateTime,
+        participantIds,
+      );
 
       onSuccess();
     } catch (error) {

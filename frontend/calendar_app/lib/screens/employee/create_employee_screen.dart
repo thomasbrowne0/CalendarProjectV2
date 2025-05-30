@@ -64,13 +64,19 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
               CompanyWidgets.textField(
                 controller: _firstNameController,
                 label: 'First Name',
-                validator: (v) => (v == null || v.isEmpty) ? 'Please enter first name' : null,
+                validator: (v) =>
+                (v == null || v.isEmpty)
+                    ? 'Please enter first name'
+                    : null,
               ),
               CompanyWidgets.spacing(),
               CompanyWidgets.textField(
                 controller: _lastNameController,
                 label: 'Last Name',
-                validator: (v) => (v == null || v.isEmpty) ? 'Please enter last name' : null,
+                validator: (v) =>
+                (v == null || v.isEmpty)
+                    ? 'Please enter last name'
+                    : null,
               ),
               CompanyWidgets.spacing(),
               CompanyWidgets.textField(
@@ -78,7 +84,9 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                 label: 'Email',
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) =>
-                (v == null || v.isEmpty || !v.contains('@')) ? 'Please enter a valid email' : null,
+                (v == null || v.isEmpty || !v.contains('@'))
+                    ? 'Please enter a valid email'
+                    : null,
               ),
               CompanyWidgets.spacing(),
               CompanyWidgets.textField(
@@ -86,7 +94,9 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
                 label: 'Password',
                 obscure: true,
                 validator: (v) =>
-                (v == null || v.isEmpty || v.length < 6) ? 'Password must be at least 6 characters' : null,
+                (v == null || v.isEmpty || v.length < 6)
+                    ? 'Password must be at least 6 characters'
+                    : null,
               ),
               CompanyWidgets.spacing(),
               CompanyWidgets.textField(
@@ -100,7 +110,10 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
               CompanyWidgets.textField(
                 controller: _jobTitleController,
                 label: 'Job Title',
-                validator: (v) => (v == null || v.isEmpty) ? 'Please enter job title' : null,
+                validator: (v) =>
+                (v == null || v.isEmpty)
+                    ? 'Please enter job title'
+                    : null,
               ),
               const SizedBox(height: 20),
               _isLoading

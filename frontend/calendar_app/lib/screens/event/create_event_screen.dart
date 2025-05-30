@@ -36,6 +36,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     _startDate = widget.selectedDate;
     _endDate = widget.selectedDate;
   }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -57,7 +58,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final employees = Provider.of<CompanyProvider>(context).employees;
+    final employees = Provider
+        .of<CompanyProvider>(context)
+        .employees;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create Event')),
@@ -65,7 +68,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             EventFormWidgets.buildEventFormFields(
               titleController: _titleController,
               descriptionController: _descriptionController,
@@ -108,7 +112,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   endTime: _endTime,
                   selectedParticipantIds: _selectedParticipantIds,
                   onSuccess: () => Navigator.of(context).pop(),
-                  showError: (title, msg) => DialogUtil.showErrorDialog(context, title, msg),
+                  showError: (title, msg) =>
+                      DialogUtil.showErrorDialog(context, title, msg),
                   setLoading: _setLoading,
                 );
               },

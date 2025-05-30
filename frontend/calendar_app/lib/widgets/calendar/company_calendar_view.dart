@@ -29,7 +29,7 @@ class _CompanyCalendarViewState extends State<CompanyCalendarView> {
   Widget build(BuildContext context) {
     return BlocBuilder<CalendarCubit, CalendarState>(
       buildWhen: (previous, current) =>
-          previous.focusedDay != current.focusedDay ||
+      previous.focusedDay != current.focusedDay ||
           previous.events != current.events,
       builder: (context, state) {
         return TableCalendar(
@@ -51,37 +51,64 @@ class _CompanyCalendarViewState extends State<CompanyCalendarView> {
           calendarStyle: CalendarStyle(
             markersMaxCount: 3,
             markerDecoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark 
-                ? const Color(0xFF128A03)
-                : Theme.of(context).colorScheme.onSurface,
+              color: Theme
+                  .of(context)
+                  .brightness == Brightness.dark
+                  ? const Color(0xFF128A03)
+                  : Theme
+                  .of(context)
+                  .colorScheme
+                  .onSurface,
               shape: BoxShape.circle,
             ),
             todayDecoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary
+                  .withOpacity(0.3),
               shape: BoxShape.circle,
             ),
             selectedDecoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
               shape: BoxShape.circle,
             ),
             weekendTextStyle: TextStyle(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary
+                  .withOpacity(0.7),
             ),
             outsideTextStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .onSurface
+                  .withOpacity(0.4),
             ),
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
             weekdayStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .onSurface,
               fontWeight: FontWeight.bold,
             ),
             weekendStyle: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
               fontWeight: FontWeight.bold,
             ),
           ),
-          eventLoader: (day) => context.read<CalendarCubit>().getEventsForDay(day),
+          eventLoader: (day) =>
+              context.read<CalendarCubit>().getEventsForDay(day),
           selectedDayPredicate: (day) =>
               _calendarService.isSameDay(state.focusedDay, day),
           onDaySelected: (selectedDay, focusedDay) {

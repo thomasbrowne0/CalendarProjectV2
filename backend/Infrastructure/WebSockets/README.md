@@ -2,7 +2,8 @@
 
 ## Overview
 
-The WebSocket implementation uses Fleck to provide real-time communication between the server and clients. This enables instant notifications for calendar events, employee changes, and other updates.
+The WebSocket implementation uses Fleck to provide real-time communication between the server and clients. This enables
+instant notifications for calendar events, employee changes, and other updates.
 
 ## Connection Details
 

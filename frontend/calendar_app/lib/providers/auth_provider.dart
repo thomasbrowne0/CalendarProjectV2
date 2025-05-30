@@ -14,7 +14,8 @@ class AuthProvider with ChangeNotifier {
   final WebSocketService? _webSocketService;
   String? _companyId;
 
- AuthProvider(this._apiService, this._webSocketService, {AuthProvider? previousAuthProvider}) {
+  AuthProvider(this._apiService, this._webSocketService,
+      {AuthProvider? previousAuthProvider}) {
     if (previousAuthProvider != null) {
       _token = previousAuthProvider._token;
       _user = previousAuthProvider._user;
@@ -22,9 +23,13 @@ class AuthProvider with ChangeNotifier {
   }
 
   bool get isAuth => token != null;
+
   bool get isCompanyOwner => _user?.userType == 'CompanyOwner';
+
   String? get token => _token;
+
   User? get user => _user;
+
   String? get companyId => _companyId;
 
   Future<void> login(String email, String password) async {
@@ -58,10 +63,11 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> registerCompanyOwner(
-      String firstName, String lastName, String email, String password) async {
+  Future<void> registerCompanyOwner(String firstName, String lastName,
+      String email, String password) async {
     try {
-      await _apiService!.registerCompanyOwner(firstName, lastName, email, password);
+      await _apiService!.registerCompanyOwner(
+          firstName, lastName, email, password);
       await login(email, password);
     } catch (error) {
       rethrow;
@@ -75,7 +81,7 @@ class AuthProvider with ChangeNotifier {
     }
 
     final extractedData =
-        json.decode(prefs.getString('authData')!) as Map<String, dynamic>;
+    json.decode(prefs.getString('authData')!) as Map<String, dynamic>;
     final expiryDate = DateTime.parse(extractedData['expiryDate']);
 
     if (expiryDate.isBefore(DateTime.now())) {
@@ -88,7 +94,8 @@ class AuthProvider with ChangeNotifier {
     _expiryDate = expiryDate;
     _companyId = extractedData['companyId'];
 
-    if (_companyId == null && _token != null && _user != null && !_user!.isCompanyOwner) {
+    if (_companyId == null && _token != null && _user != null &&
+        !_user!.isCompanyOwner) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(_token!);
       _companyId = decodedToken['CompanyId'] ?? decodedToken['companyId'];
     } else if (_user != null && _user!.isCompanyOwner) {
@@ -114,10 +121,10 @@ class AuthProvider with ChangeNotifier {
     _user = null;
     _expiryDate = null;
     _companyId = null;
-    
+
     final prefs = await SharedPreferences.getInstance();
     prefs.remove('authData');
-    
+
     _apiService!.setToken(''); // Clear token in ApiService
     notifyListeners();
   }
@@ -130,7 +137,7 @@ class AuthProvider with ChangeNotifier {
       'expiryDate': _expiryDate!.toIso8601String(),
       'companyId': _companyId,
     });
-    
+
     prefs.setString('authData', authData);
   }
 }

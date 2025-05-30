@@ -28,9 +28,10 @@ class ProviderConfig {
       /// Provides a singleton instance of WebSocketService that depends on ApiService.
       /// Automatically disposes the WebSocket connection when not needed.
       Provider<WebSocketService>(
-        create: (context) => WebSocketService(
-          Provider.of<ApiService>(context, listen: false),
-        ),
+        create: (context) =>
+            WebSocketService(
+              Provider.of<ApiService>(context, listen: false),
+            ),
         dispose: (_, service) => service.dispose(),
       ),
 
@@ -38,12 +39,10 @@ class ProviderConfig {
       /// Updates when either dependency changes.
       ChangeNotifierProxyProvider2<ApiService, WebSocketService, AuthProvider>(
         create: (_) => AuthProvider(null, null),
-        update: (
-            context,
+        update: (context,
             apiService,
             webSocketService,
-            previousAuthProvider,
-            ) =>
+            previousAuthProvider,) =>
             AuthProvider(
               apiService,
               webSocketService,
@@ -53,15 +52,16 @@ class ProviderConfig {
 
       /// Provides CompanyProvider which depends on ApiService, AuthProvider, and WebSocketService.
       /// This provider listens to changes in its three dependencies.
-      ChangeNotifierProxyProvider3<ApiService, AuthProvider, WebSocketService, CompanyProvider>(
+      ChangeNotifierProxyProvider3<ApiService,
+          AuthProvider,
+          WebSocketService,
+          CompanyProvider>(
         create: (_) => CompanyProvider(null, null, null),
-        update: (
-            context,
+        update: (context,
             apiService,
             authProvider,
             webSocketService,
-            _,
-            ) =>
+            _,) =>
             CompanyProvider(
               apiService,
               authProvider,
@@ -73,12 +73,10 @@ class ProviderConfig {
       /// Updates when either dependency changes.
       ChangeNotifierProxyProvider2<ApiService, AuthProvider, CalendarProvider>(
         create: (_) => CalendarProvider(null, null),
-        update: (
-            context,
+        update: (context,
             apiService,
             authProvider,
-            _,
-            ) =>
+            _,) =>
             CalendarProvider(
               apiService,
               authProvider,

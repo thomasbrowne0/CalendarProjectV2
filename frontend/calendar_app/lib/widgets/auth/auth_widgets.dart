@@ -6,7 +6,10 @@ class AuthWidgets {
   static Widget loginTitle(BuildContext context) {
     return Text(
       'Login',
-      style: Theme.of(context).textTheme.headlineSmall,
+      style: Theme
+          .of(context)
+          .textTheme
+          .headlineSmall,
     );
   }
 
@@ -63,7 +66,10 @@ class AuthWidgets {
   static Widget registerTitle(BuildContext context) {
     return Text(
       'Register',
-      style: Theme.of(context).textTheme.headlineSmall,
+      style: Theme
+          .of(context)
+          .textTheme
+          .headlineSmall,
     );
   }
 
@@ -71,7 +77,8 @@ class AuthWidgets {
     return TextFormField(
       controller: controller,
       decoration: const InputDecoration(labelText: 'First Name'),
-      validator: (value) => (value == null || value.isEmpty)
+      validator: (value) =>
+      (value == null || value.isEmpty)
           ? 'Please enter your first name'
           : null,
     );
@@ -81,7 +88,8 @@ class AuthWidgets {
     return TextFormField(
       controller: controller,
       decoration: const InputDecoration(labelText: 'Last Name'),
-      validator: (value) => (value == null || value.isEmpty)
+      validator: (value) =>
+      (value == null || value.isEmpty)
           ? 'Please enter your last name'
           : null,
     );
